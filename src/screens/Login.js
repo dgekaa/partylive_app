@@ -41,7 +41,10 @@ const Login = (props) => {
               <Text style={styles.headText}>Авторизация</Text>
               <TextInput
                 placeholder="email"
-                style={styles.input}
+                style={[
+                  styles.input,
+                  validationError ? {borderColor: 'red'} : {},
+                ]}
                 onChangeText={(email) => {
                   setEmail(email);
                 }}
@@ -49,7 +52,10 @@ const Login = (props) => {
               />
               <TextInput
                 placeholder="password"
-                style={styles.input}
+                style={[
+                  styles.input,
+                  validationError ? {borderColor: 'red'} : {},
+                ]}
                 secureTextEntry
                 onChangeText={(pass) => {
                   setPassword(pass);

@@ -71,9 +71,4 @@ const styles = StyleSheet.create({
   },
 });
 
-Map.navigationOptions = {
-  title: 'Map',
-  header: null,
-};
-
 export default Map;

@@ -174,7 +174,7 @@ const App = () => {
             />
           )}>
           <Drawer.Screen name="Главная" component={StackRoutes} />
-          <Drawer.Screen name="Карта" component={Map} />
+          {/* <Drawer.Screen name="Карта" component={Map} /> */}
           {!loggedIn && (
             <Drawer.Screen
               name="Вход"

@@ -161,9 +161,4 @@ const styles = StyleSheet.create({
   },
 });
 
-Company.navigationOptions = {
-  title: 'Company',
-  headerTitle: (props) => <Header {...props} />,
-};
-
 export default Company;

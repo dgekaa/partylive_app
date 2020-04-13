@@ -62,38 +62,36 @@ const Registration = (props) => {
     setRepassword('');
   };
 
-  const registerErrHandle = (err) => {
-    console.log(err.message, ' __ERR');
-
+  const registerErrHandle = () => {
     if (name.length === 0) {
-      return setNameErr(true);
+      return setNameErr('Поле обязательно для ввода');
     }
     setNameErr(false);
 
     if (email.length === 0) {
-      return setEmailErr(true);
+      return setEmailErr('Поле обязательно для ввода');
     }
     setEmailErr(false);
 
     if (password.length === 0 || password.length < 8) {
-      return setPasswordErr(true);
+      return setPasswordErr('Поле не менее 8 символов');
     }
     setPasswordErr(false);
 
     if (repassword.length === 0 || repassword.length < 8) {
-      return setRepasswordErr(true);
+      return setRepasswordErr('Поле не менее 8 символов');
     }
     setRepasswordErr(false);
 
     if (password !== repassword) {
-      setPasswordErr(true);
-      setRepasswordErr(true);
+      setPasswordErr('Пароли не совпадают');
+      setRepasswordErr('Пароли не совпадают');
       return;
     }
     setPasswordErr(false);
     setRepasswordErr(false);
 
-    setEmailErr(true);
+    setEmailErr('Email не валиден либо уже существует');
   };
 
   return (
@@ -140,6 +138,9 @@ const Registration = (props) => {
                 }}
                 value={repassword}
               />
+              <Text style={styles.validationErr}>
+                {nameErr || emailErr || passwordErr || repasswordErr}
+              </Text>
               <TouchableOpacity
                 style={styles.btn}
                 onPress={() => {
@@ -194,6 +195,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     height: 45,
     paddingHorizontal: 10,
+  },
+  validationErr: {
+    color: 'red',
+    opacity: 0.6,
+    textAlign: 'center',
+    paddingTop: 10,
   },
   btn: {
     borderRadius: 5,
