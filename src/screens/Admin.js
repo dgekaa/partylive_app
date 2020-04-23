@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import ImagePicker from 'react-native-image-crop-picker';
 import {
   StyleSheet,
   View,
@@ -7,19 +8,17 @@ import {
   ScrollView,
   Platform,
   Dimensions,
+  Image,
+  TextInput,
 } from 'react-native';
-import Dialog, {
-  DialogTitle,
-  DialogButton,
-  ScaleAnimation,
-  DialogContent,
-} from 'react-native-popup-dialog';
+import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import Video from 'react-native-video';
 import gql from 'graphql-tag';
 import {EN_SHORT_DAY_OF_WEEK} from '../constants';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Query, Mutation, useMutation, useQuery} from 'react-apollo';
+import Header from '../components/Header';
 
 import {
   Collapse,
@@ -105,26 +104,6 @@ const DELETE_SCHEDULE = gql`
     }
   }
 `;
-// $schedules: CreateScheduleMorphMany
-
-// const UPDATE_STREAMS_SCHEDULE = gql`
-//   mutation UPDATESTREAMSSCHEDULE(
-//     $id: ID!
-//     $start_time: String!
-//     $end_time: String!
-//   ) {
-//     updateStream(
-//       input: {
-//         id: $id
-//         schedules: {
-//           update: [{id: $id, start_time: $start_time, end_time: $end_time}]
-//         }
-//       }
-//     ) {
-//       id
-//     }
-//   }
-// `;
 
 const UPDATE_STREAMS_SCHEDULE = gql`
   mutation UPDATESTREAMSSCHEDULE($id: ID!, $update: [UpdateScheduleInput!]) {
@@ -154,8 +133,8 @@ const CREATE_STREAMS_SCHEDULE = gql`
   }
 `;
 
-const Admin = ({route}) => {
-  const {streams, schedules} = route.params.item;
+const Admin = (props) => {
+  const {streams, schedules} = props.navigation.state.params.item;
 
   const [popupVisible, setPopupVisible] = useState(false);
 
@@ -184,6 +163,11 @@ const Admin = ({route}) => {
   const [pickedEndTime, setPickedEndTime] = useState('');
   const [enumWeekName, setEnumWeekName] = useState('');
   const [isClickedWorkTime, setIsClickedWorkTime] = useState(false);
+  const [pickerImageMime, setpPickerImageMime] = useState('');
+  const [pickerImageData, setpPickerImageData] = useState('');
+  const [inputName, setInputName] = useState('');
+  const [inputPseudonim, setInputPseudonim] = useState('');
+  const [inputDescription, setInputDescription] = useState('');
 
   useEffect(() => {
     setPickedStartTime('');
@@ -191,7 +175,7 @@ const Admin = ({route}) => {
   }, [popupVisible]);
 
   const {loading, error, data, refetch} = useQuery(GET_PLACE, {
-    variables: {id: route.params.item.id},
+    variables: {id: props.navigation.state.params.item.id},
   });
 
   const [CREATE_WORK_TIME_mutation] = useMutation(CREATE_WORK_TIME);
@@ -225,7 +209,7 @@ const Admin = ({route}) => {
         setPopupVisible(false);
         CREATE_WORK_TIME_mutation({
           variables: {
-            id: route.params.item.id,
+            id: props.navigation.state.params.item.id,
             day: enumWeekName,
             start_time: pickedStartTime,
             end_time: pickedEndTime,
@@ -320,10 +304,23 @@ const Admin = ({route}) => {
     showMode('time');
   };
 
+  const goToPickImage = () => {
+    ImagePicker.openPicker({
+      width: 250,
+      height: 250,
+      cropping: true,
+      includeBase64: true,
+    }).then((image) => {
+      setpPickerImageMime(image.mime);
+      setpPickerImageData(image.data);
+    });
+  };
+
   if (loading) return <Text>'Loading...'</Text>;
   if (error) return <Text>`Error! ${error.message}`</Text>;
   return (
     <ScrollView style={styles.Admin}>
+      <Header props={props} />
       <View style={styles.videoWrap}>
         <Video
           source={{uri: streams[0] && streams[0].url}}
@@ -333,6 +330,84 @@ const Admin = ({route}) => {
         />
       </View>
       <View>
+        <Collapse
+          onToggle={(isOpen) => {
+            // console.log(isOpen);
+          }}>
+          <CollapseHeader style={styles.tableHeader}>
+            <Text>Профиль заведения</Text>
+          </CollapseHeader>
+          <CollapseBody style={styles.tableBody}>
+            <View>
+              {pickerImageMime ? (
+                <Image
+                  style={styles.pickerImageStyle}
+                  source={{
+                    uri: `data:${pickerImageMime};base64,${pickerImageData}`,
+                  }}
+                />
+              ) : (
+                <View style={styles.noPickerImageStyle}>
+                  <Text style={styles.noPickerImageText}>Загрузить фото</Text>
+                  <Text style={styles.noPickerImageText}>250 X 250</Text>
+                </View>
+              )}
+              <TouchableOpacity
+                style={styles.imageUploader}
+                onPress={() => goToPickImage()}>
+                <Text style={styles.changePhotoText}>Сменить фото профиля</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.textInputWrap}>
+              <Text style={styles.textInputTitleText}>Название заведения:</Text>
+              <TextInput
+                style={styles.textInputStyle}
+                onChangeText={(text) => setInputName(text)}
+                value={inputName}
+              />
+            </View>
+            <View style={styles.textInputWrap}>
+              <Text style={styles.textInputTitleText}>Псевдоним:</Text>
+              <TextInput
+                style={styles.textInputStyle}
+                onChangeText={(text) => setInputPseudonim(text)}
+                value={inputPseudonim}
+              />
+            </View>
+            <View style={styles.textInputWrap}>
+              <Text style={styles.textInputTitleText}>Категория:</Text>
+              <View style={styles.btnCategoryWrap}>
+                <TouchableOpacity style={styles.btnCategory}>
+                  <Text>Бар</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.textInputWrap}>
+              <Text style={styles.textInputTitleText}>Адрес заведения:</Text>
+              <TextInput
+                style={styles.textInputStyle}
+                onChangeText={(text) => {}}
+                value={'Адрес'}
+              />
+              <TouchableOpacity style={styles.pinkBtn}>
+                <Text style={styles.pinkBtnText}>ВЫБРАТЬ АДРЕС НА КАРТЕ</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.textInputWrap}>
+              <Text style={styles.textInputTitleText}>Описание:</Text>
+              <TextInput
+                maxLength={300}
+                multiline={true}
+                style={styles.textInputMultilineStyle}
+                onChangeText={(text) => setInputDescription(text)}
+                value={inputDescription}
+              />
+            </View>
+            <TouchableOpacity style={styles.pinkBtn}>
+              <Text style={styles.pinkBtnText}>СОХРАНИТЬ</Text>
+            </TouchableOpacity>
+          </CollapseBody>
+        </Collapse>
         <Collapse
           onToggle={(isOpen) => {
             // console.log(isOpen);
@@ -518,6 +593,70 @@ const styles = StyleSheet.create({
   },
   tableBody: {
     padding: 10,
+  },
+  imageUploader: {
+    alignSelf: 'center',
+    paddingTop: 10,
+  },
+  noPickerImageStyle: {
+    alignSelf: 'center',
+    width: 125,
+    height: 125,
+    backgroundColor: '#f2f2f7',
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  changePhotoText: {
+    color: '#e32a6c',
+  },
+  noPickerImageText: {
+    color: '#aeaeae',
+  },
+  pickerImageStyle: {
+    width: 125,
+    height: 125,
+    alignSelf: 'center',
+    borderRadius: 5,
+  },
+  textInputWrap: {
+    marginVertical: 20,
+  },
+  textInputTitleText: {
+    fontSize: 16,
+    color: '#4F4F4F',
+  },
+  textInputStyle: {
+    borderBottomColor: '#999',
+    borderBottomWidth: 1,
+  },
+  btnCategoryWrap: {
+    marginTop: 10,
+  },
+  btnCategory: {
+    borderColor: '#C4C4C4',
+    borderRadius: 4,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 70,
+    height: 35,
+  },
+  textInputMultilineStyle: {
+    borderBottomColor: '#999',
+    borderBottomWidth: 1,
+  },
+  pinkBtn: {
+    backgroundColor: '#E32A6C',
+    borderRadius: 5,
+    height: 36,
+    width: 244,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  pinkBtnText: {
+    color: '#fff',
   },
   graphRow: {
     flexDirection: 'row',

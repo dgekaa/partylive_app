@@ -7,6 +7,7 @@ import {
   TextInput,
   AsyncStorage,
 } from 'react-native';
+import Header from '../components/Header';
 
 import {Query, Mutation} from 'react-apollo';
 import gql from 'graphql-tag';
@@ -53,7 +54,10 @@ const Registration = (props) => {
   const [emailErr, setEmailErr] = useState(false);
 
   const registerHandle = (res) => {
-    props.changeLoginState(true, res.data.register.tokens.access_token);
+    props.navigation.state.params.changeLoginState(
+      true,
+      res.data.register.tokens.access_token,
+    );
     props.navigation.navigate('Home');
 
     setName('');
@@ -95,81 +99,90 @@ const Registration = (props) => {
   };
 
   return (
-    <View style={styles.login}>
-      <Mutation mutation={REGISTER}>
-        {(addMutation, {data}) => {
-          return (
-            <View style={styles.loginForm}>
-              <Text style={styles.headText}>Регистрация</Text>
-              <TextInput
-                placeholder="name"
-                style={[styles.input, nameErr ? {borderColor: 'red'} : {}]}
-                onChangeText={(name) => {
-                  setName(name);
-                }}
-                value={name}
-              />
-              <TextInput
-                placeholder="email"
-                style={[styles.input, emailErr ? {borderColor: 'red'} : {}]}
-                onChangeText={(email) => {
-                  setEmail(email);
-                }}
-                value={email}
-              />
-              <TextInput
-                placeholder="password"
-                style={[styles.input, passwordErr ? {borderColor: 'red'} : {}]}
-                secureTextEntry
-                onChangeText={(pass) => {
-                  setPassword(pass);
-                }}
-                value={password}
-              />
-              <TextInput
-                placeholder="repassword"
-                style={[
-                  styles.input,
-                  repasswordErr ? {borderColor: 'red'} : {},
-                ]}
-                secureTextEntry
-                onChangeText={(repass) => {
-                  setRepassword(repass);
-                }}
-                value={repassword}
-              />
-              <Text style={styles.validationErr}>
-                {nameErr || emailErr || passwordErr || repasswordErr}
-              </Text>
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => {
-                  addMutation({
-                    variables: {
-                      name: name,
-                      email: email,
-                      password: password,
-                      password_confirmation: repassword,
-                    },
-                  })
-                    .then((res) => {
-                      registerHandle(res);
+    <View style={styles.loginWrap}>
+      <Header props={props} />
+      <View style={styles.login}>
+        <Mutation mutation={REGISTER}>
+          {(addMutation, {data}) => {
+            return (
+              <View style={styles.loginForm}>
+                <Text style={styles.headText}>Регистрация</Text>
+                <TextInput
+                  placeholder="name"
+                  style={[styles.input, nameErr ? {borderColor: 'red'} : {}]}
+                  onChangeText={(name) => {
+                    setName(name);
+                  }}
+                  value={name}
+                />
+                <TextInput
+                  placeholder="email"
+                  style={[styles.input, emailErr ? {borderColor: 'red'} : {}]}
+                  onChangeText={(email) => {
+                    setEmail(email);
+                  }}
+                  value={email}
+                />
+                <TextInput
+                  placeholder="password"
+                  style={[
+                    styles.input,
+                    passwordErr ? {borderColor: 'red'} : {},
+                  ]}
+                  secureTextEntry
+                  onChangeText={(pass) => {
+                    setPassword(pass);
+                  }}
+                  value={password}
+                />
+                <TextInput
+                  placeholder="repassword"
+                  style={[
+                    styles.input,
+                    repasswordErr ? {borderColor: 'red'} : {},
+                  ]}
+                  secureTextEntry
+                  onChangeText={(repass) => {
+                    setRepassword(repass);
+                  }}
+                  value={repassword}
+                />
+                <Text style={styles.validationErr}>
+                  {nameErr || emailErr || passwordErr || repasswordErr}
+                </Text>
+                <TouchableOpacity
+                  style={styles.btn}
+                  onPress={() => {
+                    addMutation({
+                      variables: {
+                        name: name,
+                        email: email,
+                        password: password,
+                        password_confirmation: repassword,
+                      },
                     })
-                    .catch((err) => {
-                      registerErrHandle(err);
-                    });
-                }}>
-                <Text style={styles.btnText}>Зарегистрироваться</Text>
-              </TouchableOpacity>
-            </View>
-          );
-        }}
-      </Mutation>
+                      .then((res) => {
+                        registerHandle(res);
+                      })
+                      .catch((err) => {
+                        registerErrHandle(err);
+                      });
+                  }}>
+                  <Text style={styles.btnText}>Зарегистрироваться</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+        </Mutation>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  loginWrap: {
+    flex: 1,
+  },
   login: {
     flex: 1,
     backgroundColor: '#eee',

@@ -7,6 +7,8 @@ import {
   TextInput,
 } from 'react-native';
 
+import Header from '../components/Header';
+
 import {Query, Mutation} from 'react-apollo';
 import gql from 'graphql-tag';
 
@@ -30,76 +32,82 @@ const Login = (props) => {
   const [validationError, setValidationError] = useState('');
 
   return (
-    <View style={styles.login}>
-      <Mutation
-        mutation={LOGIN}
-        //  refetchQueries={[{ query: dogQuery }]}
-      >
-        {(addMutation, {data}) => {
-          return (
-            <View style={styles.loginForm}>
-              <Text style={styles.headText}>Авторизация</Text>
-              <TextInput
-                placeholder="email"
-                style={[
-                  styles.input,
-                  validationError ? {borderColor: 'red'} : {},
-                ]}
-                onChangeText={(email) => {
-                  setEmail(email);
-                }}
-                value={email}
-              />
-              <TextInput
-                placeholder="password"
-                style={[
-                  styles.input,
-                  validationError ? {borderColor: 'red'} : {},
-                ]}
-                secureTextEntry
-                onChangeText={(pass) => {
-                  setPassword(pass);
-                }}
-                value={password}
-              />
-              <Text style={styles.validationError}>{validationError}</Text>
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => {
-                  addMutation({
-                    variables: {
-                      username: email,
-                      password: password,
-                    },
-                  })
-                    .then((res) => {
-                      props.changeLoginState(true, res.data.login.access_token);
-                      props.navigation.navigate('Home');
-                      setEmail('');
-                      setPassword('');
-                      setValidationError('');
+    <View style={styles.loginWrap}>
+      <Header props={props} />
+      <View style={styles.login}>
+        <Mutation mutation={LOGIN}>
+          {(addMutation, {data}) => {
+            return (
+              <View style={styles.loginForm}>
+                <Text style={styles.headText}>Авторизация</Text>
+                <TextInput
+                  placeholder="email"
+                  style={[
+                    styles.input,
+                    validationError ? {borderColor: 'red'} : {},
+                  ]}
+                  onChangeText={(email) => {
+                    setEmail(email);
+                  }}
+                  value={email}
+                />
+                <TextInput
+                  placeholder="password"
+                  style={[
+                    styles.input,
+                    validationError ? {borderColor: 'red'} : {},
+                  ]}
+                  secureTextEntry
+                  onChangeText={(pass) => {
+                    setPassword(pass);
+                  }}
+                  value={password}
+                />
+                <Text style={styles.validationError}>{validationError}</Text>
+                <TouchableOpacity
+                  style={styles.btn}
+                  onPress={() => {
+                    addMutation({
+                      variables: {
+                        username: email,
+                        password: password,
+                      },
                     })
-                    .catch((err) => {
-                      setValidationError('Неверный логин либо пароль');
-                      console.log(err.message, '______err');
-                    });
-                }}>
-                <Text style={styles.btnText}>Вход</Text>
-              </TouchableOpacity>
-            </View>
-          );
-        }}
-      </Mutation>
+                      .then((res) => {
+                        props.navigation.state.params.changeLoginState(
+                          true,
+                          res.data.login.access_token,
+                        );
+                        props.navigation.navigate('Home');
+                        setEmail('');
+                        setPassword('');
+                        setValidationError('');
+                      })
+                      .catch((err) => {
+                        setValidationError('Неверный логин либо пароль');
+                        console.log(err.message, '______err');
+                      });
+                  }}>
+                  <Text style={styles.btnText}>Вход</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+        </Mutation>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  loginWrap: {
+    flex: 1,
+  },
   login: {
     flex: 1,
     backgroundColor: '#eee',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   loginForm: {
     width: '80%',

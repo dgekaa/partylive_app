@@ -20,6 +20,7 @@ import java.util.Arrays;
 import com.airbnb.android.react.maps.MapsPackage;
 import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.reactcommunity.rndatetimepicker.RNDateTimePickerPackage;
+import com.reactnative.ivpusic.imagepicker.PickerPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -49,7 +50,8 @@ protected List<ReactPackage> getPackages() {
             new ReactVideoPackage(),
             new MapsPackage(),
             new GeolocationPackage(),
-            new RNDateTimePickerPackage()
+            new RNDateTimePickerPackage(),
+            new PickerPackage()
     );
 }
 

@@ -25,7 +25,7 @@ const GET_CATEGORIES = gql`
   }
 `;
 
-const Map = ({navigation, route}) => {
+const Map = (props) => {
   const [DATA, setDATA] = useState([]);
   const [companyData, setCompanyData] = useState([]);
 
@@ -42,6 +42,7 @@ const Map = ({navigation, route}) => {
 
   return (
     <View style={styles.Map}>
+      <Header props={props} />
       <Query query={GET_CATEGORIES}>
         {({loading, error, data}) => {
           if (loading)
@@ -57,7 +58,7 @@ const Map = ({navigation, route}) => {
       <View style={styles.content}>
         <GoogleMap />
       </View>
-      <BottomTabNavigator navigation={navigation} route={route} />
+      {/* <BottomTabNavigator navigation={navigation} route={route} /> */}
     </View>
   );
 };

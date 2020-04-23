@@ -7,6 +7,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
+import Header from '../components/Header';
+
 import {Query} from 'react-apollo';
 import gql from 'graphql-tag';
 
@@ -48,9 +50,9 @@ const GET_PLACES = gql`
 `;
 
 const EditCompany = (props) => {
-  console.log(props, 'props edit c');
   return (
     <View style={styles.EditCompany}>
+      <Header props={props} />
       <Text style={styles.headerText}>Список заведений</Text>
       <Query query={GET_PLACES}>
         {({loading, error, data}) => {
@@ -92,6 +94,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'uppercase',
     paddingBottom: 30,
+    paddingTop: 10,
   },
   row: {
     flexDirection: 'row',

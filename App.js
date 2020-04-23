@@ -1,13 +1,17 @@
 import React, {useState, useEffect} from 'react';
-
-import {NavigationContainer} from '@react-navigation/native';
 import {
-  createDrawerNavigator,
-  DrawerContentScrollView,
-  DrawerItemList,
-  DrawerItem,
-} from '@react-navigation/drawer';
-import {createStackNavigator} from '@react-navigation/stack';
+  Dimensions,
+  SafeAreaViewm,
+  ScrollView,
+  SafeAreaView,
+  Text,
+} from 'react-native';
+
+import {createBottomTabNavigator} from 'react-navigation-tabs';
+import {createStackNavigator} from 'react-navigation-stack';
+import {createAppContainer} from 'react-navigation';
+
+// import {createDrawerNavigator} from 'react-navigation-drawer';
 
 import Map from './src/screens/Map';
 import Home from './src/screens/Home';
@@ -25,7 +29,8 @@ import {setContext} from 'apollo-link-context';
 
 import {getToken, signIn, signOut} from './src/util';
 
-import Header from './src/components/Header';
+import {List, ListItem} from 'native-base';
+import {createDrawerNavigator} from 'react-navigation-drawer';
 
 const httpLink = new HttpLink({
   uri: 'http://194.87.95.37/graphql',
@@ -48,84 +53,57 @@ const client = new ApolloClient({
   link: link,
 });
 
-const Stack = createStackNavigator();
-const Drawer = createDrawerNavigator();
-
-const StackRoutes = () => (
-  <Stack.Navigator initialRouteName="Home">
-    <Stack.Screen
-      name="Home"
-      component={Home}
-      options={{
-        title: 'Главная',
-        header: (props) => <Header props={props} />,
-      }}
-    />
-    <Stack.Screen
-      name="Map"
-      component={Map}
-      options={{
-        // title: 'Карта',
-        header: (props) => <Header props={props} />,
-      }}
-    />
-    <Stack.Screen
-      name="Company"
-      component={Company}
-      options={{
-        header: (props) => <Header props={props} />,
-      }}
-    />
-    <Stack.Screen
-      name="Login"
-      component={Login}
-      options={{
-        // title: 'Login',
-        header: (props) => <Header props={props} />,
-      }}
-    />
-    <Stack.Screen
-      name="Registration"
-      component={Registration}
-      options={{
-        // title: 'Registration',
-        header: (props) => <Header props={props} />,
-      }}
-    />
-    <Stack.Screen
-      name="Admin"
-      component={Admin}
-      options={{
-        // title: 'Admin',
-        header: (props) => <Header props={props} />,
-      }}
-    />
-    <Stack.Screen
-      name="EditCompany"
-      component={EditCompany}
-      options={{
-        // title: 'EditCompany',
-        header: (props) => <Header props={props} />,
-      }}
-    />
-  </Stack.Navigator>
-);
-
-const CustomBtn = (props) => {
+const SideMenu = (props) => {
   return (
-    <DrawerContentScrollView {...props}>
-      <DrawerItemList {...props} />
-      {props.loggedIn && (
-        <DrawerItem
-          label="Выход"
-          labelStyle={{color: 'red'}}
-          onPress={() => {
-            props.changeLoginState(false);
-            props.navigation.navigate('Home');
-          }}
-        />
-      )}
-    </DrawerContentScrollView>
+    <SafeAreaView style={{flex: 1}}>
+      <ScrollView>
+        <List>
+          <ListItem onPress={() => props.navigation.navigate('Home')}>
+            <Text>Главная</Text>
+          </ListItem>
+          <ListItem onPress={() => props.navigation.navigate('Map')}>
+            <Text>Карта</Text>
+          </ListItem>
+          {props.loggedIn && (
+            <ListItem onPress={() => props.navigation.navigate('EditCompany')}>
+              <Text>Список заведений</Text>
+            </ListItem>
+          )}
+          {!props.loggedIn && (
+            <ListItem
+              onPress={() =>
+                props.navigation.navigate('Login', {
+                  changeLoginState: props.changeLoginState,
+                })
+              }>
+              <Text>Вход</Text>
+            </ListItem>
+          )}
+          {!props.loggedIn && (
+            <ListItem
+              onPress={() =>
+                props.navigation.navigate('Registration', {
+                  changeLoginState: props.changeLoginState,
+                })
+              }>
+              <Text>Регистрация</Text>
+            </ListItem>
+          )}
+        </List>
+        <List>
+          {props.loggedIn && (
+            <ListItem
+              noBorder
+              onPress={() => {
+                props.changeLoginState(false);
+                props.navigation.navigate('Home');
+              }}>
+              <Text style={{color: 'red'}}>Выход</Text>
+            </ListItem>
+          )}
+        </List>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -152,53 +130,104 @@ const App = () => {
     }
   };
 
+  const navOptionHandler = (navigation) => ({
+    header: null,
+  });
+
+  const HomeStackNavigator = createStackNavigator({
+    Home: {
+      screen: Home,
+      navigationOptions: navOptionHandler,
+    },
+  });
+
+  const MapStackNavigator = createStackNavigator({
+    Map: {
+      screen: Map,
+      navigationOptions: navOptionHandler,
+    },
+  });
+
+  const MainTab = createBottomTabNavigator(
+    {
+      Home: {
+        screen: HomeStackNavigator,
+        navigationOptions: {
+          tabBarLabel: 'Home',
+        },
+      },
+      Map: MapStackNavigator,
+    },
+    {
+      tabBarOptions: {
+        style: {
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#fff',
+          paddingBottom: 15,
+          borderTopColor: '#ededed',
+        },
+      },
+    },
+  );
+
+  const MainStack = createStackNavigator(
+    {
+      Home: {
+        screen: MainTab,
+        navigationOptions: navOptionHandler,
+      },
+      EditCompany: {
+        screen: EditCompany,
+        navigationOptions: navOptionHandler,
+      },
+      Login: {
+        screen: Login,
+        navigationOptions: navOptionHandler,
+      },
+      Registration: {
+        screen: Registration,
+        navigationOptions: navOptionHandler,
+      },
+      Admin: {
+        screen: Admin,
+        navigationOptions: navOptionHandler,
+      },
+      Company: {
+        screen: Company,
+        navigationOptions: navOptionHandler,
+      },
+    },
+    {initialRouteKey: 'Home'},
+  );
+
+  const AppDrawer = createDrawerNavigator(
+    {
+      drawer: MainStack,
+    },
+    {
+      contentComponent: (props) => {
+        return (
+          <SideMenu
+            {...props}
+            loggedIn={loggedIn}
+            changeLoginState={handleChangeLoginState}
+          />
+        );
+      },
+      animationEnabled: true,
+      swipeEnabled: true,
+      drawerWidth: (Dimensions.get('window').width * 3) / 4,
+      drawerPosition: 'right',
+      edgeWidth: 50,
+    },
+  );
+
+  const AppContainer = createAppContainer(AppDrawer);
+
   return (
     <ApolloProvider client={client}>
-      <NavigationContainer>
-        <Drawer.Navigator
-          edgeWidth={50}
-          drawerPosition="right"
-          mode="modal"
-          headerMode="screen"
-          initialRouteName="Home"
-          drawerType="slide"
-          drawerStyle={{
-            backgroundColor: '#fff',
-            width: 240,
-          }}
-          drawerContent={(props) => (
-            <CustomBtn
-              {...props}
-              loggedIn={loggedIn}
-              changeLoginState={handleChangeLoginState}
-            />
-          )}>
-          <Drawer.Screen name="Главная" component={StackRoutes} />
-          {/* <Drawer.Screen name="Карта" component={Map} /> */}
-          {!loggedIn && (
-            <Drawer.Screen
-              name="Вход"
-              component={(props) => (
-                <Login {...props} changeLoginState={handleChangeLoginState} />
-              )}
-            />
-          )}
-          {!loggedIn && (
-            <Drawer.Screen
-              name="Регистрация"
-              component={(props) => (
-                <Registration
-                  {...props}
-                  changeLoginState={handleChangeLoginState}
-                />
-              )}
-            />
-          )}
-          {loggedIn && (
-            <Drawer.Screen name="Список заведений" component={EditCompany} />
-          )}
-        </Drawer.Navigator>
-      </NavigationContainer>
+      <AppContainer />
     </ApolloProvider>
   );
 };

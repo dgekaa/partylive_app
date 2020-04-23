@@ -1,14 +1,14 @@
 import React from 'react';
 import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 
-const Header = ({props}) => {
+const CustomHeader = ({props}) => {
   return (
     <View style={styles.header}>
       <TouchableOpacity
         onPress={() => {
           props.navigation.goBack();
         }}>
-        {props.previous && <Text style={styles.goBack}>{'<'}</Text>}
+        {props.navigation.goBack && <Text style={styles.goBack}>{'<'}</Text>}
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => {
@@ -21,7 +21,15 @@ const Header = ({props}) => {
           </View>
         </View>
       </TouchableOpacity>
-      <View></View>
+      <TouchableOpacity
+        style={styles.burgerWrap}
+        onPress={() => {
+          props.navigation.openDrawer();
+        }}>
+        <View style={styles.burgerOne}></View>
+        <View style={styles.burgerOne}></View>
+        <View style={styles.burgerOne}></View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -33,7 +41,7 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: '#ededed',
     borderBottomWidth: 1,
   },
   goBack: {
@@ -59,6 +67,16 @@ const styles = StyleSheet.create({
     color: 'white',
     paddingHorizontal: 5,
   },
+  burgerWrap: {
+    width: 30,
+    height: 20,
+    justifyContent: 'space-between',
+  },
+  burgerOne: {
+    height: 2,
+    backgroundColor: '#000',
+    borderRadius: 2,
+  },
 });
 
-export default Header;
+export default CustomHeader;

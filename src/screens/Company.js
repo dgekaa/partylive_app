@@ -6,11 +6,16 @@ import Video from 'react-native-video';
 import {EN_SHORT_TO_RU_LONG_V_P} from '../constants';
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 
-import BottomTabNavigator from '../components/BottomTabNavigator';
 import Header from '../components/Header';
 
-const Company = ({route, navigation}) => {
-  const {name, address, streams, categories} = route.params.data;
+const Company = (props) => {
+  console.log(props, ' COMPANY SS ');
+  const {
+    name,
+    address,
+    streams,
+    categories,
+  } = props.navigation.state.params.data;
 
   const [showStream, setShowStream] = useState();
   const [nextStreamTime, setNextStreamTime] = useState();
@@ -18,13 +23,18 @@ const Company = ({route, navigation}) => {
   const [isWork, setIsWork] = useState();
 
   useEffect(() => {
-    isShowStreamNow(route.params.data, setShowStream, setNextStreamTime);
+    isShowStreamNow(
+      props.navigation.state.params.data,
+      setShowStream,
+      setNextStreamTime,
+    );
 
-    isWorkTimeNow(route.params.data, setWorkTime, setIsWork);
-  }, [route.params.data]);
+    isWorkTimeNow(props.navigation.state.params.data, setWorkTime, setIsWork);
+  }, [props.navigation.state.params.data]);
 
   return (
     <View style={styles.home}>
+      <Header props={props} />
       <View style={styles.content}>
         <View style={styles.videoBlockWrap}>
           <View style={styles.videoWrap}>
@@ -66,7 +76,10 @@ const Company = ({route, navigation}) => {
                 {categories[0].name} "{name}"
               </Text>
               <Text style={styles.km}>
-                {route.params.distanceTo ? route.params.distanceTo : 0} km.
+                {props.navigation.state.params.distanceTo
+                  ? props.navigation.state.params.distanceTo
+                  : 0}{' '}
+                km.
               </Text>
             </View>
             <Text style={styles.workTime}>
@@ -87,7 +100,7 @@ const Company = ({route, navigation}) => {
           </View>
         </View>
       </View>
-      <BottomTabNavigator navigation={navigation} route={route} />
+      {/* <BottomTabNavigator navigation={navigation} route={route} /> */}
     </View>
   );
 };
@@ -103,7 +116,7 @@ const styles = StyleSheet.create({
   },
   videoBlockWrap: {
     flex: 2,
-    borderColor: '#999',
+    borderColor: '#ededed',
     borderWidth: 1,
     borderRadius: 5,
     backgroundColor: '#fff',
@@ -147,7 +160,7 @@ const styles = StyleSheet.create({
   mapBlockWrap: {
     flex: 1,
     marginVertical: 10,
-    borderColor: '#999',
+    borderColor: '#ededed',
     borderWidth: 1,
     borderRadius: 5,
     backgroundColor: '#fff',

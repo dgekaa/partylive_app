@@ -83,7 +83,11 @@ const SmallCompanyBlock = ({item, navigation}) => {
   return (
     <TouchableOpacity
       onPress={(e) => {
-        navigation.navigate('Company', {data: item, distanceTo});
+        navigation.navigate('Company', {
+          data: item,
+          distanceTo,
+          qwe: 'QWEQWEQW',
+        });
       }}
       style={styles.SmallCompanyBlock}>
       <View style={styles.videoWrap}>
@@ -147,7 +151,7 @@ const styles = StyleSheet.create({
     margin: 5,
     width: Dimensions.get('window').width / 2 - 10,
     borderRadius: 5,
-    borderColor: '#e5e5e5',
+    borderColor: '#ededed',
     borderWidth: 1,
   },
   videoWrap: {

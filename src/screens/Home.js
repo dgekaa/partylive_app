@@ -7,6 +7,8 @@ import {
   FlatList,
 } from 'react-native';
 
+import Header from '../components/Header';
+
 import CompanyTypeNav from '../components/CompanyTypeNav';
 import SmallCompanyBlock from '../components/SmallCompanyBlock';
 import BottomTabNavigator from '../components/BottomTabNavigator';
@@ -61,23 +63,24 @@ const GET_CATEGORIES = gql`
   }
 `;
 
-const Home = ({navigation, route}) => {
+const Home = (props) => {
   const [DATA, setDATA] = useState([]);
   const [companyData, setCompanyData] = useState([]);
 
   const clickedType = (type) => {
-    if (type.toLowerCase() !== 'все') {
+    if (type.toLowerCase() === 'все') {
+      setCompanyData(DATA.places);
+    } else {
       const filteredData = DATA.places.filter(
         (el) => el.categories[0].name.toUpperCase() === type.toUpperCase(),
       );
       setCompanyData(filteredData);
-    } else {
-      setCompanyData(DATA.places);
     }
   };
 
   return (
     <View style={styles.home}>
+      <Header props={props} />
       <Query query={GET_CATEGORIES}>
         {({loading, error, data}) => {
           if (loading)
@@ -101,20 +104,28 @@ const Home = ({navigation, route}) => {
               );
             if (error) return <Text>Error! ${error.message}</Text>;
             setDATA(data);
-            return (
-              <FlatList
-                data={companyData.length ? companyData : data.places}
-                numColumns={2}
-                renderItem={({item, index}) => (
-                  <SmallCompanyBlock item={item} navigation={navigation} />
-                )}
-                keyExtractor={(item) => item.id}
-              />
-            );
+            if (companyData.length) {
+              return (
+                <FlatList
+                  data={companyData.length ? companyData : []}
+                  numColumns={2}
+                  renderItem={({item, index}) => (
+                    <SmallCompanyBlock
+                      item={item}
+                      navigation={props.navigation}
+                    />
+                  )}
+                  keyExtractor={(item) => item.id}
+                />
+              );
+            }
+            if (!companyData.length) {
+              return <Text style={styles.nullFilter}>Нет заведений</Text>;
+            }
           }}
         </Query>
       </View>
-      <BottomTabNavigator navigation={navigation} route={route} />
+      {/* <BottomTabNavigator navigation={navigation} route={route} /> */}
     </View>
   );
 };
@@ -125,6 +136,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  nullFilter: {
+    textAlign: 'center',
+    paddingTop: 20,
   },
 });
 
