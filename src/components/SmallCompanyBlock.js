@@ -22,16 +22,15 @@ const SmallCompanyBlock = ({item, navigation}) => {
   const [workTime, setWorkTime] = useState();
   const [isWork, setIsWork] = useState();
   const [distanceTo, setDistanceTo] = useState();
+  const [lon, setLon] = useState('');
+  const [lat, setLat] = useState('');
 
   useEffect(() => {
     isShowStreamNow(item, setShowStream, setNextStreamTime);
     isWorkTimeNow(item, setWorkTime, setIsWork);
   }, [item]);
 
-  const [lon, setLon] = useState('');
-  const [lat, setLat] = useState('');
-
-  const requestCameraPermission = async () => {
+  const requestLocationPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -44,15 +43,13 @@ const SmallCompanyBlock = ({item, navigation}) => {
         },
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use location !!!');
+        console.log('You can use location');
         Geolocation.watchPosition(
           (position) => {
             setLon(position.coords.longitude);
             setLat(position.coords.latitude);
           },
-          (error) => {
-            console.log(error.code, error.message, ' ERR LOCATION');
-          },
+          (error) => console.log(error.code, error.message, 'ERR LOCATION'),
           {enableHighAccuracy: false, timeout: 50000},
         );
       } else {
@@ -64,7 +61,7 @@ const SmallCompanyBlock = ({item, navigation}) => {
   };
 
   useEffect(() => {
-    requestCameraPermission();
+    requestLocationPermission();
   }, []);
 
   useEffect(() => {
@@ -80,13 +77,47 @@ const SmallCompanyBlock = ({item, navigation}) => {
     }
   }, [lon, lat, item]);
 
+  const whenIsTranslationTime = () => {
+    if (
+      nextStreamTime &&
+      nextStreamTime.start_time &&
+      nextStreamTime.day.toLowerCase() !== 'сегодня'
+    ) {
+      return (
+        'Трансляция начнется в ' +
+        EN_SHORT_TO_RU_LONG_V_P[nextStreamTime.day] +
+        ' в ' +
+        nextStreamTime.start_time
+      );
+    } else if (
+      nextStreamTime &&
+      nextStreamTime.start_time &&
+      nextStreamTime.day.toLowerCase() === 'сегодня'
+    ) {
+      return 'Трансляция начнется сегодня в ' + nextStreamTime.start_time;
+    } else if (!nextStreamTime) {
+      return 'Нет предстоящих трансляций';
+    }
+  };
+
+  const whenIsWorkTime = () => {
+    if (!isWork) {
+      return 'Закрыто';
+    } else {
+      if (workTime) {
+        return 'Открыто до ' + workTime.split('-')[1];
+      } else {
+        return 'Время работы не задано';
+      }
+    }
+  };
+
   return (
     <TouchableOpacity
       onPress={(e) => {
         navigation.navigate('Company', {
           data: item,
           distanceTo,
-          qwe: 'QWEQWEQW',
         });
       }}
       style={styles.SmallCompanyBlock}>
@@ -101,25 +132,10 @@ const SmallCompanyBlock = ({item, navigation}) => {
             onError={(err) => console.log(err, 'VIDEO ERRRRR ')}
             style={styles.backgroundVideo}
             resizeMode="contain"
-            // cover,stretch,contain
           />
         ) : (
           <View style={styles.backgroundVideo}>
-            <Text style={styles.noVideoText}>
-              {nextStreamTime &&
-                nextStreamTime.start_time &&
-                nextStreamTime.day.toLowerCase() !== 'сегодня' &&
-                'Трансляция начнется в ' +
-                  EN_SHORT_TO_RU_LONG_V_P[nextStreamTime.day] +
-                  ' в ' +
-                  nextStreamTime.start_time}
-              {nextStreamTime &&
-                nextStreamTime.start_time &&
-                nextStreamTime.day.toLowerCase() === 'сегодня' &&
-                'Трансляция начнется сегодня в ' + nextStreamTime.start_time}
-
-              {!nextStreamTime && 'Нет предстоящих трансляций'}
-            </Text>
+            <Text style={styles.noVideoText}>{whenIsTranslationTime()}</Text>
           </View>
         )}
       </View>
@@ -131,14 +147,7 @@ const SmallCompanyBlock = ({item, navigation}) => {
             {item.categories && item.categories[0] && item.categories[0].name}
           </Text>
         </View>
-
-        <Text>
-          {!isWork
-            ? 'Закрыто'
-            : workTime
-            ? 'Открыто до ' + workTime.split('-')[1]
-            : 'Время работы не задано'}
-        </Text>
+        <Text>{whenIsWorkTime()}</Text>
       </View>
     </TouchableOpacity>
   );
