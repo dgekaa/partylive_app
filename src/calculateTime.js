@@ -1,4 +1,5 @@
 import {EN_SHORT_DAY_OF_WEEK} from './constants';
+
 const numberDayNow = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 let numberDayYest;
 

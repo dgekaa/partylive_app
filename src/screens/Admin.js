@@ -11,189 +11,52 @@ import {
   Image,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import Video from 'react-native-video';
-import gql from 'graphql-tag';
-import {EN_SHORT_DAY_OF_WEEK} from '../constants';
-
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {Query, Mutation, useMutation, useQuery} from 'react-apollo';
-import Header from '../components/Header';
-
+import {Query, useMutation, useQuery} from 'react-apollo';
 import {
   Collapse,
   CollapseHeader,
   CollapseBody,
 } from 'accordion-collapse-react-native';
 
-const GET_PLACE = gql`
-  query GETPLACE($id: ID!) {
-    place(id: $id) {
-      id
-      name
-      address
-      description
-      logo
-      menu
-      actions
-      coordinates
-      streams {
-        url
-        name
-        id
-        preview
-        schedules {
-          id
-          day
-          start_time
-          end_time
-        }
-      }
-      schedules {
-        id
-        day
-        start_time
-        end_time
-      }
-      categories {
-        id
-        name
-      }
-    }
-  }
-`;
-
-const CREATE_WORK_TIME = gql`
-  mutation CREATEWORKTIME(
-    $id: ID!
-    $day: WeekDay!
-    $start_time: String!
-    $end_time: String!
-  ) {
-    updatePlace(
-      input: {
-        id: $id
-        schedules: {
-          create: {day: $day, start_time: $start_time, end_time: $end_time}
-        }
-      }
-    ) {
-      id
-    }
-  }
-`;
-
-const UPDATE_WORK_SCHEDULE = gql`
-  mutation UPDATEWORKSCHEDULE(
-    $id: ID!
-    $start_time: String!
-    $end_time: String!
-  ) {
-    updateSchedule(
-      input: {id: $id, start_time: $start_time, end_time: $end_time}
-    ) {
-      id
-    }
-  }
-`;
-const UPDATE_PLACE_DATA = gql`
-  mutation UPDATEPLACEDATA(
-    $id: ID!
-    $name: String
-    $description: String
-    $categories: CreateCategoryMorphToMany
-  ) {
-    updatePlace(
-      input: {
-        id: $id
-        name: $name
-        description: $description
-        categories: $categories
-      }
-    ) {
-      id
-      name
-      description
-      categories {
-        id
-        name
-      }
-    }
-  }
-`;
-
-const DELETE_SCHEDULE = gql`
-  mutation DELETESCHEDULE($id: ID!) {
-    deleteSchedule(id: $id) {
-      id
-    }
-  }
-`;
-
-const UPDATE_STREAMS_SCHEDULE = gql`
-  mutation UPDATESTREAMSSCHEDULE($id: ID!, $update: [UpdateScheduleInput!]) {
-    updateStream(input: {id: $id, schedules: {update: $update}}) {
-      id
-    }
-  }
-`;
-
-const CREATE_STREAMS_SCHEDULE = gql`
-  mutation CREATESTREAMSSCHEDULE(
-    $id: ID!
-    $day: WeekDay!
-    $start_time: String!
-    $end_time: String!
-  ) {
-    updateStream(
-      input: {
-        id: $id
-        schedules: {
-          create: [{day: $day, start_time: $start_time, end_time: $end_time}]
-        }
-      }
-    ) {
-      id
-    }
-  }
-`;
-
-const GET_CATEGORIES = gql`
-  query {
-    categories {
-      id
-      name
-      slug
-    }
-  }
-`;
+import {EN_SHORT_DAY_OF_WEEK} from '../constants';
+import Header from '../components/Header';
+import {
+  GET_PLACE,
+  CREATE_WORK_TIME,
+  UPDATE_WORK_SCHEDULE,
+  UPDATE_PLACE_DATA,
+  DELETE_SCHEDULE,
+  UPDATE_STREAMS_SCHEDULE,
+  CREATE_STREAMS_SCHEDULE,
+  GET_CATEGORIES,
+} from '../QUERYES';
 
 const Admin = (props) => {
-  const {streams, schedules} = props.navigation.state.params.item;
+  const {streams} = props.navigation.state.params.item;
 
   const [popupVisible, setPopupVisible] = useState(false);
 
   const SetNewTimeObject = (data) => {
     const timeObject = {};
     EN_SHORT_DAY_OF_WEEK.forEach((e, i) => {
-      data.forEach((el, ind) => {
-        if (!timeObject[e.day]) {
-          timeObject[e.day] = 'Пусто';
-        }
-        if (el.day) {
-          timeObject[el.day] = el;
-        }
+      data.forEach((el) => {
+        if (!timeObject[e.day]) timeObject[e.day] = 'Пусто';
+        if (el.day) timeObject[el.day] = el;
       });
     });
     return timeObject;
   };
+
   // ================================
   const [date, setDate] = useState(new Date().getTime());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
   const [selectedDay, setSelectedDay] = useState(false);
-
   const [isPickStartTime, setIsPickStartTime] = useState(false);
   const [pickedStartTime, setPickedStartTime] = useState('');
   const [pickedEndTime, setPickedEndTime] = useState('');
@@ -226,14 +89,12 @@ const Admin = (props) => {
   const [CREATE_WORK_TIME_mutation] = useMutation(CREATE_WORK_TIME);
   const [UPDATE_WORK_SCHEDULE_mutation] = useMutation(UPDATE_WORK_SCHEDULE);
   const [DELETE_SCHEDULE_mutation] = useMutation(DELETE_SCHEDULE);
-
   const [UPDATE_STREAMS_SCHEDULE_mutation] = useMutation(
     UPDATE_STREAMS_SCHEDULE,
   );
   const [CREATE_STREAMS_SCHEDULE_mutation] = useMutation(
     CREATE_STREAMS_SCHEDULE,
   );
-
   const [UPDATE_PLACE_DATA_mutation] = useMutation(UPDATE_PLACE_DATA);
 
   const setAsDayOf = (day) => {
@@ -244,9 +105,7 @@ const Admin = (props) => {
         },
         optimisticResponse: null,
       });
-      setTimeout(() => {
-        refetch();
-      }, 300);
+      setTimeout(() => refetch(), 300);
     }
   };
 
@@ -318,7 +177,7 @@ const Admin = (props) => {
     }
   };
 
-  const onChange = (event, selectedTime) => {
+  const onChangeTime = (event, selectedTime) => {
     const currentDate = selectedTime || date;
     setShow(Platform.OS === 'ios');
     setDate(currentDate);
@@ -407,11 +266,7 @@ const Admin = (props) => {
         />
       </View>
       <View>
-        <Collapse
-          onToggle={(isOpen) => {
-            console.log(data, ' ADMIN data');
-            // console.log(isOpen);
-          }}>
+        <Collapse onToggle={(isOpen) => {}}>
           <CollapseHeader style={styles.tableHeader}>
             <Text>Профиль заведения</Text>
           </CollapseHeader>
@@ -459,32 +314,28 @@ const Admin = (props) => {
               <View style={styles.btnCategoryWrap}>
                 <Query query={GET_CATEGORIES}>
                   {(prop) => {
-                    if (prop.loading)
+                    if (prop.loading) {
                       return (
                         <View>
                           <ActivityIndicator size="large" color="#0000ff" />
                         </View>
                       );
+                    }
                     if (prop.error)
                       return <Text>Error! ${prop.error.message}</Text>;
-
                     return prop.data.categories.map((el, i) => (
                       <TouchableOpacity
                         key={i}
                         style={[
                           styles.btnCategory,
                           typeOfCompany && typeOfCompany === el.name
-                            ? {
-                                backgroundColor: '#e32a6c',
-                              }
+                            ? styles.bacgrBtn
                             : !typeOfCompany &&
                               el.name &&
                               data.place.categories &&
                               data.place.categories[0] &&
                               data.place.categories[0].name === el.name
-                            ? {
-                                backgroundColor: '#e32a6c',
-                              }
+                            ? styles.bacgrBtn
                             : {},
                         ]}
                         onPress={() => {
@@ -546,10 +397,7 @@ const Admin = (props) => {
             </TouchableOpacity>
           </CollapseBody>
         </Collapse>
-        <Collapse
-          onToggle={(isOpen) => {
-            // console.log(isOpen);
-          }}>
+        <Collapse onToggle={(isOpen) => {}}>
           <CollapseHeader style={styles.tableHeader}>
             <Text>График работы</Text>
           </CollapseHeader>
@@ -576,9 +424,7 @@ const Admin = (props) => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.graphDayOf}
-                    onPress={() => {
-                      setAsDayOf(oneDay);
-                    }}>
+                    onPress={() => setAsDayOf(oneDay)}>
                     <Text style={styles.graphTimeText}>Вых</Text>
                   </TouchableOpacity>
                 </View>
@@ -586,11 +432,7 @@ const Admin = (props) => {
             })}
           </CollapseBody>
         </Collapse>
-        {/* -------------------------------- */}
-        <Collapse
-          onToggle={(isOpen) => {
-            // console.log(isOpen);
-          }}>
+        <Collapse onToggle={(isOpen) => {}}>
           <CollapseHeader style={styles.tableHeader}>
             <Text>График трансляций</Text>
           </CollapseHeader>
@@ -607,7 +449,7 @@ const Admin = (props) => {
                     style={styles.graphTime}
                     onPress={() => {
                       if (!data.place.streams[0]) {
-                        alert('Стрим еще не создан');
+                        Alert.alert('Оповещение', 'Стрим еще не создан');
                       } else {
                         setSelectedDay(oneDay);
                         setEnumWeekName(el.day);
@@ -625,7 +467,7 @@ const Admin = (props) => {
                     style={styles.graphDayOf}
                     onPress={() => {
                       if (!data.place.streams[0]) {
-                        alert('Стрим еще не создан');
+                        Alert.alert('Оповещение', 'Стрим еще не создан');
                       } else {
                         setAsDayOf(oneDay);
                       }
@@ -640,9 +482,7 @@ const Admin = (props) => {
       </View>
       <Dialog
         visible={popupVisible}
-        onTouchOutside={() => {
-          setPopupVisible(false);
-        }}
+        onTouchOutside={() => setPopupVisible(false)}
         dialogAnimation={
           new ScaleAnimation({
             initialValue: 0,
@@ -663,7 +503,7 @@ const Admin = (props) => {
                     {pickedStartTime || selectedDay.start_time || '-'}
                   </Text>
                 </TouchableOpacity>
-                <View style={styles.space}></View>
+                <View style={styles.space} />
                 <TouchableOpacity
                   style={styles.dialogTimeBlock}
                   onPress={() => {
@@ -681,9 +521,7 @@ const Admin = (props) => {
                   } else {
                     saveStreamTime();
                   }
-                  setTimeout(() => {
-                    refetch();
-                  }, 500);
+                  setTimeout(() => refetch(), 500);
                 }}>
                 <Text style={styles.saveBtnText}>Сохранить</Text>
               </TouchableOpacity>
@@ -700,7 +538,7 @@ const Admin = (props) => {
           mode={mode}
           is24Hour={true}
           display="spinner"
-          onChange={onChange}
+          onChange={onChangeTime}
         />
       )}
     </ScrollView>
@@ -878,6 +716,9 @@ const styles = StyleSheet.create({
   },
   graphSaveText: {
     color: 'green',
+  },
+  bacgrBtn: {
+    backgroundColor: '#e32a6c',
   },
 });
 

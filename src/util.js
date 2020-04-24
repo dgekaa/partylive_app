@@ -17,7 +17,6 @@ export const getUser = async () => {
   if (user) {
     return Promise.resolve(user);
   }
-
   user = await AsyncStorage.getItem(USER_DATA);
   return user;
 };

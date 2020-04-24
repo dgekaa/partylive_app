@@ -1,21 +1,18 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, View, Text} from 'react-native';
-
 import Video from 'react-native-video';
 
 import {EN_SHORT_TO_RU_LONG_V_P} from '../constants';
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
-
 import Header from '../components/Header';
 
 const Company = (props) => {
-  console.log(props, ' COMPANY SS ');
   const {
-    name,
-    address,
-    streams,
-    categories,
-  } = props.navigation.state.params.data;
+    data: {name, address, streams, categories},
+    distanceTo,
+  } = props.navigation.state.params;
+
+  const dataCompany = props.navigation.state.params.data;
 
   const [showStream, setShowStream] = useState();
   const [nextStreamTime, setNextStreamTime] = useState();
@@ -23,14 +20,44 @@ const Company = (props) => {
   const [isWork, setIsWork] = useState();
 
   useEffect(() => {
-    isShowStreamNow(
-      props.navigation.state.params.data,
-      setShowStream,
-      setNextStreamTime,
-    );
+    isShowStreamNow(dataCompany, setShowStream, setNextStreamTime);
+    isWorkTimeNow(dataCompany, setWorkTime, setIsWork);
+  }, [dataCompany]);
 
-    isWorkTimeNow(props.navigation.state.params.data, setWorkTime, setIsWork);
-  }, [props.navigation.state.params.data]);
+  const whenIsTranslationTime = () => {
+    if (
+      nextStreamTime &&
+      nextStreamTime.start_time &&
+      nextStreamTime.day.toLowerCase() !== 'сегодня'
+    ) {
+      return (
+        'Трансляция начнется в ' +
+        EN_SHORT_TO_RU_LONG_V_P[nextStreamTime.day] +
+        ' в ' +
+        nextStreamTime.start_time
+      );
+    } else if (
+      nextStreamTime &&
+      nextStreamTime.start_time &&
+      nextStreamTime.day.toLowerCase() === 'сегодня'
+    ) {
+      return 'Трансляция начнется сегодня в ' + nextStreamTime.start_time;
+    } else if (!nextStreamTime) {
+      return 'Нет предстоящих трансляций';
+    }
+  };
+
+  const whenIsWorkTime = () => {
+    if (!isWork) {
+      return 'Закрыто';
+    } else {
+      if (workTime) {
+        return 'Открыто до ' + workTime.split('-')[1];
+      } else {
+        return 'Время работы не задано';
+      }
+    }
+  };
 
   return (
     <View style={styles.home}>
@@ -42,9 +69,6 @@ const Company = (props) => {
               <Video
                 resizeMode="contain"
                 source={{uri: streams[0].url}}
-                //  ref={(ref) => {
-                //    this.player = ref
-                //  }}
                 onBuffer={(buf) => console.log(buf)}
                 onError={(err) => console.log(err, '_ERR_')}
                 style={styles.backgroundVideo}
@@ -52,20 +76,7 @@ const Company = (props) => {
             ) : (
               <View style={styles.backgroundVideo}>
                 <Text style={styles.noVideoText}>
-                  {nextStreamTime &&
-                    nextStreamTime.start_time &&
-                    nextStreamTime.day.toLowerCase() !== 'сегодня' &&
-                    'Трансляция начнется в ' +
-                      EN_SHORT_TO_RU_LONG_V_P[nextStreamTime.day] +
-                      ' в ' +
-                      nextStreamTime.start_time}
-                  {nextStreamTime &&
-                    nextStreamTime.start_time &&
-                    nextStreamTime.day.toLowerCase() === 'сегодня' &&
-                    'Трансляция начнется сегодня в ' +
-                      nextStreamTime.start_time}
-
-                  {!nextStreamTime && 'Нет предстоящих трансляций'}
+                  {whenIsTranslationTime()}
                 </Text>
               </View>
             )}
@@ -75,20 +86,9 @@ const Company = (props) => {
               <Text style={styles.name}>
                 {categories[0].name} "{name}"
               </Text>
-              <Text style={styles.km}>
-                {props.navigation.state.params.distanceTo
-                  ? props.navigation.state.params.distanceTo
-                  : 0}{' '}
-                km.
-              </Text>
+              <Text style={styles.km}>{distanceTo ? distanceTo : 0} km.</Text>
             </View>
-            <Text style={styles.workTime}>
-              {!isWork
-                ? 'Закрыто'
-                : workTime
-                ? 'Открыто до ' + workTime.split('-')[1]
-                : 'Время работы не задано'}
-            </Text>
+            <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
           </View>
         </View>
         <View style={styles.mapBlockWrap}>

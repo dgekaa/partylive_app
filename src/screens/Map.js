@@ -1,32 +1,15 @@
-import React, {useState, useEffect} from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-} from 'react-native';
+import React, {useState} from 'react';
+import {StyleSheet, View, Text, ActivityIndicator} from 'react-native';
+import {Query} from 'react-apollo';
 
 import Header from '../components/Header';
 import GoogleMap from '../components/GoogleMap';
 import CompanyTypeNav from '../components/CompanyTypeNav';
-
-import {Query} from 'react-apollo';
-import gql from 'graphql-tag';
-
-const GET_CATEGORIES = gql`
-  query {
-    categories {
-      id
-      name
-      slug
-    }
-  }
-`;
+import {GET_CATEGORIES} from '../QUERYES';
 
 const Map = (props) => {
-  const [DATA, setDATA] = useState([]);
-  const [companyData, setCompanyData] = useState([]);
+  // const [DATA, setDATA] = useState([]);
+  // const [companyData, setCompanyData] = useState([]);
 
   const clickedType = (type) => {
     // if (type.toLowerCase() !== 'все') {
@@ -44,12 +27,13 @@ const Map = (props) => {
       <Header props={props} />
       <Query query={GET_CATEGORIES}>
         {({loading, error, data}) => {
-          if (loading)
+          if (loading) {
             return (
               <View>
                 <ActivityIndicator size="large" color="#0000ff" />
               </View>
             );
+          }
           if (error) return <Text>Error! ${error.message}</Text>;
           return <CompanyTypeNav data={data} clickedType={clickedType} />;
         }}

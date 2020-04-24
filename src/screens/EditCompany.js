@@ -5,72 +5,36 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
+import {Query} from 'react-apollo';
 
 import Header from '../components/Header';
-
-import {Query} from 'react-apollo';
-import gql from 'graphql-tag';
-
-const GET_PLACES = gql`
-  query {
-    places {
-      id
-      name
-      address
-      description
-      logo
-      menu
-      actions
-      coordinates
-      streams {
-        url
-        name
-        id
-        preview
-        schedules {
-          id
-          day
-          start_time
-          end_time
-        }
-      }
-      schedules {
-        id
-        day
-        start_time
-        end_time
-      }
-      categories {
-        id
-        name
-      }
-    }
-  }
-`;
+import {GET_PLACES} from '../QUERYES';
 
 const EditCompany = (props) => {
   return (
     <View style={styles.EditCompany}>
       <Header props={props} />
       <Text style={styles.headerText}>Список заведений</Text>
-      <Query query={GET_PLACES}>
-        {({loading, error, data}) => {
-          if (loading)
-            return (
-              <View>
-                <ActivityIndicator size="large" color="#0000ff" />
-              </View>
-            );
-          if (error) return <Text>Error! ${error.message}</Text>;
-          return data.places.map((el, id) => {
-            return (
+      <ScrollView>
+        <Query query={GET_PLACES}>
+          {({loading, error, data}) => {
+            if (loading) {
+              return (
+                <View>
+                  <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+              );
+            }
+            if (error) return <Text>Error! ${error.message}</Text>;
+            return data.places.map((el) => (
               <View style={styles.row} key={el.id}>
                 <TouchableOpacity
                   style={styles.textRowName}
-                  onPress={() => {
-                    props.navigation.navigate('Admin', {item: el});
-                  }}>
+                  onPress={() =>
+                    props.navigation.navigate('Admin', {item: el})
+                  }>
                   <Text>{el.name}</Text>
                 </TouchableOpacity>
                 <Text style={styles.textRowId}>{el.id}</Text>
@@ -78,10 +42,10 @@ const EditCompany = (props) => {
                   {el.categories[0] && el.categories[0].name}
                 </Text>
               </View>
-            );
-          });
-        }}
-      </Query>
+            ));
+          }}
+        </Query>
+      </ScrollView>
     </View>
   );
 };

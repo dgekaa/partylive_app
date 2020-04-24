@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -6,61 +6,12 @@ import {
   ActivityIndicator,
   FlatList,
 } from 'react-native';
+import {Query} from 'react-apollo';
 
 import Header from '../components/Header';
-
 import CompanyTypeNav from '../components/CompanyTypeNav';
 import SmallCompanyBlock from '../components/SmallCompanyBlock';
-
-import {Query} from 'react-apollo';
-import gql from 'graphql-tag';
-
-const GET_PLACES = gql`
-  query {
-    places {
-      id
-      name
-      address
-      description
-      logo
-      menu
-      actions
-      coordinates
-      streams {
-        url
-        name
-        id
-        preview
-        schedules {
-          id
-          day
-          start_time
-          end_time
-        }
-      }
-      schedules {
-        id
-        day
-        start_time
-        end_time
-      }
-      categories {
-        id
-        name
-      }
-    }
-  }
-`;
-
-const GET_CATEGORIES = gql`
-  query {
-    categories {
-      id
-      name
-      slug
-    }
-  }
-`;
+import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
 
 const Home = (props) => {
   const [DATA, setDATA] = useState([]);
@@ -72,7 +23,7 @@ const Home = (props) => {
     } else {
       const filteredData = DATA.places.filter((el) => {
         if (el.categories[0] && el.categories[0].name) {
-          return el.categories[0].name.toUpperCase() === type.toUpperCase();
+          return el.categories[0].name.toLowerCase() === type.toLowerCase();
         }
       });
       setCompanyData(filteredData);
@@ -84,12 +35,13 @@ const Home = (props) => {
       <Header props={props} />
       <Query query={GET_CATEGORIES}>
         {({loading, error, data}) => {
-          if (loading)
+          if (loading) {
             return (
               <View>
                 <ActivityIndicator size="large" color="#0000ff" />
               </View>
             );
+          }
           if (error) return <Text>Error! ${error.message}</Text>;
           return <CompanyTypeNav data={data} clickedType={clickedType} />;
         }}
@@ -97,12 +49,13 @@ const Home = (props) => {
       <View style={styles.content}>
         <Query query={GET_PLACES}>
           {({loading, error, data}) => {
-            if (loading)
+            if (loading) {
               return (
                 <View>
                   <ActivityIndicator size="large" color="#0000ff" />
                 </View>
               );
+            }
             if (error) return <Text>Error! ${error.message}</Text>;
             setDATA(data);
             if (companyData.length) {
@@ -110,7 +63,7 @@ const Home = (props) => {
                 <FlatList
                   data={companyData.length ? companyData : []}
                   numColumns={2}
-                  renderItem={({item, index}) => (
+                  renderItem={({item}) => (
                     <SmallCompanyBlock
                       item={item}
                       navigation={props.navigation}

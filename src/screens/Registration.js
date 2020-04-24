@@ -1,53 +1,21 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
   Text,
   TouchableOpacity,
   TextInput,
-  AsyncStorage,
 } from 'react-native';
+import {Mutation} from 'react-apollo';
+
 import Header from '../components/Header';
-
-import {Query, Mutation} from 'react-apollo';
-import gql from 'graphql-tag';
-
-const REGISTER = gql`
-  mutation REGISTER(
-    $name: String!
-    $password: String!
-    $password_confirmation: String!
-    $email: String!
-  ) {
-    register(
-      input: {
-        name: $name
-        password: $password
-        password_confirmation: $password_confirmation
-        email: $email
-      }
-    ) {
-      status
-      tokens {
-        access_token
-        refresh_token
-        expires_in
-        token_type
-        user {
-          name
-          email
-        }
-      }
-    }
-  }
-`;
+import {REGISTER} from '../QUERYES';
 
 const Registration = (props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [repassword, setRepassword] = useState('');
   const [name, setName] = useState('');
-
   const [nameErr, setNameErr] = useState(false);
   const [passwordErr, setPasswordErr] = useState(false);
   const [repasswordErr, setRepasswordErr] = useState(false);
@@ -67,26 +35,16 @@ const Registration = (props) => {
   };
 
   const registerErrHandle = () => {
-    if (name.length === 0) {
-      return setNameErr('Поле обязательно для ввода');
-    }
+    if (name.length === 0) return setNameErr('Поле обязательно для ввода');
     setNameErr(false);
-
-    if (email.length === 0) {
-      return setEmailErr('Поле обязательно для ввода');
-    }
+    if (email.length === 0) return setEmailErr('Поле обязательно для ввода');
     setEmailErr(false);
-
-    if (password.length === 0 || password.length < 8) {
+    if (password.length === 0 || password.length < 8)
       return setPasswordErr('Поле не менее 8 символов');
-    }
     setPasswordErr(false);
-
-    if (repassword.length === 0 || repassword.length < 8) {
+    if (repassword.length === 0 || repassword.length < 8)
       return setRepasswordErr('Поле не менее 8 символов');
-    }
     setRepasswordErr(false);
-
     if (password !== repassword) {
       setPasswordErr('Пароли не совпадают');
       setRepasswordErr('Пароли не совпадают');
@@ -94,7 +52,6 @@ const Registration = (props) => {
     }
     setPasswordErr(false);
     setRepasswordErr(false);
-
     setEmailErr('Email не валиден либо уже существует');
   };
 
@@ -109,42 +66,28 @@ const Registration = (props) => {
                 <Text style={styles.headText}>Регистрация</Text>
                 <TextInput
                   placeholder="name"
-                  style={[styles.input, nameErr ? {borderColor: 'red'} : {}]}
-                  onChangeText={(name) => {
-                    setName(name);
-                  }}
+                  style={[styles.input, nameErr && styles.borderErr]}
+                  onChangeText={(n) => setName(n)}
                   value={name}
                 />
                 <TextInput
                   placeholder="email"
-                  style={[styles.input, emailErr ? {borderColor: 'red'} : {}]}
-                  onChangeText={(email) => {
-                    setEmail(email);
-                  }}
+                  style={[styles.input, emailErr && styles.borderErr]}
+                  onChangeText={(em) => setEmail(em)}
                   value={email}
                 />
                 <TextInput
                   placeholder="password"
-                  style={[
-                    styles.input,
-                    passwordErr ? {borderColor: 'red'} : {},
-                  ]}
+                  style={[styles.input, passwordErr && styles.borderErr]}
                   secureTextEntry
-                  onChangeText={(pass) => {
-                    setPassword(pass);
-                  }}
+                  onChangeText={(pass) => setPassword(pass)}
                   value={password}
                 />
                 <TextInput
                   placeholder="repassword"
-                  style={[
-                    styles.input,
-                    repasswordErr ? {borderColor: 'red'} : {},
-                  ]}
+                  style={[styles.input, repasswordErr && styles.borderErr]}
                   secureTextEntry
-                  onChangeText={(repass) => {
-                    setRepassword(repass);
-                  }}
+                  onChangeText={(repass) => setRepassword(repass)}
                   value={repassword}
                 />
                 <Text style={styles.validationErr}>
@@ -155,18 +98,14 @@ const Registration = (props) => {
                   onPress={() => {
                     addMutation({
                       variables: {
-                        name: name,
-                        email: email,
-                        password: password,
+                        name,
+                        email,
+                        password,
                         password_confirmation: repassword,
                       },
                     })
-                      .then((res) => {
-                        registerHandle(res);
-                      })
-                      .catch((err) => {
-                        registerErrHandle(err);
-                      });
+                      .then((res) => registerHandle(res))
+                      .catch((err) => registerErrHandle(err));
                   }}>
                   <Text style={styles.btnText}>Зарегистрироваться</Text>
                 </TouchableOpacity>
@@ -228,6 +167,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textTransform: 'uppercase',
+  },
+  borderErr: {
+    borderColor: 'red',
   },
 });
 

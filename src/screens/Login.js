@@ -6,29 +6,14 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
+import {Mutation} from 'react-apollo';
 
 import Header from '../components/Header';
-
-import {Query, Mutation} from 'react-apollo';
-import gql from 'graphql-tag';
-
-const LOGIN = gql`
-  mutation LOGIN($username: String!, $password: String!) {
-    login(input: {username: $username, password: $password}) {
-      access_token
-      user {
-        id
-        name
-        email
-      }
-    }
-  }
-`;
+import {LOGIN} from '../QUERYES';
 
 const Login = (props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
   const [validationError, setValidationError] = useState('');
 
   return (
@@ -42,25 +27,15 @@ const Login = (props) => {
                 <Text style={styles.headText}>Авторизация</Text>
                 <TextInput
                   placeholder="email"
-                  style={[
-                    styles.input,
-                    validationError ? {borderColor: 'red'} : {},
-                  ]}
-                  onChangeText={(email) => {
-                    setEmail(email);
-                  }}
+                  style={[styles.input, validationError && styles.borderErr]}
+                  onChangeText={(em) => setEmail(em)}
                   value={email}
                 />
                 <TextInput
                   placeholder="password"
-                  style={[
-                    styles.input,
-                    validationError ? {borderColor: 'red'} : {},
-                  ]}
+                  style={[styles.input, validationError && styles.borderErr]}
                   secureTextEntry
-                  onChangeText={(pass) => {
-                    setPassword(pass);
-                  }}
+                  onChangeText={(pass) => setPassword(pass)}
                   value={password}
                 />
                 <Text style={styles.validationError}>{validationError}</Text>
@@ -70,7 +45,7 @@ const Login = (props) => {
                     addMutation({
                       variables: {
                         username: email,
-                        password: password,
+                        password,
                       },
                     })
                       .then((res) => {
@@ -148,6 +123,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingTop: 10,
     opacity: 0.6,
+  },
+  borderErr: {
+    borderColor: 'red',
   },
 });
 
