@@ -74,7 +74,9 @@ const EditCompany = (props) => {
                   <Text>{el.name}</Text>
                 </TouchableOpacity>
                 <Text style={styles.textRowId}>{el.id}</Text>
-                <Text style={styles.textRowType}>{el.categories[0].name}</Text>
+                <Text style={styles.textRowType}>
+                  {el.categories[0] && el.categories[0].name}
+                </Text>
               </View>
             );
           });

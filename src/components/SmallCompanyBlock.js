@@ -128,7 +128,7 @@ const SmallCompanyBlock = ({item, navigation}) => {
         <View style={styles.middleText}>
           <Text style={styles.km}>{distanceTo ? distanceTo : 0} km.</Text>
           <Text style={styles.categories}>
-            {item.categories && item.categories[0].name}
+            {item.categories && item.categories[0] && item.categories[0].name}
           </Text>
         </View>
 

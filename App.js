@@ -1,17 +1,15 @@
 import React, {useState, useEffect} from 'react';
-import {
-  Dimensions,
-  SafeAreaViewm,
-  ScrollView,
-  SafeAreaView,
-  Text,
-} from 'react-native';
-
+import {Dimensions, ScrollView, SafeAreaView, Text} from 'react-native';
 import {createBottomTabNavigator} from 'react-navigation-tabs';
 import {createStackNavigator} from 'react-navigation-stack';
 import {createAppContainer} from 'react-navigation';
-
-// import {createDrawerNavigator} from 'react-navigation-drawer';
+import {HttpLink} from 'apollo-link-http';
+import {InMemoryCache} from 'apollo-cache-inmemory';
+import ApolloClient from 'apollo-client';
+import {ApolloProvider} from 'react-apollo';
+import {setContext} from 'apollo-link-context';
+import {List, ListItem} from 'native-base';
+import {createDrawerNavigator} from 'react-navigation-drawer';
 
 import Map from './src/screens/Map';
 import Home from './src/screens/Home';
@@ -20,17 +18,7 @@ import Login from './src/screens/Login';
 import Registration from './src/screens/Registration';
 import EditCompany from './src/screens/EditCompany';
 import Admin from './src/screens/Admin';
-
-import {HttpLink} from 'apollo-link-http';
-import {InMemoryCache} from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
-import {ApolloProvider} from 'react-apollo';
-import {setContext} from 'apollo-link-context';
-
 import {getToken, signIn, signOut} from './src/util';
-
-import {List, ListItem} from 'native-base';
-import {createDrawerNavigator} from 'react-navigation-drawer';
 
 const httpLink = new HttpLink({
   uri: 'http://194.87.95.37/graphql',

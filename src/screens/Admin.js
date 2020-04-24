@@ -10,6 +10,7 @@ import {
   Dimensions,
   Image,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import Video from 'react-native-video';
@@ -96,6 +97,31 @@ const UPDATE_WORK_SCHEDULE = gql`
     }
   }
 `;
+const UPDATE_PLACE_DATA = gql`
+  mutation UPDATEPLACEDATA(
+    $id: ID!
+    $name: String
+    $description: String
+    $categories: CreateCategoryMorphToMany
+  ) {
+    updatePlace(
+      input: {
+        id: $id
+        name: $name
+        description: $description
+        categories: $categories
+      }
+    ) {
+      id
+      name
+      description
+      categories {
+        id
+        name
+      }
+    }
+  }
+`;
 
 const DELETE_SCHEDULE = gql`
   mutation DELETESCHEDULE($id: ID!) {
@@ -129,6 +155,16 @@ const CREATE_STREAMS_SCHEDULE = gql`
       }
     ) {
       id
+    }
+  }
+`;
+
+const GET_CATEGORIES = gql`
+  query {
+    categories {
+      id
+      name
+      slug
     }
   }
 `;
@@ -168,11 +204,20 @@ const Admin = (props) => {
   const [inputName, setInputName] = useState('');
   const [inputPseudonim, setInputPseudonim] = useState('');
   const [inputDescription, setInputDescription] = useState('');
+  const [typeOfCompany, setTypeOfCompany] = useState('');
+  const [typeOfCompanyId, setTypeOfCompanyId] = useState('');
 
   useEffect(() => {
     setPickedStartTime('');
     setPickedEndTime('');
   }, [popupVisible]);
+
+  useEffect(() => {
+    data &&
+      data.place &&
+      data.place.description &&
+      setInputDescription(data.place.description);
+  }, []);
 
   const {loading, error, data, refetch} = useQuery(GET_PLACE, {
     variables: {id: props.navigation.state.params.item.id},
@@ -188,6 +233,8 @@ const Admin = (props) => {
   const [CREATE_STREAMS_SCHEDULE_mutation] = useMutation(
     CREATE_STREAMS_SCHEDULE,
   );
+
+  const [UPDATE_PLACE_DATA_mutation] = useMutation(UPDATE_PLACE_DATA);
 
   const setAsDayOf = (day) => {
     if (day.id) {
@@ -316,6 +363,36 @@ const Admin = (props) => {
     });
   };
 
+  const saveNewData = () => {
+    !typeOfCompanyId
+      ? UPDATE_PLACE_DATA_mutation({
+          variables: {
+            id: data.place.id,
+            name: inputName || data.place.name,
+            description: inputDescription || data.place.description,
+          },
+          optimisticResponse: null,
+        }).then(
+          (res) => console.log(res, 'RES'),
+          (err) => console.log(err, 'ERR'),
+        )
+      : UPDATE_PLACE_DATA_mutation({
+          variables: {
+            id: data.place.id,
+            name: inputName || data.place.name,
+            description: inputDescription || data.place.description,
+            categories: {
+              disconnect: data.place.categories[0].id,
+              connect: typeOfCompanyId,
+            },
+          },
+          optimisticResponse: null,
+        }).then(
+          (res) => console.log(res, 'RES'),
+          (err) => console.log(err, 'ERR'),
+        );
+  };
+
   if (loading) return <Text>'Loading...'</Text>;
   if (error) return <Text>`Error! ${error.message}`</Text>;
   return (
@@ -332,6 +409,7 @@ const Admin = (props) => {
       <View>
         <Collapse
           onToggle={(isOpen) => {
+            console.log(data, ' ADMIN data');
             // console.log(isOpen);
           }}>
           <CollapseHeader style={styles.tableHeader}>
@@ -364,6 +442,7 @@ const Admin = (props) => {
                 style={styles.textInputStyle}
                 onChangeText={(text) => setInputName(text)}
                 value={inputName}
+                placeholder={data.place.name}
               />
             </View>
             <View style={styles.textInputWrap}>
@@ -372,14 +451,69 @@ const Admin = (props) => {
                 style={styles.textInputStyle}
                 onChangeText={(text) => setInputPseudonim(text)}
                 value={inputPseudonim}
+                placeholder={data.place.name}
               />
             </View>
             <View style={styles.textInputWrap}>
               <Text style={styles.textInputTitleText}>Категория:</Text>
               <View style={styles.btnCategoryWrap}>
-                <TouchableOpacity style={styles.btnCategory}>
-                  <Text>Бар</Text>
-                </TouchableOpacity>
+                <Query query={GET_CATEGORIES}>
+                  {(prop) => {
+                    if (prop.loading)
+                      return (
+                        <View>
+                          <ActivityIndicator size="large" color="#0000ff" />
+                        </View>
+                      );
+                    if (prop.error)
+                      return <Text>Error! ${prop.error.message}</Text>;
+
+                    return prop.data.categories.map((el, i) => (
+                      <TouchableOpacity
+                        key={i}
+                        style={[
+                          styles.btnCategory,
+                          typeOfCompany && typeOfCompany === el.name
+                            ? {
+                                backgroundColor: '#e32a6c',
+                              }
+                            : !typeOfCompany &&
+                              el.name &&
+                              data.place.categories &&
+                              data.place.categories[0] &&
+                              data.place.categories[0].name === el.name
+                            ? {
+                                backgroundColor: '#e32a6c',
+                              }
+                            : {},
+                        ]}
+                        onPress={() => {
+                          setTypeOfCompany(el.name);
+                          setTypeOfCompanyId(el.id);
+                        }}>
+                        <Text
+                          style={
+                            (styles.btnCategory,
+                            typeOfCompany && typeOfCompany === el.name
+                              ? {
+                                  color: '#fff',
+                                }
+                              : !typeOfCompany &&
+                                el.name &&
+                                data.place.categories &&
+                                data.place.categories[0] &&
+                                data.place.categories[0].name === el.name
+                              ? {
+                                  color: '#fff',
+                                }
+                              : {})
+                          }>
+                          {el.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ));
+                  }}
+                </Query>
               </View>
             </View>
             <View style={styles.textInputWrap}>
@@ -387,7 +521,9 @@ const Admin = (props) => {
               <TextInput
                 style={styles.textInputStyle}
                 onChangeText={(text) => {}}
-                value={'Адрес'}
+                value={data.place.address}
+                contextMenuHidden={true}
+                editable={false}
               />
               <TouchableOpacity style={styles.pinkBtn}>
                 <Text style={styles.pinkBtnText}>ВЫБРАТЬ АДРЕС НА КАРТЕ</Text>
@@ -403,7 +539,9 @@ const Admin = (props) => {
                 value={inputDescription}
               />
             </View>
-            <TouchableOpacity style={styles.pinkBtn}>
+            <TouchableOpacity
+              style={styles.pinkBtn}
+              onPress={() => saveNewData()}>
               <Text style={styles.pinkBtnText}>СОХРАНИТЬ</Text>
             </TouchableOpacity>
           </CollapseBody>
@@ -632,6 +770,9 @@ const styles = StyleSheet.create({
   },
   btnCategoryWrap: {
     marginTop: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   btnCategory: {
     borderColor: '#C4C4C4',

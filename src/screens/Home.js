@@ -71,9 +71,11 @@ const Home = (props) => {
     if (type.toLowerCase() === 'все') {
       setCompanyData(DATA.places);
     } else {
-      const filteredData = DATA.places.filter(
-        (el) => el.categories[0].name.toUpperCase() === type.toUpperCase(),
-      );
+      const filteredData = DATA.places.filter((el) => {
+        if (el.categories[0] && el.categories[0].name) {
+          return el.categories[0].name.toUpperCase() === type.toUpperCase();
+        }
+      });
       setCompanyData(filteredData);
     }
   };
