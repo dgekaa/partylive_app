@@ -3,15 +3,16 @@ import {StyleSheet, View, Text, TouchableOpacity, FlatList} from 'react-native';
 
 const CompanyTypeNav = ({data, clickedType}) => {
   const [buttonActive, setButtonActive] = useState(0);
-  const navigationFlatList = useRef(null);
-
   const [DATA, setDATA] = useState([]);
+
+  const navigationFlatList = useRef(null);
 
   useEffect(() => {
     if (data && data.categories) {
       setDATA([{id: 0, name: 'Все'}, ...data.categories]);
     }
   }, [data]);
+
   return (
     <View style={styles.CompanyTypeNav}>
       {!!DATA.length && (
@@ -24,7 +25,7 @@ const CompanyTypeNav = ({data, clickedType}) => {
           renderItem={({item, index}) => (
             <TouchableOpacity
               style={
-                buttonActive == item.id
+                buttonActive === item.id
                   ? styles.buttonActive
                   : styles.buttonNotActive
               }
@@ -39,7 +40,7 @@ const CompanyTypeNav = ({data, clickedType}) => {
               }}>
               <Text
                 style={
-                  buttonActive == item.id ? {color: '#FFF'} : {color: '#000'}
+                  buttonActive === item.id ? {color: '#FFF'} : {color: '#000'}
                 }>
                 {item.name}
               </Text>

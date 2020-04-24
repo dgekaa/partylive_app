@@ -4,16 +4,10 @@ import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 const CustomHeader = ({props}) => {
   return (
     <View style={styles.header}>
-      <TouchableOpacity
-        onPress={() => {
-          props.navigation.goBack();
-        }}>
+      <TouchableOpacity onPress={() => props.navigation.goBack()}>
         {props.navigation.goBack && <Text style={styles.goBack}>{'<'}</Text>}
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => {
-          props.navigation.navigate('Home');
-        }}>
+      <TouchableOpacity onPress={() => props.navigation.navigate('Home')}>
         <View style={styles.PLLogo}>
           <Text style={styles.party}> PARTY</Text>
           <View style={styles.partyWrap}>
@@ -23,12 +17,10 @@ const CustomHeader = ({props}) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.burgerWrap}
-        onPress={() => {
-          props.navigation.openDrawer();
-        }}>
-        <View style={styles.burgerOne}></View>
-        <View style={styles.burgerOne}></View>
-        <View style={styles.burgerOne}></View>
+        onPress={() => props.navigation.openDrawer()}>
+        <View style={styles.burgerOne} />
+        <View style={styles.burgerOne} />
+        <View style={styles.burgerOne} />
       </TouchableOpacity>
     </View>
   );

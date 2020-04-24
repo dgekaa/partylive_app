@@ -100,7 +100,6 @@ const Company = (props) => {
           </View>
         </View>
       </View>
-      {/* <BottomTabNavigator navigation={navigation} route={route} /> */}
     </View>
   );
 };

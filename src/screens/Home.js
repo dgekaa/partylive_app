@@ -11,7 +11,6 @@ import Header from '../components/Header';
 
 import CompanyTypeNav from '../components/CompanyTypeNav';
 import SmallCompanyBlock from '../components/SmallCompanyBlock';
-import BottomTabNavigator from '../components/BottomTabNavigator';
 
 import {Query} from 'react-apollo';
 import gql from 'graphql-tag';
@@ -127,7 +126,6 @@ const Home = (props) => {
           }}
         </Query>
       </View>
-      {/* <BottomTabNavigator navigation={navigation} route={route} /> */}
     </View>
   );
 };

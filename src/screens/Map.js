@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 
 import Header from '../components/Header';
-import BottomTabNavigator from '../components/BottomTabNavigator';
 import GoogleMap from '../components/GoogleMap';
 import CompanyTypeNav from '../components/CompanyTypeNav';
 
@@ -58,7 +57,6 @@ const Map = (props) => {
       <View style={styles.content}>
         <GoogleMap />
       </View>
-      {/* <BottomTabNavigator navigation={navigation} route={route} /> */}
     </View>
   );
 };
