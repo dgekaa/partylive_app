@@ -12,7 +12,11 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
+  Switch,
+  Easing,
 } from 'react-native';
+import Drawer from 'react-native-drawer-menu';
+
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import Video from 'react-native-video';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -23,7 +27,12 @@ import {
   CollapseBody,
 } from 'accordion-collapse-react-native';
 
-import {EN_SHORT_DAY_OF_WEEK} from '../constants';
+import {
+  EN_SHORT_DAY_OF_WEEK,
+  EN_SHORT_TO_RU_SHORT,
+  SHORT_DAY_OF_WEEK,
+  EN_SHORT_TO_NUMBER,
+} from '../constants';
 import Header from '../components/Header';
 import {
   GET_PLACE,
@@ -34,6 +43,7 @@ import {
   UPDATE_STREAMS_SCHEDULE,
   CREATE_STREAMS_SCHEDULE,
   GET_CATEGORIES,
+  UPDATE_IMAGE,
 } from '../QUERYES';
 
 const Admin = (props) => {
@@ -66,9 +76,12 @@ const Admin = (props) => {
   const [pickerImageData, setpPickerImageData] = useState('');
   const [inputName, setInputName] = useState('');
   const [inputPseudonim, setInputPseudonim] = useState('');
-  const [inputDescription, setInputDescription] = useState('');
+  const [inputDescription, setInputDescription] = useState(
+    data && data.place && data.place.description && data.place.description,
+  );
   const [typeOfCompany, setTypeOfCompany] = useState('');
   const [typeOfCompanyId, setTypeOfCompanyId] = useState('');
+  const [isStreamOff, setIsStreamOff] = useState(false);
 
   useEffect(() => {
     setPickedStartTime('');
@@ -96,6 +109,7 @@ const Admin = (props) => {
     CREATE_STREAMS_SCHEDULE,
   );
   const [UPDATE_PLACE_DATA_mutation] = useMutation(UPDATE_PLACE_DATA);
+  const [UPDATE_IMAGE_mutation] = useMutation(UPDATE_IMAGE);
 
   const setAsDayOf = (day) => {
     if (day.id) {
@@ -217,6 +231,22 @@ const Admin = (props) => {
       cropping: true,
       includeBase64: true,
     }).then((image) => {
+      console.log(image, 'IMAGE');
+      const imgData = {
+        uri: image.path,
+        type: image.mime,
+        name: 'photo.jpg',
+      };
+      var formData = new FormData();
+      formData.append('image', imgData);
+      console.log(formData, 'formData');
+
+      UPDATE_IMAGE_mutation({
+        variables: {
+          file: formData,
+        },
+        optimisticResponse: null,
+      });
       setpPickerImageMime(image.mime);
       setpPickerImageData(image.data);
     });
@@ -252,20 +282,39 @@ const Admin = (props) => {
         );
   };
 
+  const decriptionLengthLimit = 300;
+
+  const tomorrowFromDay = (day) => {
+    if (day === 6) {
+      return 0;
+    } else {
+      return day + 1;
+    }
+  };
+
   if (loading) return <Text>'Loading...'</Text>;
   if (error) return <Text>`Error! ${error.message}`</Text>;
   return (
     <ScrollView style={styles.Admin}>
       <Header props={props} />
-      <View style={styles.videoWrap}>
-        <Video
-          source={{uri: streams[0] && streams[0].url}}
-          onBuffer={(buf) => console.log(buf)}
-          onError={(err) => console.log(err, '_ERR_')}
-          style={styles.backgroundVideo}
-        />
-      </View>
+
       <View>
+        <Collapse onToggle={(isOpen) => {}}>
+          <CollapseHeader style={styles.tableHeader}>
+            <Text>Стрим</Text>
+          </CollapseHeader>
+          <CollapseBody style={styles.tableBody}>
+            <View style={styles.videoWrap}>
+              <Video
+                source={{uri: streams[0] && streams[0].url}}
+                onBuffer={(buf) => console.log(buf)}
+                onError={(err) => console.log(err, '_ERR_')}
+                style={styles.backgroundVideo}
+              />
+            </View>
+            <Text>Стрим!!!!!!!!!!!!!!</Text>
+          </CollapseBody>
+        </Collapse>
         <Collapse onToggle={(isOpen) => {}}>
           <CollapseHeader style={styles.tableHeader}>
             <Text>Профиль заведения</Text>
@@ -290,6 +339,20 @@ const Admin = (props) => {
                 onPress={() => goToPickImage()}>
                 <Text style={styles.changePhotoText}>Сменить фото профиля</Text>
               </TouchableOpacity>
+            </View>
+            <View style={styles.streamOffMainWrap}>
+              <View style={styles.streamOffWrap}>
+                <Text style={styles.streamOffMainText}>Отключить стрим</Text>
+                <Text style={styles.streamOffText}>
+                  Выключается до следующего дня
+                </Text>
+              </View>
+              <Switch
+                trackColor={{false: '#aeaeae', true: '#e32a6c'}}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={setIsStreamOff}
+                value={isStreamOff}
+              />
             </View>
             <View style={styles.textInputWrap}>
               <Text style={styles.textInputTitleText}>Название заведения:</Text>
@@ -382,8 +445,25 @@ const Admin = (props) => {
             </View>
             <View style={styles.textInputWrap}>
               <Text style={styles.textInputTitleText}>Описание:</Text>
+              {/* data.place.description */}
+              <Text
+                style={[
+                  styles.textDescLimit,
+                  inputDescription
+                    ? inputDescription.length === decriptionLengthLimit
+                      ? {color: 'red'}
+                      : {color: 'green'}
+                    : data.place.description.length === decriptionLengthLimit
+                    ? {color: 'red'}
+                    : {color: 'green'},
+                ]}>
+                {inputDescription
+                  ? inputDescription.length
+                  : data.place.description.length}
+                / {decriptionLengthLimit}
+              </Text>
               <TextInput
-                maxLength={300}
+                maxLength={decriptionLengthLimit}
                 multiline={true}
                 style={styles.textInputMultilineStyle}
                 onChangeText={(text) => setInputDescription(text)}
@@ -407,7 +487,16 @@ const Admin = (props) => {
 
               return (
                 <View key={i} style={styles.graphRow}>
-                  <Text style={styles.graphDay}>{el.day}</Text>
+                  <Text style={styles.graphDay}>
+                    {EN_SHORT_TO_RU_SHORT[el.day]}
+                    {oneDay.start_time &&
+                      (oneDay.start_time.split(':')[0] * 3600 +
+                        oneDay.start_time.split(':')[1] * 60 <=
+                      oneDay.end_time.split(':')[0] * 3600 +
+                        oneDay.end_time.split(':')[1] * 60
+                        ? ''
+                        : `-${SHORT_DAY_OF_WEEK[tomorrowFromDay(i)]}`)}
+                  </Text>
                   <TouchableOpacity
                     style={styles.graphTime}
                     onPress={() => {
@@ -444,7 +533,16 @@ const Admin = (props) => {
 
               return (
                 <View key={i} style={styles.graphRow}>
-                  <Text style={styles.graphDay}>{el.day}</Text>
+                  <Text style={styles.graphDay}>
+                    {EN_SHORT_TO_RU_SHORT[el.day]}
+                    {oneDay.start_time &&
+                      (oneDay.start_time.split(':')[0] * 3600 +
+                        oneDay.start_time.split(':')[1] * 60 <=
+                      oneDay.end_time.split(':')[0] * 3600 +
+                        oneDay.end_time.split(':')[1] * 60
+                        ? ''
+                        : `-${SHORT_DAY_OF_WEEK[tomorrowFromDay(i)]}`)}
+                  </Text>
                   <TouchableOpacity
                     style={styles.graphTime}
                     onPress={() => {
@@ -492,6 +590,34 @@ const Admin = (props) => {
         <DialogContent>
           {selectedDay && (
             <View style={styles.dialogContent}>
+              {/* {console.log(pickedStartTime, 'pickedStartTime')}
+              {console.log(pickedEndTime, 'pickedEndTime')} */}
+              {console.log(selectedDay.start_time, '  selectedDay.start_time')}
+              {console.log(selectedDay, '--------------selectedDay')}
+              {console.log(enumWeekName, '=============enumWeekName')}
+
+              <View style={styles.dialogContentDays}>
+                <Text>{EN_SHORT_TO_RU_SHORT[enumWeekName]}</Text>
+
+                {selectedDay.start_time ? (
+                  selectedDay.start_time.split(':')[0] * 3600 +
+                    selectedDay.start_time.split(':')[1] * 60 <=
+                  selectedDay.end_time.split(':')[0] * 3600 +
+                    selectedDay.end_time.split(':')[1] * 60 ? (
+                    <Text>{EN_SHORT_TO_RU_SHORT[enumWeekName]}</Text>
+                  ) : (
+                    <Text>
+                      {
+                        SHORT_DAY_OF_WEEK[
+                          tomorrowFromDay(EN_SHORT_TO_NUMBER[enumWeekName])
+                        ]
+                      }
+                    </Text>
+                  )
+                ) : (
+                  <Text>{EN_SHORT_TO_RU_SHORT[enumWeekName]}</Text>
+                )}
+              </View>
               <View style={styles.dialogTimeBlockWrap}>
                 <TouchableOpacity
                   style={styles.dialogTimeBlock}
@@ -595,12 +721,30 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 5,
   },
+  streamOffMainWrap: {
+    flexDirection: 'row',
+    paddingTop: 20,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  streamOffMainText: {
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  streamOffText: {
+    fontSize: 16,
+    color: '#999',
+  },
   textInputWrap: {
     marginVertical: 20,
   },
   textInputTitleText: {
     fontSize: 16,
     color: '#4F4F4F',
+  },
+  textDescLimit: {
+    textAlign: 'right',
+    fontSize: 12,
   },
   textInputStyle: {
     borderBottomColor: '#999',
@@ -667,6 +811,11 @@ const styles = StyleSheet.create({
   },
   dialogContent: {
     width: Dimensions.get('window').width * 0.8,
+  },
+  dialogContentDays: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
   },
   dialogTimeBlockWrap: {
     flexDirection: 'row',

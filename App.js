@@ -1,5 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {Dimensions, ScrollView, SafeAreaView, Text} from 'react-native';
+import {
+  Dimensions,
+  ScrollView,
+  SafeAreaView,
+  Text,
+  StyleSheet,
+} from 'react-native';
 import {createBottomTabNavigator} from 'react-navigation-tabs';
 import {createStackNavigator} from 'react-navigation-stack';
 import {createAppContainer} from 'react-navigation';
@@ -41,60 +47,6 @@ const client = new ApolloClient({
   link: link,
 });
 
-const SideMenu = (props) => {
-  return (
-    <SafeAreaView style={{flex: 1}}>
-      <ScrollView>
-        <List>
-          <ListItem onPress={() => props.navigation.navigate('Home')}>
-            <Text>Главная</Text>
-          </ListItem>
-          <ListItem onPress={() => props.navigation.navigate('Map')}>
-            <Text>Карта</Text>
-          </ListItem>
-          {props.loggedIn && (
-            <ListItem onPress={() => props.navigation.navigate('EditCompany')}>
-              <Text>Список заведений</Text>
-            </ListItem>
-          )}
-          {!props.loggedIn && (
-            <ListItem
-              onPress={() =>
-                props.navigation.navigate('Login', {
-                  changeLoginState: props.changeLoginState,
-                })
-              }>
-              <Text>Вход</Text>
-            </ListItem>
-          )}
-          {!props.loggedIn && (
-            <ListItem
-              onPress={() =>
-                props.navigation.navigate('Registration', {
-                  changeLoginState: props.changeLoginState,
-                })
-              }>
-              <Text>Регистрация</Text>
-            </ListItem>
-          )}
-        </List>
-        <List>
-          {props.loggedIn && (
-            <ListItem
-              noBorder
-              onPress={() => {
-                props.changeLoginState(false);
-                props.navigation.navigate('Home');
-              }}>
-              <Text style={{color: 'red'}}>Выход</Text>
-            </ListItem>
-          )}
-        </List>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-
 const App = () => {
   const [loggedIn, setLoggedIn] = useState();
 
@@ -122,29 +74,33 @@ const App = () => {
     header: null,
   });
 
+  // НИЖНЕЕ МЕНЮ
   const HomeStackNavigator = createStackNavigator({
     Home: {
       screen: Home,
       navigationOptions: navOptionHandler,
     },
   });
-
   const MapStackNavigator = createStackNavigator({
     Map: {
       screen: Map,
       navigationOptions: navOptionHandler,
     },
   });
-
   const MainTab = createBottomTabNavigator(
     {
       Home: {
         screen: HomeStackNavigator,
         navigationOptions: {
-          tabBarLabel: 'Home',
+          tabBarLabel: 'Главная',
         },
       },
-      Map: MapStackNavigator,
+      Map: {
+        screen: MapStackNavigator,
+        navigationOptions: {
+          tabBarLabel: 'Карта',
+        },
+      },
     },
     {
       tabBarOptions: {
@@ -189,6 +145,61 @@ const App = () => {
     {initialRouteKey: 'Home'},
   );
 
+  // БОКОВОЕ МЕНЮ
+  const SideMenu = (props) => {
+    return (
+      <SafeAreaView style={{flex: 1}}>
+        <ScrollView>
+          <List>
+            <ListItem onPress={() => props.navigation.navigate('Home')}>
+              <Text>Главная</Text>
+            </ListItem>
+            <ListItem onPress={() => props.navigation.navigate('Map')}>
+              <Text>Карта</Text>
+            </ListItem>
+            {props.loggedIn && (
+              <ListItem
+                onPress={() => props.navigation.navigate('EditCompany')}>
+                <Text>Список заведений</Text>
+              </ListItem>
+            )}
+            {!props.loggedIn && (
+              <ListItem
+                onPress={() =>
+                  props.navigation.navigate('Login', {
+                    changeLoginState: props.changeLoginState,
+                  })
+                }>
+                <Text>Вход</Text>
+              </ListItem>
+            )}
+            {!props.loggedIn && (
+              <ListItem
+                onPress={() =>
+                  props.navigation.navigate('Registration', {
+                    changeLoginState: props.changeLoginState,
+                  })
+                }>
+                <Text>Регистрация</Text>
+              </ListItem>
+            )}
+          </List>
+          <List style={styles.logoutBtn}>
+            {props.loggedIn && (
+              <ListItem
+                noBorder
+                onPress={() => {
+                  props.changeLoginState(false);
+                  props.navigation.navigate('Home');
+                }}>
+                <Text style={styles.logoutBtnText}>Выход</Text>
+              </ListItem>
+            )}
+          </List>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  };
   const AppDrawer = createDrawerNavigator(
     {
       drawer: MainStack,
@@ -219,5 +230,21 @@ const App = () => {
     </ApolloProvider>
   );
 };
+
+const styles = StyleSheet.create({
+  logoutBtn: {
+    backgroundColor: '#e32a6c',
+    width: 100,
+    height: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 3,
+    margin: 15,
+  },
+  logoutBtnText: {
+    color: '#fff',
+    fontSize: 18,
+  },
+});
 
 export default App;

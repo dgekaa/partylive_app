@@ -8,6 +8,26 @@ export const DAY_OF_WEEK = [
   'Воскресенье',
 ];
 
+export const EN_SHORT_TO_NUMBER = {
+  Mon: 0,
+  Tue: 1,
+  Wed: 2,
+  Thu: 3,
+  Fri: 4,
+  Sat: 5,
+  Sun: 6,
+};
+
+export const EN_SHORT_TO_RU_SHORT = {
+  Mon: 'Пн',
+  Tue: 'Вт',
+  Wed: 'Ср',
+  Thu: 'Чт',
+  Fri: 'Пт',
+  Sat: 'Сб',
+  Sun: 'Вс',
+};
+
 export const SHORT_DAY_OF_WEEK = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
 export const EN_SHORT_TO_RU_LONG = {

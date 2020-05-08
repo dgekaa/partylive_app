@@ -221,3 +221,9 @@ export const CREATE_STREAMS_SCHEDULE = gql`
     }
   }
 `;
+
+export const UPDATE_IMAGE = gql`
+  mutation UPDATEIMAGE($file: Upload!) {
+    PlaceImage(file: $file)
+  }
+`;
