@@ -21,7 +21,7 @@ import {OffCanvas3D} from 'react-native-off-canvas-menu';
 
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import Video from 'react-native-video';
-import DateTimePicker from '@react-native-community/datetimepicker';
+// import DateTimePicker from '@react-native-community/datetimepicker';
 import {Query, useMutation, useQuery} from 'react-apollo';
 import {
   Collapse,
@@ -801,7 +801,7 @@ const Admin = (props) => {
           )}
         </DialogContent>
       </Dialog>
-      {show && (
+      {/* {show && (
         <DateTimePicker
           testID="dateTimePicker"
           timeZoneOffsetInMinutes={0}
@@ -811,7 +811,7 @@ const Admin = (props) => {
           display="spinner"
           onChange={onChangeTime}
         />
-      )}
+      )} */}
     </View>
   );
 };

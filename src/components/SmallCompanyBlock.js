@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   PermissionsAndroid,
+  Image,
 } from 'react-native';
 import Video from 'react-native-video';
 import Geolocation from '@react-native-community/geolocation';
@@ -120,20 +121,30 @@ const SmallCompanyBlock = ({item, navigation}) => {
           distanceTo,
         });
       }}
-      style={styles.SmallCompanyBlock}>
-      <View style={styles.videoWrap}>
+      style={[styles.SmallCompanyBlock]}>
+      <View style={[styles.videoWrap]}>
         {showStream ? (
-          <Video
+          <Image
+            // width={100}
+            // height={100}
+            style={styles.backgroundVideo}
             source={{
               uri: item.streams && item.streams[0] && item.streams[0].preview,
             }}
-            ref={video}
-            onBuffer={(buf) => console.log(buf, ' BUFFFF ')}
-            onError={(err) => console.log(err, 'VIDEO ERRRRR ')}
-            style={styles.backgroundVideo}
-            resizeMode="contain"
           />
         ) : (
+          // <Video
+          //   // uri: "http://partycamera.org/klever/preview.jpg",
+
+          //   source={{
+          //     uri: item.streams && item.streams[0] && item.streams[0].preview,
+          //   }}
+          //   ref={video}
+          //   onBuffer={(buf) => console.log(buf, ' BUFFFF ')}
+          //   onError={(err) => console.log(err, 'VIDEO ERRRRR ')}
+          //   style={styles.backgroundVideo}
+          //   resizeMode="contain"
+          // />
           <View style={styles.backgroundVideo}>
             <Text style={styles.noVideoText}>{whenIsTranslationTime()}</Text>
           </View>

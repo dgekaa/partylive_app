@@ -67,6 +67,7 @@ const Company = (props) => {
           <View style={styles.videoWrap}>
             {showStream ? (
               <Video
+                controls={true}
                 resizeMode="contain"
                 source={{uri: streams[0].url}}
                 onBuffer={(buf) => console.log(buf)}
