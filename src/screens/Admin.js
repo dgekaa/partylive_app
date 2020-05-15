@@ -21,6 +21,7 @@ import {OffCanvas3D} from 'react-native-off-canvas-menu';
 
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import Video from 'react-native-video';
+import VideoPlayer from 'react-native-video-controls';
 // import DateTimePicker from '@react-native-community/datetimepicker';
 import {Query, useMutation, useQuery} from 'react-apollo';
 import {
@@ -101,6 +102,8 @@ const Admin = (props) => {
   const [typeOfCompany, setTypeOfCompany] = useState('');
   const [typeOfCompanyId, setTypeOfCompanyId] = useState('');
   const [isStreamOff, setIsStreamOff] = useState(false);
+
+  const videoRef = useRef(null);
 
   useEffect(() => {
     setPickedStartTime('');
@@ -321,7 +324,9 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-
+  useEffect(() => {
+    console.log(streamValue, 'GGG');
+  });
   const moveOutStream = () => {
     Animated.timing(streamValue, {
       toValue: -Dimensions.get('window').width,
@@ -367,6 +372,7 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
+
   // ----------------------------------------------------------
   const streamScheduleValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
@@ -430,18 +436,32 @@ const Admin = (props) => {
         <TouchableOpacity
           onPress={() => {
             moveOutStream();
+            !videoRef.current.state.paused &&
+              videoRef.current.methods.togglePlayPause();
           }}>
           <Text>{'<'} ВЕРНУТЬСЯ</Text>
         </TouchableOpacity>
         <Text style={styles.headerAdminTitle}>Стрим</Text>
         <View style={styles.videoWrap}>
-          <Video
+          <VideoPlayer
+            ref={videoRef}
+            poster={streams[0].preview}
+            paused={true}
+            source={{uri: streams[0].url}}
+            // style={styles.backgroundVideo}
+            disableSeekbar
+            disableTimer
+            disableBack
+            disableFullscreen
+            toggleResizeModeOnFullscreen={false}
+          />
+          {/* <Video
             paused={true}
             source={{uri: streams[0] && streams[0].url}}
             onBuffer={(buf) => console.log(buf)}
             onError={(err) => console.log(err, '_ERR_')}
             style={styles.backgroundVideo}
-          />
+          /> */}
         </View>
       </Animated.ScrollView>
 

@@ -8,7 +8,7 @@ import {
   PermissionsAndroid,
   Image,
 } from 'react-native';
-import Video from 'react-native-video';
+// import Video from 'react-native-video';
 import Geolocation from '@react-native-community/geolocation';
 
 import {getDistanceFromLatLonInKm} from '../getDistance';
@@ -16,7 +16,7 @@ import {EN_SHORT_TO_RU_LONG_V_P} from '../constants';
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 
 const SmallCompanyBlock = ({item, navigation}) => {
-  const video = useRef(null);
+  // const video = useRef(null);
 
   const [showStream, setShowStream] = useState();
   const [nextStreamTime, setNextStreamTime] = useState();

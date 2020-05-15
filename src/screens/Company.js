@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, View, Text} from 'react-native';
-import Video from 'react-native-video';
+import VideoPlayer from 'react-native-video-controls';
 
 import {EN_SHORT_TO_RU_LONG_V_P} from '../constants';
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 import Header from '../components/Header';
 
 const Company = (props) => {
+  console.log(props, 'PROPS');
   const {
     data: {name, address, streams, categories},
     distanceTo,
@@ -66,15 +67,25 @@ const Company = (props) => {
         <View style={styles.videoBlockWrap}>
           <View style={styles.videoWrap}>
             {showStream ? (
-              <Video
-                controls={true}
-                resizeMode="contain"
+              <VideoPlayer
+                // paused={true}
                 source={{uri: streams[0].url}}
-                onBuffer={(buf) => console.log(buf)}
-                onError={(err) => console.log(err, '_ERR_')}
-                style={styles.backgroundVideo}
+                // style={styles.backgroundVideo}
+                disableSeekbar
+                disableTimer
+                disableBack
+                disableFullscreen
+                toggleResizeModeOnFullscreen={false}
               />
             ) : (
+              // <Video
+              //   controls={true}
+              //   resizeMode="contain"
+              //   source={{uri: streams[0].url}}
+              //   onBuffer={(buf) => console.log(buf)}
+              //   onError={(err) => console.log(err, '_ERR_')}
+              //   style={styles.backgroundVideo}
+              // />
               <View style={styles.backgroundVideo}>
                 <Text style={styles.noVideoText}>
                   {whenIsTranslationTime()}
