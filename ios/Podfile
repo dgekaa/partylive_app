@@ -61,6 +61,8 @@ target 'party_live_app' do
   pod 'RNReanimated', :path => '../node_modules/react-native-reanimated'
 
 
+  pod 'react-native-nodemediaclient', :path => '../node_modules/react-native-nodemediaclient'
+
   target 'party_live_appTests' do
     inherit! :complete
     # Pods for testing

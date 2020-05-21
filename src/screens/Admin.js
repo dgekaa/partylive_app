@@ -1,34 +1,27 @@
-import React, {useState, useEffect, useRef, Component} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import ImagePicker from 'react-native-image-crop-picker';
 import {
   StyleSheet,
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
+  Alert,
   Platform,
   Dimensions,
   Image,
   TextInput,
   ActivityIndicator,
-  Alert,
   Switch,
   Animated,
+  PermissionsAndroid,
 } from 'react-native';
-import SideMenu from 'react-native-side-menu';
-import Drawer from 'react-native-drawer';
-import {OffCanvas3D} from 'react-native-off-canvas-menu';
+import {NodeCameraView} from 'react-native-nodemediaclient';
 
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import Video from 'react-native-video';
 import VideoPlayer from 'react-native-video-controls';
 // import DateTimePicker from '@react-native-community/datetimepicker';
 import {Query, useMutation, useQuery} from 'react-apollo';
-import {
-  Collapse,
-  CollapseHeader,
-  CollapseBody,
-} from 'accordion-collapse-react-native';
 
 import {
   EN_SHORT_DAY_OF_WEEK,
@@ -104,6 +97,12 @@ const Admin = (props) => {
   const [isStreamOff, setIsStreamOff] = useState(false);
 
   const videoRef = useRef(null);
+
+  // useEffect(() => {
+  //   fetch('https://admin:280289Km')
+  //     .then((res) => console.log(res, 'FFF'))
+  //     .catch((err) => console.log(err, 'HHH'));
+  // }, []);
 
   useEffect(() => {
     setPickedStartTime('');
@@ -324,9 +323,7 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-  useEffect(() => {
-    console.log(streamValue, 'GGG');
-  });
+
   const moveOutStream = () => {
     Animated.timing(streamValue, {
       toValue: -Dimensions.get('window').width,
@@ -393,8 +390,42 @@ const Admin = (props) => {
     }).start();
   };
   //  ===================================================
-  const AppID = useState(null)[0];
-  const ChannelName = useState('test')[0];
+  const vbRef = useRef(null);
+  const [publishBtnTitle, setPublishBtnTitle] = useState('');
+  const [isPublish, setIsPublish] = useState(false);
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     console.log(vbRef.current.switchCamera(), 'VB REF');
+  //   }, 1000);
+  // }, []);
+
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.requestMultiple(
+        [
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        ],
+        {
+          title: 'Cool Photo App Camera And Microphone Permission',
+          message:
+            'Cool Photo App needs access to your camera ' +
+            'so you can take awesome pictures.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the camera');
+      } else {
+        console.log('Camera permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
 
   // ===================================================
   if (loading) return <Text>'Loading...'</Text>;
@@ -429,6 +460,52 @@ const Admin = (props) => {
         </TouchableOpacity>
         <View>
           <Text>LIVE____СТРИМ</Text>
+          <View style={{height: 200, width: 200, backgroundColor: 'pink'}}>
+            {/* //////////////////////////// */}
+            <TouchableOpacity
+              style={{backgroundColor: 'gold'}}
+              onPress={requestCameraPermission}>
+              <Text>!!!request permissions!!!</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                if (isPublish) {
+                  setPublishBtnTitle('Start Publish');
+                  setIsPublish(false);
+
+                  vbRef.current.stop();
+                } else {
+                  setPublishBtnTitle('Stop Publish');
+                  setIsPublish(true);
+
+                  vbRef.current.start();
+                }
+              }}>
+              <Text> 11 {publishBtnTitle} 22</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                vbRef.current.switchCamera();
+              }}>
+              <Text>SWITCH CAMERA</Text>
+            </TouchableOpacity>
+            {/* vbRef.current.switchCamera() */}
+            <NodeCameraView
+              style={{height: 300, width: 300}}
+              ref={vbRef}
+              outputUrl={'rtmp://194.87.235.18/streaming/123'}
+              camera={{cameraId: 1, cameraFrontMirror: true}}
+              audio={{bitrate: 32000, profile: 1, samplerate: 44100}}
+              video={{
+                preset: 12,
+                bitrate: 100000,
+                profile: 1,
+                fps: 15,
+                videoFrontMirror: false,
+              }}
+              autopreview={true}
+            />
+          </View>
         </View>
       </View>
       <Animated.ScrollView

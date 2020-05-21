@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import cn.nodemedia.react_native_nodemediaclient.NodeMediaReactPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.swmansion.reanimated.ReanimatedPackage;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
@@ -44,6 +45,7 @@ public class MainApplication extends Application implements ReactApplication {
 protected List<ReactPackage> getPackages() {
     return Arrays.asList(
             new MainReactPackage(),
+            new NodeMediaReactPackage(),
             new RNGestureHandlerPackage(),
             new ReanimatedPackage(),
             new SafeAreaContextPackage(),
