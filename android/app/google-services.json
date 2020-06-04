@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1048046613365",
+    "firebase_url": "https://partylive-5b734.firebaseio.com",
+    "project_id": "partylive-5b734",
+    "storage_bucket": "partylive-5b734.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048046613365:android:73ee4ee7d7d5524f4c193c",
+        "android_client_info": {
+          "package_name": "com.party_live_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1048046613365-pe1eg9pdki8l89fnab8b10rri8sc5ifp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC86XgyC7ADqKm5KsxGKbkYi0DFEqDxVu4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1048046613365-pe1eg9pdki8l89fnab8b10rri8sc5ifp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

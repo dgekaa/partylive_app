@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   Dimensions,
   PermissionsAndroid,
+  ImageBackground,
   Image,
 } from 'react-native';
-// import Video from 'react-native-video';
 import Geolocation from '@react-native-community/geolocation';
 
 import {getDistanceFromLatLonInKm} from '../getDistance';
@@ -16,8 +16,6 @@ import {EN_SHORT_TO_RU_LONG_V_P} from '../constants';
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 
 const SmallCompanyBlock = ({item, navigation}) => {
-  // const video = useRef(null);
-
   const [showStream, setShowStream] = useState();
   const [nextStreamTime, setNextStreamTime] = useState();
   const [workTime, setWorkTime] = useState();
@@ -103,10 +101,10 @@ const SmallCompanyBlock = ({item, navigation}) => {
 
   const whenIsWorkTime = () => {
     if (!isWork) {
-      return 'Закрыто';
+      return 'закрыто';
     } else {
       if (workTime) {
-        return 'Открыто до ' + workTime.split('-')[1];
+        return 'до ' + workTime.split('-')[1];
       } else {
         return 'Время работы не задано';
       }
@@ -115,51 +113,61 @@ const SmallCompanyBlock = ({item, navigation}) => {
 
   return (
     <TouchableOpacity
+      style={styles.SmallCompanyBlock}
       onPress={(e) => {
         navigation.navigate('Company', {
           data: item,
           distanceTo,
         });
-      }}
-      style={[styles.SmallCompanyBlock]}>
-      <View style={[styles.videoWrap]}>
-        {showStream ? (
-          <Image
-            // width={100}
-            // height={100}
-            style={styles.backgroundVideo}
-            source={{
-              uri: item.streams && item.streams[0] && item.streams[0].preview,
-            }}
-          />
-        ) : (
-          // <Video
-          //   // uri: "http://partycamera.org/klever/preview.jpg",
-
-          //   source={{
-          //     uri: item.streams && item.streams[0] && item.streams[0].preview,
-          //   }}
-          //   ref={video}
-          //   onBuffer={(buf) => console.log(buf, ' BUFFFF ')}
-          //   onError={(err) => console.log(err, 'VIDEO ERRRRR ')}
-          //   style={styles.backgroundVideo}
-          //   resizeMode="contain"
-          // />
-          <View style={styles.backgroundVideo}>
-            <Text style={styles.noVideoText}>{whenIsTranslationTime()}</Text>
-          </View>
-        )}
-      </View>
-      <View style={styles.description}>
-        <Text style={styles.name}>{item.name}</Text>
-        <View style={styles.middleText}>
+      }}>
+      <ImageBackground
+        source={item.streams && item.streams[0] && item.streams[0].preview}
+        style={{
+          flex: 1,
+          resizeMode: 'cover',
+          justifyContent: 'center',
+          backgroundColor: '#000',
+          borderRadius: 5,
+          position: 'relative',
+        }}>
+        <View style={styles.videoWrap}>
+          {showStream ? (
+            <></>
+          ) : (
+            <View style={styles.backgroundVideo}>
+              <Text style={styles.noVideoText}>{whenIsTranslationTime()}</Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.description}>
+          <Text style={styles.name}>{item.name}</Text>
+          {/* <View style={styles.middleText}>
           <Text style={styles.km}>{distanceTo ? distanceTo : 0} km.</Text>
           <Text style={styles.categories}>
             {item.categories && item.categories[0] && item.categories[0].name}
           </Text>
+        </View> */}
+
+          <View style={styles.workTimeRow}>
+            <View style={styles.circle} />
+            <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
+          </View>
         </View>
-        <Text>{whenIsWorkTime()}</Text>
-      </View>
+        <Image
+          style={{
+            position: 'absolute',
+            right: 5,
+            bottom: 5,
+            backgroundColor: '#000',
+            width: 16,
+            height: 16,
+          }}
+          source={{
+            uri:
+              item.categories && item.categories[0] && item.categories[0].slug,
+          }}
+        />
+      </ImageBackground>
     </TouchableOpacity>
   );
 };
@@ -167,7 +175,7 @@ const SmallCompanyBlock = ({item, navigation}) => {
 const styles = StyleSheet.create({
   SmallCompanyBlock: {
     backgroundColor: '#fff',
-    height: 250,
+    height: 180,
     margin: 5,
     width: Dimensions.get('window').width / 2 - 10,
     borderRadius: 5,
@@ -175,7 +183,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   videoWrap: {
-    height: 180,
+    height: 130,
     borderRadius: 5,
   },
   backgroundVideo: {
@@ -199,10 +207,36 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   description: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
     padding: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
   },
   name: {
-    fontWeight: 'bold',
+    fontWeight: '700',
+    fontSize: 12,
+    lineHeight: 14,
+    color: '#FFFFFF',
+  },
+  workTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  circle: {
+    width: 5,
+    height: 5,
+    backgroundColor: 'red',
+    borderRadius: 5,
+    marginRight: 5,
+    marginTop: 3,
+  },
+  workTime: {
+    fontWeight: '500',
+    fontSize: 11,
+    lineHeight: 14,
+    color: '#FFFFFF',
   },
   middleText: {
     flexDirection: 'row',

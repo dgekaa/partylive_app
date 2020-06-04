@@ -85,6 +85,7 @@ export const GET_PLACES = gql`
       categories {
         id
         name
+        slug
       }
     }
   }

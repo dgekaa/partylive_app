@@ -22,6 +22,7 @@ import com.airbnb.android.react.maps.MapsPackage;
 import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.reactcommunity.rndatetimepicker.RNDateTimePickerPackage;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
+import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -53,7 +54,8 @@ protected List<ReactPackage> getPackages() {
             new MapsPackage(),
             new GeolocationPackage(),
             new RNDateTimePickerPackage(),
-            new PickerPackage()
+            new PickerPackage(),
+            new ReactNativePushNotificationPackage()
     );
 }
 

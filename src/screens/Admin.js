@@ -18,7 +18,6 @@ import {
 import {NodeCameraView} from 'react-native-nodemediaclient';
 
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
-import Video from 'react-native-video';
 import VideoPlayer from 'react-native-video-controls';
 // import DateTimePicker from '@react-native-community/datetimepicker';
 import {Query, useMutation, useQuery} from 'react-apollo';
@@ -251,26 +250,28 @@ const Admin = (props) => {
       height: 250,
       cropping: true,
       includeBase64: true,
-    }).then((image) => {
-      console.log(image, 'IMAGE');
-      const imgData = {
-        uri: image.path,
-        type: image.mime,
-        name: 'photo.jpg',
-      };
-      var formData = new FormData();
-      formData.append('image', imgData);
-      console.log(formData, 'formData');
+    })
+      .then((image) => {
+        console.log(image, 'IMAGE_________________');
+        const imgData = {
+          uri: image.path,
+          type: image.mime,
+          name: 'photo.jpg',
+        };
+        var formData = new FormData();
+        formData.append('image', imgData);
+        console.log(formData, 'formData');
 
-      UPDATE_IMAGE_mutation({
-        variables: {
-          file: formData,
-        },
-        optimisticResponse: null,
-      });
-      setpPickerImageMime(image.mime);
-      setpPickerImageData(image.data);
-    });
+        UPDATE_IMAGE_mutation({
+          variables: {
+            file: formData,
+          },
+          optimisticResponse: null,
+        });
+        setpPickerImageMime(image.mime);
+        setpPickerImageData(image.data);
+      })
+      .catch((err) => console.log(err, ' ERR ERR'));
   };
 
   const saveNewData = () => {
@@ -390,15 +391,28 @@ const Admin = (props) => {
     }).start();
   };
   //  ===================================================
-  const vbRef = useRef(null);
-  const [publishBtnTitle, setPublishBtnTitle] = useState('');
-  const [isPublish, setIsPublish] = useState(false);
+  const translationValue = useState(
+    new Animated.Value(-Dimensions.get('window').width),
+  )[0];
+  const moveInTranslation = () => {
+    Animated.timing(translationValue, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     console.log(vbRef.current.switchCamera(), 'VB REF');
-  //   }, 1000);
-  // }, []);
+  const moveOutTranslation = () => {
+    Animated.timing(translationValue, {
+      toValue: -Dimensions.get('window').width,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
+  // +++++++++++++++++++++++++++++++++++
+  const vbRef = useRef(null);
+  const [publishBtnTitle, setPublishBtnTitle] = useState('Начать трансляцию');
+  const [isPublish, setIsPublish] = useState(false);
 
   const requestCameraPermission = async () => {
     try {
@@ -459,53 +473,12 @@ const Admin = (props) => {
           <Text>График стримов</Text>
         </TouchableOpacity>
         <View>
-          <Text>LIVE____СТРИМ</Text>
-          <View style={{height: 200, width: 200, backgroundColor: 'pink'}}>
-            {/* //////////////////////////// */}
-            <TouchableOpacity
-              style={{backgroundColor: 'gold'}}
-              onPress={requestCameraPermission}>
-              <Text>!!!request permissions!!!</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                if (isPublish) {
-                  setPublishBtnTitle('Start Publish');
-                  setIsPublish(false);
-
-                  vbRef.current.stop();
-                } else {
-                  setPublishBtnTitle('Stop Publish');
-                  setIsPublish(true);
-
-                  vbRef.current.start();
-                }
-              }}>
-              <Text> 11 {publishBtnTitle} 22</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                vbRef.current.switchCamera();
-              }}>
-              <Text>SWITCH CAMERA</Text>
-            </TouchableOpacity>
-            {/* vbRef.current.switchCamera() */}
-            <NodeCameraView
-              style={{height: 300, width: 300}}
-              ref={vbRef}
-              outputUrl={'rtmp://194.87.235.18/streaming/123'}
-              camera={{cameraId: 1, cameraFrontMirror: true}}
-              audio={{bitrate: 32000, profile: 1, samplerate: 44100}}
-              video={{
-                preset: 12,
-                bitrate: 100000,
-                profile: 1,
-                fps: 15,
-                videoFrontMirror: false,
-              }}
-              autopreview={true}
-            />
-          </View>
+          <TouchableOpacity
+            onPress={() => {
+              moveInTranslation();
+            }}>
+            <Text>Трансляции</Text>
+          </TouchableOpacity>
         </View>
       </View>
       <Animated.ScrollView
@@ -816,6 +789,80 @@ const Admin = (props) => {
             </View>
           );
         })}
+      </Animated.ScrollView>
+
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: translationValue}]}>
+        <TouchableOpacity
+          onPress={() => {
+            moveOutTranslation();
+          }}>
+          <Text>{'<'} ВЕРНУТЬСЯ</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerAdminTitle}>ТРАНСЛЯЦИЯ</Text>
+        <NodeCameraView
+          style={{height: 173, width: '100%'}}
+          ref={vbRef}
+          outputUrl={'rtmp://194.87.235.18/streaming/123'}
+          camera={{cameraId: 1, cameraFrontMirror: true}}
+          audio={{bitrate: 60000, profile: 1, samplerate: 44100}}
+          video={{
+            preset: 12,
+            bitrate: 300000,
+            profile: 1,
+            fps: 15,
+            videoFrontMirror: false,
+          }}
+          autopreview={true}
+        />
+        {/* <TouchableOpacity
+          style={{backgroundColor: 'gold'}}
+          onPress={requestCameraPermission}>
+          <Text>Запрос на сьемку</Text>
+        </TouchableOpacity> */}
+        <TouchableOpacity
+          onPress={() => {
+            if (isPublish) {
+              setPublishBtnTitle('Начать трансляцию');
+              setIsPublish(false);
+              vbRef.current.stop();
+            } else {
+              setPublishBtnTitle('Остановить трансляцию');
+              setIsPublish(true);
+              vbRef.current.start();
+            }
+          }}>
+          <Text
+            style={[
+              {
+                height: 50,
+                width: 279,
+                alignSelf: 'center',
+                marginTop: 35,
+                lineHeight: 50,
+                textAlign: 'center',
+                textTransform: 'uppercase',
+                borderRadius: 15,
+                fontWeight: 'bold',
+                fontSize: 18,
+              },
+              isPublish
+                ? {borderWidth: 2, borderColor: '#909090', color: '#999'}
+                : {
+                    backgroundColor: '#E32A6C',
+                    color: '#fff',
+                  },
+            ]}>
+            {publishBtnTitle}
+          </Text>
+        </TouchableOpacity>
+        {/* <TouchableOpacity
+          style={{height: 50}}
+          onPress={() => {
+            vbRef.current.switchCamera();
+          }}>
+          <Text>SWITCH CAMERA</Text>
+        </TouchableOpacity> */}
       </Animated.ScrollView>
       {/* --------------------------------------------------------- */}
       {/* --------------------------------------------------------- */}

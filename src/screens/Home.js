@@ -60,9 +60,9 @@ const Home = (props) => {
             setDATA(data);
             console.log(data, 'DATATATATATAT');
 
-            const left = [],
-              middle = [],
-              right = [];
+            // const left = [],
+            //   middle = [],
+            //   right = [];
 
             // data.places.forEach((el, i) => {
             //   if (el.streams && el.streams[0] && el.streams[0].url) {
