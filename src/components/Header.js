@@ -1,15 +1,15 @@
 import React from 'react';
 import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 
-const CustomHeader = ({props}) => {
+const CustomHeader = ({props: {navigation}}) => {
   return (
     <View style={styles.header}>
-      <TouchableOpacity onPress={() => props.navigation.goBack()}>
-        {props.navigation.goBack && <Text style={styles.goBack}>{'<'}</Text>}
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        {navigation.goBack && <Text style={styles.goBack}>&#60;</Text>}
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => props.navigation.navigate('Home')}>
+      <TouchableOpacity onPress={() => navigation.navigate('Home')}>
         <View style={styles.PLLogo}>
-          <Text style={styles.party}> PARTY</Text>
+          <Text style={styles.party}>PARTY</Text>
           <View style={styles.partyWrap}>
             <Text style={styles.live}>.LIVE</Text>
           </View>
@@ -17,7 +17,7 @@ const CustomHeader = ({props}) => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.burgerWrap}
-        onPress={() => props.navigation.openDrawer()}>
+        onPress={() => navigation.openDrawer()}>
         <View style={styles.burgerOne} />
         <View style={styles.burgerOne} />
         <View style={styles.burgerOne} />

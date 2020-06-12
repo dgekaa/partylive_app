@@ -7,7 +7,6 @@ import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 import Header from '../components/Header';
 
 const Company = (props) => {
-  console.log(props, 'PROPS');
   const {
     data: {name, address, streams, categories},
     distanceTo,
@@ -68,9 +67,7 @@ const Company = (props) => {
           <View style={styles.videoWrap}>
             {showStream ? (
               <VideoPlayer
-                // paused={true}
                 source={{uri: streams[0].url}}
-                // style={styles.backgroundVideo}
                 disableSeekbar
                 disableTimer
                 disableBack
@@ -78,14 +75,6 @@ const Company = (props) => {
                 toggleResizeModeOnFullscreen={false}
               />
             ) : (
-              // <Video
-              //   controls={true}
-              //   resizeMode="contain"
-              //   source={{uri: streams[0].url}}
-              //   onBuffer={(buf) => console.log(buf)}
-              //   onError={(err) => console.log(err, '_ERR_')}
-              //   style={styles.backgroundVideo}
-              // />
               <View style={styles.backgroundVideo}>
                 <Text style={styles.noVideoText}>
                   {whenIsTranslationTime()}

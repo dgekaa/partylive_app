@@ -40,9 +40,10 @@ const Home = (props) => {
       <Query query={GET_CATEGORIES}>
         {({loading, error, data}) => {
           if (loading) {
-            return <View></View>;
+            return <></>;
+          } else if (error) {
+            return <Text>Error! ${error.message}</Text>;
           }
-          if (error) return <Text>Error! ${error.message}</Text>;
           return <CompanyTypeNav data={data} clickedType={clickedType} />;
         }}
       </Query>
@@ -55,41 +56,15 @@ const Home = (props) => {
                   <ActivityIndicator size="large" color="#0000ff" />
                 </View>
               );
+            } else if (error) {
+              return <Text>Error! ${error.message}</Text>;
             }
-            if (error) return <Text>Error! ${error.message}</Text>;
             setDATA(data);
-            console.log(data, 'DATATATATATAT');
-
-            // const left = [],
-            //   middle = [],
-            //   right = [];
-
-            // data.places.forEach((el, i) => {
-            //   if (el.streams && el.streams[0] && el.streams[0].url) {
-            //     fetch(el.streams[0].url)
-            //       .then((res) => {
-            //         console.log(res, 'RES');
-            //         if (res.ok) {
-            //           left.push(el);
-            //         } else {
-            //           middle.push(el);
-            //         }
-            //         console.log(
-            //           [...left, ...middle, ...right],
-            //           '[...left, ...middle, ...right]',
-            //         );
-            //         setDATA([...left, ...middle, ...right]);
-            //       })
-            //       .catch((err) => console.log(err, 'video status err'));
-            //   } else {
-            //     right.push(el);
-            //   }
-            // });
 
             if (companyData.length) {
               return (
                 <FlatList
-                  data={companyData.length ? companyData : []}
+                  data={companyData}
                   numColumns={2}
                   renderItem={({item}) => (
                     <SmallCompanyBlock
@@ -100,8 +75,7 @@ const Home = (props) => {
                   keyExtractor={(item) => item.id}
                 />
               );
-            }
-            if (!companyData.length) {
+            } else {
               return <Text style={styles.nullFilter}>Нет заведений</Text>;
             }
           }}

@@ -21,6 +21,13 @@ const Registration = (props) => {
   const [repasswordErr, setRepasswordErr] = useState(false);
   const [emailErr, setEmailErr] = useState(false);
 
+  const clearAllInputs = () => {
+    setName('');
+    setEmail('');
+    setPassword('');
+    setRepassword('');
+  };
+
   const registerHandle = (res) => {
     props.navigation.state.params.changeLoginState(
       true,
@@ -28,10 +35,7 @@ const Registration = (props) => {
     );
     props.navigation.navigate('Home');
 
-    setName('');
-    setEmail('');
-    setPassword('');
-    setRepassword('');
+    clearAllInputs();
   };
 
   const registerErrHandle = () => {
@@ -60,7 +64,7 @@ const Registration = (props) => {
       <Header props={props} />
       <View style={styles.login}>
         <Mutation mutation={REGISTER}>
-          {(addMutation, {data}) => {
+          {(addMutation) => {
             return (
               <View style={styles.loginForm}>
                 <Text style={styles.headText}>Регистрация</Text>

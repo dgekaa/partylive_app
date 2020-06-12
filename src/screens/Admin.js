@@ -19,7 +19,7 @@ import {NodeCameraView} from 'react-native-nodemediaclient';
 
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import VideoPlayer from 'react-native-video-controls';
-// import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {Query, useMutation, useQuery} from 'react-apollo';
 
 import {
@@ -41,40 +41,10 @@ import {
   UPDATE_IMAGE,
 } from '../QUERYES';
 
-class ContentView extends React.Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.ios.js
-        </Text>
-        <Text style={styles.instructions}>
-          Press Cmd+R to reload,{'\n'}
-          Cmd+Control+Z for dev menu
-        </Text>
-      </View>
-    );
-  }
-}
-
 const Admin = (props) => {
   const {streams} = props.navigation.state.params.item;
 
   const [popupVisible, setPopupVisible] = useState(false);
-
-  const SetNewTimeObject = (data) => {
-    const timeObject = {};
-    EN_SHORT_DAY_OF_WEEK.forEach((e, i) => {
-      data.forEach((el) => {
-        if (!timeObject[e.day]) timeObject[e.day] = 'Пусто';
-        if (el.day) timeObject[el.day] = el;
-      });
-    });
-    return timeObject;
-  };
-
-  // ================================
   const [date, setDate] = useState(new Date().getTime());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -97,11 +67,7 @@ const Admin = (props) => {
 
   const videoRef = useRef(null);
 
-  // useEffect(() => {
-  //   fetch('https://admin:280289Km')
-  //     .then((res) => console.log(res, 'FFF'))
-  //     .catch((err) => console.log(err, 'HHH'));
-  // }, []);
+  const decriptionLengthLimit = 300;
 
   useEffect(() => {
     setPickedStartTime('');
@@ -130,6 +96,17 @@ const Admin = (props) => {
   );
   const [UPDATE_PLACE_DATA_mutation] = useMutation(UPDATE_PLACE_DATA);
   const [UPDATE_IMAGE_mutation] = useMutation(UPDATE_IMAGE);
+
+  const SetNewTimeObject = (data) => {
+    const timeObject = {};
+    EN_SHORT_DAY_OF_WEEK.forEach((e, i) => {
+      data.forEach((el) => {
+        if (!timeObject[e.day]) timeObject[e.day] = 'Пусто';
+        if (el.day) timeObject[el.day] = el;
+      });
+    });
+    return timeObject;
+  };
 
   const setAsDayOf = (day) => {
     if (day.id) {
@@ -167,7 +144,10 @@ const Admin = (props) => {
             end_time: pickedEndTime || selectedDay.end_time,
           },
           optimisticResponse: null,
-        });
+        }).then(
+          (res) => console.log(res, 'RES'),
+          (err) => console.log(err, 'ERR'),
+        );
       }
     }
   };
@@ -185,7 +165,10 @@ const Admin = (props) => {
             end_time: pickedEndTime,
           },
           optimisticResponse: null,
-        });
+        }).then(
+          (res) => console.log(res, 'RES'),
+          (err) => console.log(err, 'ERR'),
+        );
       }
     } else {
       if ((pickedStartTime && pickedEndTime) || selectedDay.start_time) {
@@ -216,32 +199,24 @@ const Admin = (props) => {
     setShow(Platform.OS === 'ios');
     setDate(currentDate);
 
+    const time =
+      '' +
+      (hours > 9 ? hours : '0' + hours) +
+      ':' +
+      (minutes > 9 ? minutes : '0' + minutes);
+
     const hours = selectedTime.getHours(),
       minutes = selectedTime.getMinutes();
     if (isPickStartTime) {
-      setPickedStartTime(
-        '' +
-          (hours > 9 ? hours : '0' + hours) +
-          ':' +
-          (minutes > 9 ? minutes : '0' + minutes),
-      );
+      setPickedStartTime(time);
     } else {
-      setPickedEndTime(
-        '' +
-          (hours > 9 ? hours : '0' + hours) +
-          ':' +
-          (minutes > 9 ? minutes : '0' + minutes),
-      );
+      setPickedEndTime(time);
     }
   };
 
-  const showMode = (currentMode) => {
-    setShow(true);
-    setMode(currentMode);
-  };
-
   const showTimepicker = () => {
-    showMode('time');
+    setShow(true);
+    setMode('time');
   };
 
   const goToPickImage = () => {
@@ -252,7 +227,6 @@ const Admin = (props) => {
       includeBase64: true,
     })
       .then((image) => {
-        console.log(image, 'IMAGE_________________');
         const imgData = {
           uri: image.path,
           type: image.mime,
@@ -260,14 +234,15 @@ const Admin = (props) => {
         };
         var formData = new FormData();
         formData.append('image', imgData);
-        console.log(formData, 'formData');
 
         UPDATE_IMAGE_mutation({
           variables: {
-            file: formData,
+            file: imgData,
           },
           optimisticResponse: null,
-        });
+        })
+          .then((data) => console.log(data, '_____data'))
+          .catch((err) => console.log(err, '______err'));
         setpPickerImageMime(image.mime);
         setpPickerImageData(image.data);
       })
@@ -304,8 +279,6 @@ const Admin = (props) => {
         );
   };
 
-  const decriptionLengthLimit = 300;
-
   const tomorrowFromDay = (day) => {
     if (day === 6) {
       return 0;
@@ -313,7 +286,7 @@ const Admin = (props) => {
       return day + 1;
     }
   };
-  // ----------------------------------------------------------
+
   const streamValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
   )[0];
@@ -324,7 +297,6 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-
   const moveOutStream = () => {
     Animated.timing(streamValue, {
       toValue: -Dimensions.get('window').width,
@@ -332,7 +304,7 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-  // ----------------------------------------------------------
+
   const profileValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
   )[0];
@@ -343,7 +315,6 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-
   const moveOutProfile = () => {
     Animated.timing(profileValue, {
       toValue: -Dimensions.get('window').width,
@@ -351,7 +322,7 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-  // ----------------------------------------------------------
+
   const workScheduleValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
   )[0];
@@ -362,7 +333,6 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-
   const moveOutWorkSchedule = () => {
     Animated.timing(workScheduleValue, {
       toValue: -Dimensions.get('window').width,
@@ -371,7 +341,6 @@ const Admin = (props) => {
     }).start();
   };
 
-  // ----------------------------------------------------------
   const streamScheduleValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
   )[0];
@@ -382,7 +351,6 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-
   const moveOutStreamSchedule = () => {
     Animated.timing(streamScheduleValue, {
       toValue: -Dimensions.get('window').width,
@@ -390,7 +358,7 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-  //  ===================================================
+
   const translationValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
   )[0];
@@ -401,7 +369,6 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-
   const moveOutTranslation = () => {
     Animated.timing(translationValue, {
       toValue: -Dimensions.get('window').width,
@@ -409,7 +376,7 @@ const Admin = (props) => {
       useNativeDriver: true,
     }).start();
   };
-  // +++++++++++++++++++++++++++++++++++
+
   const vbRef = useRef(null);
   const [publishBtnTitle, setPublishBtnTitle] = useState('Начать трансляцию');
   const [isPublish, setIsPublish] = useState(false);
@@ -517,10 +484,7 @@ const Admin = (props) => {
 
       <Animated.ScrollView
         style={[styles.sliderAdminMenu, {translateX: profileValue}]}>
-        <TouchableOpacity
-          onPress={() => {
-            moveOutProfile();
-          }}>
+        <TouchableOpacity onPress={() => moveOutProfile()}>
           <Text>{'<'} ВЕРНУТЬСЯ</Text>
         </TouchableOpacity>
         <View style={{padding: 10}}>
@@ -945,7 +909,7 @@ const Admin = (props) => {
           )}
         </DialogContent>
       </Dialog>
-      {/* {show && (
+      {show && (
         <DateTimePicker
           testID="dateTimePicker"
           timeZoneOffsetInMinutes={0}
@@ -955,7 +919,7 @@ const Admin = (props) => {
           display="spinner"
           onChange={onChangeTime}
         />
-      )} */}
+      )}
     </View>
   );
 };

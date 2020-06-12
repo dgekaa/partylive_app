@@ -13,6 +13,16 @@ const CompanyTypeNav = ({data, clickedType}) => {
     }
   }, [data]);
 
+  const pressButton = (item, index) => {
+    clickedType(item.name);
+    navigationFlatList.current.scrollToIndex({
+      animated: true,
+      index: index,
+      viewPosition: 0.5,
+    });
+    setButtonActive(item.id);
+  };
+
   return (
     <View style={styles.CompanyTypeNav}>
       {!!DATA.length && (
@@ -29,18 +39,12 @@ const CompanyTypeNav = ({data, clickedType}) => {
                   ? styles.buttonActive
                   : styles.buttonNotActive
               }
-              onPress={(e) => {
-                clickedType(item.name);
-                navigationFlatList.current.scrollToIndex({
-                  animated: true,
-                  index: index,
-                  viewPosition: 0.5,
-                });
-                setButtonActive(item.id);
-              }}>
+              onPress={() => pressButton(item, index)}>
               <Text
                 style={
-                  buttonActive === item.id ? {color: '#FFF'} : {color: '#000'}
+                  buttonActive === item.id
+                    ? styles.activeColor
+                    : styles.notActiveColor
                 }>
                 {item.name}
               </Text>
@@ -82,6 +86,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     backgroundColor: '#e32a6c',
   },
+  activeColor: {color: '#FFF'},
+  notActiveColor: {color: '#000'},
 });
 
 export default CompanyTypeNav;

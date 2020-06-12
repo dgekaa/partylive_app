@@ -24,11 +24,6 @@ const SmallCompanyBlock = ({item, navigation}) => {
   const [lon, setLon] = useState('');
   const [lat, setLat] = useState('');
 
-  useEffect(() => {
-    isShowStreamNow(item, setShowStream, setNextStreamTime);
-    isWorkTimeNow(item, setWorkTime, setIsWork);
-  }, [item]);
-
   const requestLocationPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -76,6 +71,11 @@ const SmallCompanyBlock = ({item, navigation}) => {
     }
   }, [lon, lat, item]);
 
+  useEffect(() => {
+    isShowStreamNow(item, setShowStream, setNextStreamTime);
+    isWorkTimeNow(item, setWorkTime, setIsWork);
+  }, [item]);
+
   const whenIsTranslationTime = () => {
     if (
       nextStreamTime &&
@@ -121,19 +121,12 @@ const SmallCompanyBlock = ({item, navigation}) => {
         });
       }}>
       <ImageBackground
-        source={item.streams && item.streams[0] && item.streams[0].preview}
-        style={{
-          flex: 1,
-          resizeMode: 'cover',
-          justifyContent: 'center',
-          backgroundColor: '#000',
-          borderRadius: 5,
-          position: 'relative',
+        style={styles.backgroundStyle}
+        source={{
+          uri: item.streams && item.streams[0] && item.streams[0].preview,
         }}>
         <View style={styles.videoWrap}>
-          {showStream ? (
-            <></>
-          ) : (
+          {!showStream && (
             <View style={styles.backgroundVideo}>
               <Text style={styles.noVideoText}>{whenIsTranslationTime()}</Text>
             </View>
@@ -141,32 +134,14 @@ const SmallCompanyBlock = ({item, navigation}) => {
         </View>
         <View style={styles.description}>
           <Text style={styles.name}>{item.name}</Text>
-          {/* <View style={styles.middleText}>
-          <Text style={styles.km}>{distanceTo ? distanceTo : 0} km.</Text>
-          <Text style={styles.categories}>
-            {item.categories && item.categories[0] && item.categories[0].name}
-          </Text>
-        </View> */}
-
-          <View style={styles.workTimeRow}>
-            <View style={styles.circle} />
-            <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
+          <View style={styles.bottomRow}>
+            <View style={styles.workTimeRow}>
+              <View style={styles.circle} />
+              <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
+            </View>
+            {distanceTo && <Text style={styles.km}>{distanceTo} km.</Text>}
           </View>
         </View>
-        <Image
-          style={{
-            position: 'absolute',
-            right: 5,
-            bottom: 5,
-            backgroundColor: '#000',
-            width: 16,
-            height: 16,
-          }}
-          source={{
-            uri:
-              item.categories && item.categories[0] && item.categories[0].slug,
-          }}
-        />
       </ImageBackground>
     </TouchableOpacity>
   );
@@ -181,6 +156,14 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: '#ededed',
     borderWidth: 1,
+  },
+  backgroundStyle: {
+    flex: 1,
+    resizeMode: 'cover',
+    justifyContent: 'center',
+    backgroundColor: '#000',
+    borderRadius: 5,
+    position: 'relative',
   },
   videoWrap: {
     height: 130,
@@ -219,6 +202,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 14,
     color: '#FFFFFF',
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   workTimeRow: {
     flexDirection: 'row',

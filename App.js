@@ -35,6 +35,7 @@ const authLink = setContext(async (req, {headers}) => {
   return {
     ...headers,
     headers: {
+      // 'Content-Type': 'multipart/form-data',
       authorization: token ? `Bearer ${token}` : null,
     },
   };
@@ -184,8 +185,8 @@ const App = () => {
               </ListItem>
             )}
           </List>
-          <List style={styles.logoutBtn}>
-            {props.loggedIn && (
+          {props.loggedIn && (
+            <List style={styles.logoutBtn}>
               <ListItem
                 noBorder
                 onPress={() => {
@@ -194,8 +195,8 @@ const App = () => {
                 }}>
                 <Text style={styles.logoutBtnText}>Выход</Text>
               </ListItem>
-            )}
-          </List>
+            </List>
+          )}
         </ScrollView>
       </SafeAreaView>
     );

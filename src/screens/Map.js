@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {StyleSheet, View, Text, ActivityIndicator} from 'react-native';
 import {Query} from 'react-apollo';
 
@@ -28,13 +28,10 @@ const Map = (props) => {
       <Query query={GET_CATEGORIES}>
         {({loading, error, data}) => {
           if (loading) {
-            return (
-              <View>
-                <ActivityIndicator size="large" color="#0000ff" />
-              </View>
-            );
+            return <ActivityIndicator size="large" color="#0000ff" />;
+          } else if (error) {
+            return <Text>Error! ${error.message}</Text>;
           }
-          if (error) return <Text>Error! ${error.message}</Text>;
           return <CompanyTypeNav data={data} clickedType={clickedType} />;
         }}
       </Query>

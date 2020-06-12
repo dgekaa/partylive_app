@@ -16,12 +16,18 @@ const Login = (props) => {
   const [password, setPassword] = useState('');
   const [validationError, setValidationError] = useState('');
 
+  const clearAllInputs = () => {
+    setEmail('');
+    setPassword('');
+    setValidationError('');
+  };
+
   return (
     <View style={styles.loginWrap}>
       <Header props={props} />
       <View style={styles.login}>
         <Mutation mutation={LOGIN}>
-          {(addMutation, {data}) => {
+          {(addMutation) => {
             return (
               <View style={styles.loginForm}>
                 <Text style={styles.headText}>Авторизация</Text>
@@ -54,13 +60,10 @@ const Login = (props) => {
                           res.data.login.access_token,
                         );
                         props.navigation.navigate('Home');
-                        setEmail('');
-                        setPassword('');
-                        setValidationError('');
+                        clearAllInputs();
                       })
-                      .catch((err) => {
+                      .catch(() => {
                         setValidationError('Неверный логин либо пароль');
-                        console.log(err.message, '______err');
                       });
                   }}>
                   <Text style={styles.btnText}>Вход</Text>
