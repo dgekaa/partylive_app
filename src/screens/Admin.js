@@ -290,87 +290,29 @@ const Admin = (props) => {
   const streamValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
   )[0];
-  const moveInStream = () => {
-    Animated.timing(streamValue, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-  const moveOutStream = () => {
-    Animated.timing(streamValue, {
-      toValue: -Dimensions.get('window').width,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  };
-
   const profileValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
   )[0];
-  const moveInProfile = () => {
-    Animated.timing(profileValue, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-  const moveOutProfile = () => {
-    Animated.timing(profileValue, {
-      toValue: -Dimensions.get('window').width,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  };
-
   const workScheduleValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
   )[0];
-  const moveInWorkSchedule = () => {
-    Animated.timing(workScheduleValue, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-  const moveOutWorkSchedule = () => {
-    Animated.timing(workScheduleValue, {
-      toValue: -Dimensions.get('window').width,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  };
-
   const streamScheduleValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
   )[0];
-  const moveInStreamSchedule = () => {
-    Animated.timing(streamScheduleValue, {
+  const translationValue = useState(
+    new Animated.Value(-Dimensions.get('window').width),
+  )[0];
+
+  const moveIn = (data) => {
+    Animated.timing(data, {
       toValue: 0,
       duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-  const moveOutStreamSchedule = () => {
-    Animated.timing(streamScheduleValue, {
-      toValue: -Dimensions.get('window').width,
-      duration: 200,
       useNativeDriver: true,
     }).start();
   };
 
-  const translationValue = useState(
-    new Animated.Value(-Dimensions.get('window').width),
-  )[0];
-  const moveInTranslation = () => {
-    Animated.timing(translationValue, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-  const moveOutTranslation = () => {
-    Animated.timing(translationValue, {
+  const moveOut = (data) => {
+    Animated.timing(data, {
       toValue: -Dimensions.get('window').width,
       duration: 200,
       useNativeDriver: true,
@@ -381,69 +323,57 @@ const Admin = (props) => {
   const [publishBtnTitle, setPublishBtnTitle] = useState('Начать трансляцию');
   const [isPublish, setIsPublish] = useState(false);
 
-  const requestCameraPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.requestMultiple(
-        [
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-        ],
-        {
-          title: 'Cool Photo App Camera And Microphone Permission',
-          message:
-            'Cool Photo App needs access to your camera ' +
-            'so you can take awesome pictures.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use the camera');
-      } else {
-        console.log('Camera permission denied');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
+  // const requestCameraPermission = async () => {
+  //   try {
+  //     const granted = await PermissionsAndroid.requestMultiple(
+  //       [
+  //         PermissionsAndroid.PERMISSIONS.CAMERA,
+  //         PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+  //       ],
+  //       {
+  //         title: 'Cool Photo App Camera And Microphone Permission',
+  //         message:
+  //           'Cool Photo App needs access to your camera ' +
+  //           'so you can take awesome pictures.',
+  //         buttonNeutral: 'Ask Me Later',
+  //         buttonNegative: 'Cancel',
+  //         buttonPositive: 'OK',
+  //       },
+  //     );
+  //     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //       console.log('You can use the camera');
+  //     } else {
+  //       console.log('Camera permission denied');
+  //     }
+  //   } catch (err) {
+  //     console.warn(err);
+  //   }
+  // };
 
-  // ===================================================
-  if (loading) return <Text>'Loading...'</Text>;
-  if (error) return <Text>`Error! ${error.message}`</Text>;
+  if (loading) {
+    return <Text>'Loading...'</Text>;
+  }
+  if (error) {
+    return <Text>`Error! ${error.message}`</Text>;
+  }
   return (
-    <View style={[styles.Admin, {flex: 1}]}>
+    <View style={styles.Admin}>
       <Header props={props} />
-      <View style={{flex: 1}}>
-        <TouchableOpacity
-          onPress={() => {
-            moveInStream();
-          }}>
+      <View style={styles.AdminInner}>
+        <TouchableOpacity onPress={() => moveIn(streamValue)}>
           <Text>Стрим</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            moveInProfile();
-          }}>
+        <TouchableOpacity onPress={() => moveIn(profileValue)}>
           <Text>Профиль заведения</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            moveInWorkSchedule();
-          }}>
+        <TouchableOpacity onPress={() => moveIn(workScheduleValue)}>
           <Text>График работы</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            moveInStreamSchedule();
-          }}>
+        <TouchableOpacity onPress={() => moveIn(streamScheduleValue)}>
           <Text>График стримов</Text>
         </TouchableOpacity>
         <View>
-          <TouchableOpacity
-            onPress={() => {
-              moveInTranslation();
-            }}>
+          <TouchableOpacity onPress={() => moveIn(translationValue)}>
             <Text>Трансляции</Text>
           </TouchableOpacity>
         </View>
@@ -452,7 +382,7 @@ const Admin = (props) => {
         style={[styles.sliderAdminMenu, {translateX: streamValue}]}>
         <TouchableOpacity
           onPress={() => {
-            moveOutStream();
+            moveOut(streamValue);
             !videoRef.current.state.paused &&
               videoRef.current.methods.togglePlayPause();
           }}>
@@ -465,32 +395,24 @@ const Admin = (props) => {
             poster={streams[0].preview}
             paused={true}
             source={{uri: streams[0].url}}
-            // style={styles.backgroundVideo}
             disableSeekbar
             disableTimer
             disableBack
             disableFullscreen
             toggleResizeModeOnFullscreen={false}
           />
-          {/* <Video
-            paused={true}
-            source={{uri: streams[0] && streams[0].url}}
-            onBuffer={(buf) => console.log(buf)}
-            onError={(err) => console.log(err, '_ERR_')}
-            style={styles.backgroundVideo}
-          /> */}
         </View>
       </Animated.ScrollView>
 
       <Animated.ScrollView
         style={[styles.sliderAdminMenu, {translateX: profileValue}]}>
-        <TouchableOpacity onPress={() => moveOutProfile()}>
+        <TouchableOpacity onPress={() => moveOut(profileValue)}>
           <Text>{'<'} ВЕРНУТЬСЯ</Text>
         </TouchableOpacity>
-        <View style={{padding: 10}}>
+        <View style={styles.profileWrap}>
           <Text style={styles.headerAdminTitle}>Профиль заведения</Text>
           <View>
-            {pickerImageMime ? (
+            {pickerImageMime && pickerImageData ? (
               <Image
                 style={styles.pickerImageStyle}
                 source={{
@@ -499,7 +421,11 @@ const Admin = (props) => {
               />
             ) : (
               <View style={styles.noPickerImageStyle}>
-                <Text style={styles.noPickerImageText}>Загрузить фото</Text>
+                <Text
+                  style={styles.noPickerImageText}
+                  onPress={() => goToPickImage()}>
+                  Загрузить фото
+                </Text>
                 <Text style={styles.noPickerImageText}>250 X 250</Text>
               </View>
             )}
@@ -553,8 +479,9 @@ const Admin = (props) => {
                       </View>
                     );
                   }
-                  if (prop.error)
+                  if (prop.error) {
                     return <Text>Error! ${prop.error.message}</Text>;
+                  }
                   return prop.data.categories.map((el, i) => (
                     <TouchableOpacity
                       key={i}
@@ -603,18 +530,16 @@ const Admin = (props) => {
             <Text style={styles.textInputTitleText}>Адрес заведения:</Text>
             <TextInput
               style={styles.textInputStyle}
-              onChangeText={(text) => {}}
               value={data.place.address}
               contextMenuHidden={true}
               editable={false}
             />
-            <TouchableOpacity style={styles.pinkBtn}>
+            <TouchableOpacity style={styles.pinkBtn} onPress={() => {}}>
               <Text style={styles.pinkBtnText}>ВЫБРАТЬ АДРЕС НА КАРТЕ</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.textInputWrap}>
             <Text style={styles.textInputTitleText}>Описание:</Text>
-            {/* data.place.description */}
             <Text
               style={[
                 styles.textDescLimit,
@@ -649,16 +574,12 @@ const Admin = (props) => {
 
       <Animated.ScrollView
         style={[styles.sliderAdminMenu, {translateX: workScheduleValue}]}>
-        <TouchableOpacity
-          onPress={() => {
-            moveOutWorkSchedule();
-          }}>
+        <TouchableOpacity onPress={() => moveOut(workScheduleValue)}>
           <Text>{'<'} ВЕРНУТЬСЯ</Text>
         </TouchableOpacity>
         <Text style={styles.headerAdminTitle}>График работы</Text>
         {EN_SHORT_DAY_OF_WEEK.map((el, i) => {
           let oneDay = SetNewTimeObject(data.place.schedules)[el.day];
-
           return (
             <View key={i} style={styles.graphRow}>
               <Text style={styles.graphDay}>
@@ -697,10 +618,7 @@ const Admin = (props) => {
 
       <Animated.ScrollView
         style={[styles.sliderAdminMenu, {translateX: streamScheduleValue}]}>
-        <TouchableOpacity
-          onPress={() => {
-            moveOutStreamSchedule();
-          }}>
+        <TouchableOpacity onPress={() => moveOut(streamScheduleValue)}>
           <Text>{'<'} ВЕРНУТЬСЯ</Text>
         </TouchableOpacity>
         <Text style={styles.headerAdminTitle}>График трансляций</Text>
@@ -757,15 +675,12 @@ const Admin = (props) => {
 
       <Animated.ScrollView
         style={[styles.sliderAdminMenu, {translateX: translationValue}]}>
-        <TouchableOpacity
-          onPress={() => {
-            moveOutTranslation();
-          }}>
+        <TouchableOpacity onPress={() => moveOut(translationValue)}>
           <Text>{'<'} ВЕРНУТЬСЯ</Text>
         </TouchableOpacity>
         <Text style={styles.headerAdminTitle}>ТРАНСЛЯЦИЯ</Text>
         <NodeCameraView
-          style={{height: 173, width: '100%'}}
+          style={styles.nodeCameraStyle}
           ref={vbRef}
           outputUrl={'rtmp://194.87.235.18/streaming/123'}
           camera={{cameraId: 1, cameraFrontMirror: true}}
@@ -784,6 +699,13 @@ const Admin = (props) => {
           onPress={requestCameraPermission}>
           <Text>Запрос на сьемку</Text>
         </TouchableOpacity> */}
+        {/* <TouchableOpacity
+          style={{height: 50}}
+          onPress={() => {
+            vbRef.current.switchCamera();
+          }}>
+          <Text>SWITCH CAMERA</Text>
+        </TouchableOpacity> */}
         <TouchableOpacity
           onPress={() => {
             if (isPublish) {
@@ -798,39 +720,15 @@ const Admin = (props) => {
           }}>
           <Text
             style={[
-              {
-                height: 50,
-                width: 279,
-                alignSelf: 'center',
-                marginTop: 35,
-                lineHeight: 50,
-                textAlign: 'center',
-                textTransform: 'uppercase',
-                borderRadius: 15,
-                fontWeight: 'bold',
-                fontSize: 18,
-              },
+              styles.startTranslBtn,
               isPublish
-                ? {borderWidth: 2, borderColor: '#909090', color: '#999'}
-                : {
-                    backgroundColor: '#E32A6C',
-                    color: '#fff',
-                  },
+                ? styles.startTranslBtnClicked
+                : styles.startTranslBtnNotClicked,
             ]}>
             {publishBtnTitle}
           </Text>
         </TouchableOpacity>
-        {/* <TouchableOpacity
-          style={{height: 50}}
-          onPress={() => {
-            vbRef.current.switchCamera();
-          }}>
-          <Text>SWITCH CAMERA</Text>
-        </TouchableOpacity> */}
       </Animated.ScrollView>
-      {/* --------------------------------------------------------- */}
-      {/* --------------------------------------------------------- */}
-      {/* --------------------------------------------------------- */}
 
       <Dialog
         visible={popupVisible}
@@ -844,12 +742,6 @@ const Admin = (props) => {
         <DialogContent>
           {selectedDay && (
             <View style={styles.dialogContent}>
-              {/* {console.log(pickedStartTime, 'pickedStartTime')}
-              {console.log(pickedEndTime, 'pickedEndTime')} */}
-              {console.log(selectedDay.start_time, '  selectedDay.start_time')}
-              {console.log(selectedDay, '--------------selectedDay')}
-              {console.log(enumWeekName, '=============enumWeekName')}
-
               <View style={styles.dialogContentDays}>
                 <Text>{EN_SHORT_TO_RU_SHORT[enumWeekName]}</Text>
 
@@ -929,6 +821,9 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height,
     flex: 1,
   },
+  AdminInner: {
+    flex: 1,
+  },
   sliderAdminMenu: {
     position: 'absolute',
     top: 0,
@@ -940,25 +835,44 @@ const styles = StyleSheet.create({
     translateX: -Dimensions.get('window').width,
     flex: 1,
   },
+  profileWrap: {
+    padding: 20,
+  },
   headerAdminTitle: {
     textTransform: 'uppercase',
     fontWeight: 'bold',
     textAlign: 'center',
     padding: 15,
   },
+  nodeCameraStyle: {
+    height: 173,
+    width: '100%',
+  },
+  startTranslBtn: {
+    height: 50,
+    width: 279,
+    alignSelf: 'center',
+    marginTop: 35,
+    lineHeight: 50,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    borderRadius: 15,
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  startTranslBtnClicked: {
+    borderWidth: 2,
+    borderColor: '#909090',
+    color: '#999',
+  },
+  startTranslBtnNotClicked: {
+    backgroundColor: '#E32A6C',
+    color: '#fff',
+  },
   videoWrap: {
     height: 250,
   },
-  backgroundVideo: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    backgroundColor: 'black',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
   tableHeader: {
     borderBottomColor: '#e3e3e3',
     borderBottomWidth: 1,

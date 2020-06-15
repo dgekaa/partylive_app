@@ -27,7 +27,7 @@ import Admin from './src/screens/Admin';
 import {getToken, signIn, signOut} from './src/util';
 
 const httpLink = new HttpLink({
-  uri: 'http://194.87.95.37/graphql',
+  uri: 'https://backend.partylive.by/graphql',
 });
 
 const authLink = setContext(async (req, {headers}) => {
@@ -35,7 +35,6 @@ const authLink = setContext(async (req, {headers}) => {
   return {
     ...headers,
     headers: {
-      // 'Content-Type': 'multipart/form-data',
       authorization: token ? `Bearer ${token}` : null,
     },
   };

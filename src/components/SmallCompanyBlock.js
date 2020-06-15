@@ -11,6 +11,12 @@ import {
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 
+import bar from '../img/bar_w.png';
+import karaoke from '../img/karaoke_w.png';
+import klub from '../img/klub_w.png';
+import launge from '../img/launge_w.png';
+import pab from '../img/pab_w.png';
+
 import {getDistanceFromLatLonInKm} from '../getDistance';
 import {EN_SHORT_TO_RU_LONG_V_P} from '../constants';
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
@@ -111,6 +117,27 @@ const SmallCompanyBlock = ({item, navigation}) => {
     }
   };
 
+  const imgSource = item.categories[0].slug;
+
+  // console.log(imgSource, '_____imgSource');
+
+  // const imgSource = {
+  //   '1': require(item.categories[0].slug),
+  // };
+
+  const getImg = () => {
+    switch (item.categories[0].slug) {
+      case 'bar':
+        return bar;
+      case 'klub':
+        return klub;
+      case 'launge':
+        return launge;
+      case 'pab':
+        return pab;
+    }
+  };
+
   return (
     <TouchableOpacity
       style={styles.SmallCompanyBlock}
@@ -133,10 +160,21 @@ const SmallCompanyBlock = ({item, navigation}) => {
           )}
         </View>
         <View style={styles.description}>
-          <Text style={styles.name}>{item.name}</Text>
+          <View style={styles.nameRow}>
+            <Image style={styles.imgType} source={getImg()} />
+            <Text style={styles.name}>{item.name}</Text>
+          </View>
+
           <View style={styles.bottomRow}>
             <View style={styles.workTimeRow}>
-              <View style={styles.circle} />
+              <View
+                style={[
+                  styles.circle,
+                  !isWork
+                    ? {backgroundColor: '#o4b000'}
+                    : {backgroundColor: '#6D6D6D'},
+                ]}
+              />
               <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
             </View>
             {distanceTo && <Text style={styles.km}>{distanceTo} km.</Text>}
@@ -150,7 +188,7 @@ const SmallCompanyBlock = ({item, navigation}) => {
 const styles = StyleSheet.create({
   SmallCompanyBlock: {
     backgroundColor: '#fff',
-    height: 180,
+    height: 190,
     margin: 5,
     width: Dimensions.get('window').width / 2 - 10,
     borderRadius: 5,
@@ -166,7 +204,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   videoWrap: {
-    height: 130,
+    height: 120,
     borderRadius: 5,
   },
   backgroundVideo: {
@@ -190,17 +228,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   description: {
+    justifyContent: 'space-around',
     position: 'absolute',
     bottom: 0,
     width: '100%',
+    height: 50,
     padding: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  imgType: {
+    width: 16,
+    height: 16,
+    marginRight: 5,
+  },
   name: {
-    fontWeight: '700',
-    fontSize: 12,
-    lineHeight: 14,
+    fontWeight: 'bold',
+    fontSize: 18,
     color: '#FFFFFF',
   },
   bottomRow: {
@@ -212,16 +260,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   circle: {
-    width: 5,
-    height: 5,
-    backgroundColor: 'red',
+    width: 7,
+    height: 7,
     borderRadius: 5,
-    marginRight: 5,
     marginTop: 3,
+    marginLeft: 4.5,
+    marginRight: 9.5,
   },
   workTime: {
-    fontWeight: '500',
-    fontSize: 11,
+    fontWeight: 'normal',
+    fontSize: 12,
     lineHeight: 14,
     color: '#FFFFFF',
   },
@@ -234,8 +282,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   km: {
-    color: 'rgb(227, 42, 108)',
+    color: '#fff',
     fontWeight: 'bold',
+    fontSize: 12,
   },
 });
 
