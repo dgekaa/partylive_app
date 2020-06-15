@@ -150,7 +150,12 @@ export const isShowStreamNow = (item, setShowStream, setNextStreamTime) => {
   }
 };
 
-export const isWorkTimeNow = (item, setWorkTime, setIsWork) => {
+export const isWorkTimeNow = (
+  item,
+  setWorkTime,
+  setIsWork,
+  setNextWorkTime = () => {},
+) => {
   let yesterdayWorkTime, todayWorkTime;
 
   item.schedules.forEach((el) => {

@@ -23,7 +23,7 @@ import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.reactcommunity.rndatetimepicker.RNDateTimePickerPackage;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
-
+import com.BV.LinearGradient.LinearGradientPackage;
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =
@@ -55,7 +55,8 @@ protected List<ReactPackage> getPackages() {
             new GeolocationPackage(),
             new RNDateTimePickerPackage(),
             new PickerPackage(),
-            new ReactNativePushNotificationPackage()
+            new ReactNativePushNotificationPackage(),
+            new LinearGradientPackage()
     );
 }
 

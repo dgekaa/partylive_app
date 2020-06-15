@@ -5,6 +5,8 @@ import {
   SafeAreaView,
   Text,
   StyleSheet,
+  Image,
+  View,
 } from 'react-native';
 import {createBottomTabNavigator} from 'react-navigation-tabs';
 import {createStackNavigator} from 'react-navigation-stack';
@@ -92,13 +94,33 @@ const App = () => {
       Home: {
         screen: HomeStackNavigator,
         navigationOptions: {
-          tabBarLabel: 'Главная',
+          tabBarIcon: ({focused, horizontal, tintColor}) => (
+            <View style={{flexDirection: 'row'}}>
+              <Image
+                width={28}
+                height={28}
+                source={require('./src/img/menu2.png')}
+              />
+              <Text>Главная</Text>
+            </View>
+          ),
+          tabBarLabel: ({focused, horizontal, tintColor}) => <Text></Text>,
         },
       },
       Map: {
         screen: MapStackNavigator,
         navigationOptions: {
-          tabBarLabel: 'Карта',
+          tabBarIcon: ({focused, horizontal, tintColor}) => (
+            <View>
+              <Image
+                width={28}
+                height={28}
+                source={require('./src/img/location1.png')}
+              />
+              <Text>Карта</Text>
+            </View>
+          ),
+          tabBarLabel: ({focused, horizontal, tintColor}) => <Text></Text>,
         },
       },
     },

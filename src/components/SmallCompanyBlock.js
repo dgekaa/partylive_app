@@ -10,6 +10,7 @@ import {
   Image,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
+import LinearGradient from 'react-native-linear-gradient';
 
 import bar from '../img/bar_w.png';
 import karaoke from '../img/karaoke_w.png';
@@ -29,6 +30,7 @@ const SmallCompanyBlock = ({item, navigation}) => {
   const [distanceTo, setDistanceTo] = useState();
   const [lon, setLon] = useState('');
   const [lat, setLat] = useState('');
+  const [nextWorkTime, setNextWorkTime] = useState(null);
 
   const requestLocationPermission = async () => {
     try {
@@ -117,14 +119,6 @@ const SmallCompanyBlock = ({item, navigation}) => {
     }
   };
 
-  const imgSource = item.categories[0].slug;
-
-  // console.log(imgSource, '_____imgSource');
-
-  // const imgSource = {
-  //   '1': require(item.categories[0].slug),
-  // };
-
   const getImg = () => {
     switch (item.categories[0].slug) {
       case 'bar':
@@ -135,6 +129,8 @@ const SmallCompanyBlock = ({item, navigation}) => {
         return launge;
       case 'pab':
         return pab;
+      case 'karaoke':
+        return karaoke;
     }
   };
 
@@ -159,26 +155,31 @@ const SmallCompanyBlock = ({item, navigation}) => {
             </View>
           )}
         </View>
-        <View style={styles.description}>
-          <View style={styles.nameRow}>
-            <Image style={styles.imgType} source={getImg()} />
-            <Text style={styles.name}>{item.name}</Text>
-          </View>
 
-          <View style={styles.bottomRow}>
-            <View style={styles.workTimeRow}>
-              <View
-                style={[
-                  styles.circle,
-                  !isWork
-                    ? {backgroundColor: '#o4b000'}
-                    : {backgroundColor: '#6D6D6D'},
-                ]}
-              />
-              <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
+        <View style={styles.description}>
+          <LinearGradient
+            colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.7)']}
+            style={styles.linearGradient}>
+            <View style={styles.nameRow}>
+              <Image style={styles.imgType} source={getImg()} />
+              <Text style={styles.name}>{item.name}</Text>
             </View>
-            {distanceTo && <Text style={styles.km}>{distanceTo} km.</Text>}
-          </View>
+
+            <View style={styles.bottomRow}>
+              <View style={styles.workTimeRow}>
+                <View
+                  style={[
+                    !isWork
+                      ? {backgroundColor: '#04b000'}
+                      : {backgroundColor: '#6D6D6D'},
+                    styles.circle,
+                  ]}
+                />
+                <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
+              </View>
+              {distanceTo && <Text style={styles.km}>{distanceTo} km.</Text>}
+            </View>
+          </LinearGradient>
         </View>
       </ImageBackground>
     </TouchableOpacity>
@@ -194,6 +195,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: '#ededed',
     borderWidth: 1,
+    overflow: 'hidden',
   },
   backgroundStyle: {
     flex: 1,
@@ -233,9 +235,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     height: 50,
-    padding: 5,
-    paddingHorizontal: 10,
     borderRadius: 5,
+  },
+  linearGradient: {
+    paddingHorizontal: 10,
+    padding: 5,
   },
   nameRow: {
     flexDirection: 'row',

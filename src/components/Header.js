@@ -1,11 +1,15 @@
 import React from 'react';
-import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, Image} from 'react-native';
 
 const CustomHeader = ({props: {navigation}}) => {
   return (
     <View style={styles.header}>
       <TouchableOpacity onPress={() => navigation.goBack()}>
-        {navigation.goBack && <Text style={styles.goBack}>&#60;</Text>}
+        {navigation.goBack && (
+          <Image
+            style={styles.goBack}
+            source={require('../img/arrow.png')}></Image>
+        )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Home')}>
         <View style={styles.PLLogo}>
@@ -36,9 +40,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ededed',
     borderBottomWidth: 1,
   },
-  goBack: {
-    fontSize: 25,
-  },
+  goBack: {},
   PLLogo: {
     flexDirection: 'row',
   },
