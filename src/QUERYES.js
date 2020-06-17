@@ -60,6 +60,7 @@ export const GET_PLACES = gql`
       name
       address
       description
+      alias
       logo
       menu
       actions

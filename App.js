@@ -94,33 +94,37 @@ const App = () => {
       Home: {
         screen: HomeStackNavigator,
         navigationOptions: {
-          tabBarIcon: ({focused, horizontal, tintColor}) => (
-            <View style={{flexDirection: 'row'}}>
+          tabBarIcon: ({focused}) => (
+            <View style={styles.bottomTabBlock}>
               <Image
-                width={28}
-                height={28}
+                width={26}
+                height={26}
                 source={require('./src/img/menu2.png')}
               />
-              <Text>Главная</Text>
+              <Text style={[styles.bottomTabText, focused && styles.focused]}>
+                Главная
+              </Text>
             </View>
           ),
-          tabBarLabel: ({focused, horizontal, tintColor}) => <Text></Text>,
+          tabBarLabel: () => {},
         },
       },
       Map: {
         screen: MapStackNavigator,
         navigationOptions: {
-          tabBarIcon: ({focused, horizontal, tintColor}) => (
-            <View>
+          tabBarIcon: ({focused}) => (
+            <View style={styles.bottomTabBlock}>
               <Image
-                width={28}
-                height={28}
+                width={26}
+                height={26}
                 source={require('./src/img/location1.png')}
               />
-              <Text>Карта</Text>
+              <Text style={[styles.bottomTabText, focused && styles.focused]}>
+                Карта
+              </Text>
             </View>
           ),
-          tabBarLabel: ({focused, horizontal, tintColor}) => <Text></Text>,
+          tabBarLabel: () => {},
         },
       },
     },
@@ -174,7 +178,7 @@ const App = () => {
         <ScrollView>
           <List>
             <ListItem onPress={() => props.navigation.navigate('Home')}>
-              <Text>Главная</Text>
+              <Text>Список</Text>
             </ListItem>
             <ListItem onPress={() => props.navigation.navigate('Map')}>
               <Text>Карта</Text>
@@ -266,6 +270,20 @@ const styles = StyleSheet.create({
   logoutBtnText: {
     color: '#fff',
     fontSize: 18,
+  },
+  bottomTabBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  bottomTabText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    marginLeft: 8,
+  },
+  focused: {
+    color: '#e32a6c',
   },
 });
 

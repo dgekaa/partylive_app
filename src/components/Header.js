@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderBottomColor: '#ededed',
     borderBottomWidth: 1,
+    backgroundColor: '#fff',
   },
   goBack: {},
   PLLogo: {

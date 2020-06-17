@@ -1,25 +1,30 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {StyleSheet, View, Text, ActivityIndicator} from 'react-native';
-import {Query} from 'react-apollo';
+import {Query, useQuery} from 'react-apollo';
 
 import Header from '../components/Header';
 import GoogleMap from '../components/GoogleMap';
 import CompanyTypeNav from '../components/CompanyTypeNav';
-import {GET_CATEGORIES} from '../QUERYES';
+import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
 
 const Map = (props) => {
-  // const [DATA, setDATA] = useState([]);
-  // const [companyData, setCompanyData] = useState([]);
+  const {data} = useQuery(GET_PLACES);
+
+  const [companyData, setCompanyData] = useState([]);
+
+  useEffect(() => {
+    data.places && setCompanyData(data.places);
+  }, [data]);
 
   const clickedType = (type) => {
-    // if (type.toLowerCase() !== 'все') {
-    //   const filteredData = DATA.places.filter(
-    //     (el) => el.categories[0].name.toUpperCase() === type.toUpperCase(),
-    //   );
-    //   setCompanyData(filteredData);
-    // } else {
-    //   setCompanyData(DATA.places);
-    // }
+    if (type.toLowerCase() !== 'все') {
+      const filteredData = data.places.filter(
+        (el) => el.categories[0].name.toUpperCase() === type.toUpperCase(),
+      );
+      setCompanyData(filteredData);
+    } else {
+      setCompanyData(data.places);
+    }
   };
 
   return (
@@ -35,9 +40,7 @@ const Map = (props) => {
           return <CompanyTypeNav data={data} clickedType={clickedType} />;
         }}
       </Query>
-      <View style={styles.content}>
-        <GoogleMap />
-      </View>
+      <View style={styles.content}>{<GoogleMap places={companyData} />}</View>
     </View>
   );
 };

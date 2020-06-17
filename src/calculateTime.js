@@ -1,6 +1,6 @@
 import {EN_SHORT_DAY_OF_WEEK} from './constants';
-
-const numberDayNow = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+export const numberDayNow =
+  new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 let numberDayYest;
 
 if (new Date().getDay() === 0) {
@@ -36,7 +36,12 @@ const SetNewTimeObject = (data) => {
   return timeObject;
 };
 
-export const isShowStreamNow = (item, setShowStream, setNextStreamTime) => {
+export const isShowStreamNow = (
+  item,
+  setShowStream,
+  setNextStreamTime,
+  see_you_tomorrow,
+) => {
   if (item.streams[0]) {
     let yesterdayStream, todayStream;
 
@@ -66,34 +71,38 @@ export const isShowStreamNow = (item, setShowStream, setNextStreamTime) => {
       todayStream &&
       todayStream.end_time.split(':')[0] * HtoMs +
         todayStream.end_time.split(':')[1] * MtoMs;
+
     if (
       startYesterdayStreamMS > endYesterdayStreamMS &&
-      endYesterdayStreamMS > currentTimeMS
+      endYesterdayStreamMS > currentTimeMS &&
+      !see_you_tomorrow
     ) {
       // идет видео за вчерашний день ещe
       setShowStream(true);
     } else if (
-      startTodayStreamMS > endTodayStreamMS &&
-      currentTimeMS > startTodayStreamMS
+      startTodayStreamMS >= endTodayStreamMS &&
+      currentTimeMS >= startTodayStreamMS &&
+      !see_you_tomorrow
     ) {
       // если видео началось сегодня и закончилось завтра
+
       setShowStream(true);
     } else if (
       startTodayStreamMS < endTodayStreamMS &&
       currentTimeMS > startTodayStreamMS &&
-      currentTimeMS < endTodayStreamMS
+      currentTimeMS < endTodayStreamMS &&
+      !see_you_tomorrow
     ) {
       // началось и закончилось сегодня
       setShowStream(true);
     } else {
       setShowStream(false);
 
-      const sch = SetNewTimeObject(item.streams[0].schedules);
+      const STobject = SetNewTimeObject(item.streams[0].schedules);
       const sortedArr = [];
       EN_SHORT_DAY_OF_WEEK.forEach((el, i) => {
-        sortedArr.push(sch[el.day]);
+        sortedArr.push(STobject[el.day]);
       });
-
       let isSetTime = false;
 
       for (let i = 0; i < sortedArr.length; i++) {
@@ -108,7 +117,6 @@ export const isShowStreamNow = (item, setShowStream, setNextStreamTime) => {
               day: 'сегодня',
               start_time: sortedArr[i].start_time,
             });
-
             isSetTime = true;
           }
         }
@@ -119,7 +127,6 @@ export const isShowStreamNow = (item, setShowStream, setNextStreamTime) => {
             if (sortedArr[i].start_time) {
               setNextStreamTime({
                 id: item.id,
-
                 day: sortedArr[i].day,
                 start_time: sortedArr[i].start_time,
               });
@@ -136,7 +143,6 @@ export const isShowStreamNow = (item, setShowStream, setNextStreamTime) => {
             if (sortedArr[i].start_time) {
               setNextStreamTime({
                 id: item.id,
-
                 day: sortedArr[i].day,
                 start_time: sortedArr[i].start_time,
               });
@@ -239,5 +245,60 @@ export const isWorkTimeNow = (
           ':' +
           todayWorkTime.end_time.split(':')[1],
     );
+
+    const STobject = SetNewTimeObject(item.schedules);
+    const sortedArr = [];
+    EN_SHORT_DAY_OF_WEEK.forEach((el, i) => {
+      sortedArr.push(STobject[el.day]);
+    });
+    let isSetTime = false;
+    for (let i = 0; i < sortedArr.length; i++) {
+      const streamWillBeToday = sortedArr[i] && sortedArr[i].day === curDay;
+      if (streamWillBeToday) {
+        const todayStartStream =
+          sortedArr[i].start_time.split(':')[0] * HtoMs +
+          sortedArr[i].start_time.split(':')[1] * MtoMs;
+        if (currentTimeMS < todayStartStream) {
+          setNextWorkTime({
+            day: 'сегодня',
+            start_time: sortedArr[i].start_time,
+            end_time: sortedArr[i].end_time,
+          });
+
+          isSetTime = true;
+        }
+      }
+    }
+    if (!isSetTime) {
+      for (let i = 0; i < sortedArr.length; i++) {
+        if (sortedArr[i] && i > numberDayNow) {
+          if (sortedArr[i].start_time) {
+            setNextWorkTime({
+              day: sortedArr[i].day,
+              start_time: sortedArr[i].start_time,
+              end_time: sortedArr[i].end_time,
+            });
+
+            isSetTime = true;
+            break;
+          }
+        }
+      }
+    }
+    if (!isSetTime) {
+      for (let i = 0; i < sortedArr.length; i++) {
+        if (sortedArr[i] && i < numberDayNow) {
+          if (sortedArr[i].start_time) {
+            setNextWorkTime({
+              day: sortedArr[i].day,
+              start_time: sortedArr[i].start_time,
+              end_time: sortedArr[i].end_time,
+            });
+            isSetTime = true;
+            break;
+          }
+        }
+      }
+    }
   }
 };

@@ -306,7 +306,7 @@ const Admin = (props) => {
   const moveIn = (data) => {
     Animated.timing(data, {
       toValue: 0,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start();
   };
@@ -351,7 +351,7 @@ const Admin = (props) => {
   // };
 
   if (loading) {
-    return <Text>'Loading...'</Text>;
+    return <ActivityIndicator size="large" color="#0000ff" />;
   }
   if (error) {
     return <Text>`Error! ${error.message}`</Text>;
@@ -360,21 +360,36 @@ const Admin = (props) => {
     <View style={styles.Admin}>
       <Header props={props} />
       <View style={styles.AdminInner}>
-        <TouchableOpacity onPress={() => moveIn(streamValue)}>
-          <Text>Стрим</Text>
+        <TouchableOpacity
+          style={styles.oneBlock}
+          onPress={() => moveIn(streamValue)}>
+          <Text style={styles.oneBlockText}>Стрим</Text>
+          <Text style={styles.oneBlockArrow}>&#62;</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => moveIn(profileValue)}>
-          <Text>Профиль заведения</Text>
+        <TouchableOpacity
+          style={styles.oneBlock}
+          onPress={() => moveIn(profileValue)}>
+          <Text style={styles.oneBlockText}>Профиль заведения</Text>
+          <Text style={styles.oneBlockArrow}>&#62;</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => moveIn(workScheduleValue)}>
-          <Text>График работы</Text>
+        <TouchableOpacity
+          style={styles.oneBlock}
+          onPress={() => moveIn(workScheduleValue)}>
+          <Text style={styles.oneBlockText}>График работы</Text>
+          <Text style={styles.oneBlockArrow}>&#62;</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => moveIn(streamScheduleValue)}>
-          <Text>График стримов</Text>
+        <TouchableOpacity
+          style={styles.oneBlock}
+          onPress={() => moveIn(streamScheduleValue)}>
+          <Text style={styles.oneBlockText}>График стримов</Text>
+          <Text style={styles.oneBlockArrow}>&#62;</Text>
         </TouchableOpacity>
         <View>
-          <TouchableOpacity onPress={() => moveIn(translationValue)}>
-            <Text>Трансляции</Text>
+          <TouchableOpacity
+            style={styles.oneBlock}
+            onPress={() => moveIn(translationValue)}>
+            <Text style={styles.oneBlockText}>Трансляции</Text>
+            <Text style={styles.oneBlockArrow}>&#62;</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -823,6 +838,21 @@ const styles = StyleSheet.create({
   },
   AdminInner: {
     flex: 1,
+    paddingTop: 10,
+  },
+  oneBlock: {
+    height: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    justifyContent: 'space-between',
+  },
+  oneBlockText: {
+    fontSize: 18,
+  },
+  oneBlockArrow: {
+    fontSize: 22,
+    color: '#BDBDBD',
   },
   sliderAdminMenu: {
     position: 'absolute',

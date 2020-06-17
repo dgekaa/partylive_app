@@ -19,7 +19,7 @@ import launge from '../img/launge_w.png';
 import pab from '../img/pab_w.png';
 
 import {getDistanceFromLatLonInKm} from '../getDistance';
-import {EN_SHORT_TO_RU_LONG_V_P} from '../constants';
+import {EN_SHORT_TO_RU_LONG_V_P, EN_SHORT_TO_RU_LONG} from '../constants';
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 
 const SmallCompanyBlock = ({item, navigation}) => {
@@ -81,7 +81,7 @@ const SmallCompanyBlock = ({item, navigation}) => {
 
   useEffect(() => {
     isShowStreamNow(item, setShowStream, setNextStreamTime);
-    isWorkTimeNow(item, setWorkTime, setIsWork);
+    isWorkTimeNow(item, setWorkTime, setIsWork, setNextWorkTime);
   }, [item]);
 
   const whenIsTranslationTime = () => {
@@ -146,23 +146,51 @@ const SmallCompanyBlock = ({item, navigation}) => {
       <ImageBackground
         style={styles.backgroundStyle}
         source={{
-          uri: item.streams && item.streams[0] && item.streams[0].preview,
+          uri:
+            showStream &&
+            item.streams &&
+            item.streams[0] &&
+            item.streams[0].preview,
         }}>
         <View style={styles.videoWrap}>
           {!showStream && (
             <View style={styles.backgroundVideo}>
-              <Text style={styles.noVideoText}>{whenIsTranslationTime()}</Text>
+              <Text style={styles.noVideoText}>
+                {nextWorkTime
+                  ? isWork
+                    ? whenIsTranslationTime()
+                    : 'Откроется:'
+                  : isWork
+                  ? whenIsTranslationTime()
+                  : 'Закрыто'}
+              </Text>
+              <Text style={styles.noVideoText}>
+                {nextWorkTime && nextWorkTime.start_time
+                  ? `${
+                      nextWorkTime.day.toLowerCase() !== 'сегодня'
+                        ? EN_SHORT_TO_RU_LONG[nextWorkTime.day]
+                        : nextWorkTime.day
+                    }`
+                  : ''}
+              </Text>
+              <Text style={styles.noVideoText}>
+                {nextWorkTime &&
+                  nextWorkTime.start_time &&
+                  nextWorkTime.start_time + '-' + nextWorkTime.end_time}
+              </Text>
             </View>
           )}
         </View>
 
         <View style={styles.description}>
           <LinearGradient
-            colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.7)']}
+            colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.7)']}
             style={styles.linearGradient}>
             <View style={styles.nameRow}>
               <Image style={styles.imgType} source={getImg()} />
-              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.name} numberOfLines={1}>
+                {item.name}
+              </Text>
             </View>
 
             <View style={styles.bottomRow}>
@@ -254,6 +282,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
     color: '#FFFFFF',
+    paddingRight: 20,
   },
   bottomRow: {
     flexDirection: 'row',
