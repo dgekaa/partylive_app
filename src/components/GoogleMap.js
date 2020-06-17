@@ -1,19 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {
-  StyleSheet,
-  View,
-  ImageBackground,
-  Text,
-  Image,
-  PermissionsAndroid,
-} from 'react-native';
+import {StyleSheet, View, ImageBackground, Text, Image} from 'react-native';
 import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import LinearGradient from 'react-native-linear-gradient';
-import Geolocation from '@react-native-community/geolocation';
 
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 import {EN_SHORT_TO_RU_LONG_V_P, EN_SHORT_TO_RU_LONG} from '../constants';
 import {getDistanceFromLatLonInKm} from '../getDistance';
+import {requestLocationPermission} from '../permission';
 
 import bar from '../img/bar_w.png';
 import karaoke from '../img/karaoke_w.png';
@@ -22,8 +15,6 @@ import launge from '../img/launge_w.png';
 import pab from '../img/pab_w.png';
 
 const CustomMarker = ({marker}) => {
-  // console.log(marker, 'CUSTOM');
-
   const [showStream, setShowStream] = useState();
   const [nextStreamTime, setNextStreamTime] = useState();
   const [workTime, setWorkTime] = useState();
@@ -33,47 +24,8 @@ const CustomMarker = ({marker}) => {
   const [lon, setLon] = useState('');
   const [lat, setLat] = useState('');
 
-  const requestLocationPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Cool location Permission',
-          message: 'Нужен доступ к вашему местоположению.',
-          buttonNeutral: 'Спросить позже',
-          buttonNegative: 'Отмена',
-          buttonPositive: 'OK',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use location');
-        Geolocation.getCurrentPosition(
-          (position) => {
-            console.log(position, 'POSition');
-            setLon(position.coords.longitude);
-            setLat(position.coords.latitude);
-          },
-          (err) => console.log(err, 'err'),
-        );
-        // Geolocation.watchPosition(
-        //   (position) => {
-        //     console.log(position, '_____________________position');
-        //     setLon(position.coords.longitude);
-        //     setLat(position.coords.latitude);
-        //   },
-        //   (error) => console.log(error.code, error.message, 'ERR LOCATION'),
-        //   {enableHighAccuracy: false, timeout: 50000},
-        // );
-      } else {
-        console.log('Location permission denied');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
-
   useEffect(() => {
-    requestLocationPermission();
+    requestLocationPermission(setLon, setLat);
   }, []);
 
   useEffect(() => {
@@ -205,6 +157,7 @@ const CustomMarker = ({marker}) => {
           {distanceTo && <Text style={styles.km}>{distanceTo} km.</Text>}
         </View>
       </LinearGradient>
+      {/* <Text style={styles.arrow}>&#9660;</Text> */}
     </ImageBackground>
   );
 };
@@ -213,61 +166,27 @@ const GoogleMap = ({places}) => {
   const [lon, setLon] = useState('');
   const [lat, setLat] = useState('');
 
-  const requestLocationPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Cool location Permission',
-          message: 'Нужен доступ к вашему местоположению.',
-          buttonNeutral: 'Спросить позже',
-          buttonNegative: 'Отмена',
-          buttonPositive: 'OK',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use location----');
-        Geolocation.getCurrentPosition(
-          (position) => {
-            console.log(position, 'POSition');
-            setLon(position.coords.longitude);
-            setLat(position.coords.latitude);
-          },
-          (err) => console.log(err, 'err'),
-        );
-        // Geolocation.watchPosition(
-        //   (position) => {
-        //     console.log(position, '_____________________position');
-        //     setLon(position.coords.longitude);
-        //     setLat(position.coords.latitude);
-        //   },
-        //   (error) => console.log(error.code, error.message, 'ERR LOCATION'),
-        //   {enableHighAccuracy: false, timeout: 50000},
-        // );
-      } else {
-        console.log('Location permission denied');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
-
   useEffect(() => {
-    requestLocationPermission();
+    requestLocationPermission(setLon, setLat);
   }, []);
+
+  const [initialRegion, setInitialRegion] = useState({
+    latitude: 53.9097,
+    longitude: 27.556,
+    latitudeDelta: 0.25,
+    longitudeDelta: 0.25,
+  });
 
   return (
     <View style={styles.container}>
       <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.map}
-        region={{
-          latitude: 53.9097,
-          longitude: 27.556,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.0121,
+        initialRegion={initialRegion}
+        // region={region}
+        onRegionChange={(data) => {
+          console.log(data);
         }}>
-        {console.log(lat, '==========================', lon)}
         {!!lat && (
           <Marker coordinate={{latitude: +lat, longitude: +lon}}>
             <Image
@@ -281,6 +200,7 @@ const GoogleMap = ({places}) => {
           const location = marker.coordinates.split(',');
           return (
             <Marker
+              id={marker.id}
               coordinate={{latitude: +location[0], longitude: +location[1]}}>
               <CustomMarker marker={marker} />
             </Marker>
@@ -310,14 +230,14 @@ const styles = StyleSheet.create({
     height: 130,
     backgroundColor: '#000',
     borderRadius: 5,
-    overflow: 'hidden',
     justifyContent: 'flex-end',
     position: 'relative',
+    overflow: 'hidden',
   },
   descBlock: {
     height: 40,
     width: 130,
-    padding: 3,
+    padding: 5,
     paddingRight: 10,
   },
   nameRow: {
@@ -376,6 +296,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 12,
+  },
+  arrow: {
+    position: 'absolute',
+    bottom: -20,
+    left: 0,
+    fontSize: 30,
+    color: 'green',
   },
 });
 
