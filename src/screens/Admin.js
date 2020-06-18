@@ -175,6 +175,8 @@ const Admin = (props) => {
   const [typeOfCompanyId, setTypeOfCompanyId] = useState('');
   const [isStreamOff, setIsStreamOff] = useState(false);
 
+  const windowWidth = Dimensions.get('window').width;
+
   const videoRef = useRef(null);
 
   const decriptionLengthLimit = 300;
@@ -247,7 +249,7 @@ const Admin = (props) => {
     UPDATE_PLACE_DATA,
     refreshObject,
   );
-  const [UPDATE_IMAGE_mutation] = useMutation(UPDATE_IMAGE);
+  const [UPDATE_IMAGE_mutation] = useMutation(UPDATE_IMAGE, refreshObject);
   const [UPDATE_SEE_YOU_TOMORROW_mutation] = useMutation(
     UPDATE_SEE_YOU_TOMORROW,
     refreshObject,
@@ -382,8 +384,8 @@ const Admin = (props) => {
 
   const goToPickImage = () => {
     ImagePicker.openPicker({
-      width: 250,
-      height: 250,
+      width: windowWidth - 50,
+      height: (windowWidth - 50) * 0.65,
       cropping: true,
       includeBase64: true,
     })
@@ -462,27 +464,13 @@ const Admin = (props) => {
     }
   };
 
-  const streamValue = useState(
-    new Animated.Value(-Dimensions.get('window').width),
-  )[0];
-  const profileValue = useState(
-    new Animated.Value(-Dimensions.get('window').width),
-  )[0];
-  const workScheduleValue = useState(
-    new Animated.Value(-Dimensions.get('window').width),
-  )[0];
-  const streamScheduleValue = useState(
-    new Animated.Value(-Dimensions.get('window').width),
-  )[0];
-  const translationValue = useState(
-    new Animated.Value(-Dimensions.get('window').width),
-  )[0];
-  const chooseCategoryValue = useState(
-    new Animated.Value(-Dimensions.get('window').width),
-  )[0];
-  const descriptionValue = useState(
-    new Animated.Value(-Dimensions.get('window').width),
-  )[0];
+  const streamValue = useState(new Animated.Value(-windowWidth))[0];
+  const profileValue = useState(new Animated.Value(-windowWidth))[0];
+  const workScheduleValue = useState(new Animated.Value(-windowWidth))[0];
+  const streamScheduleValue = useState(new Animated.Value(-windowWidth))[0];
+  const translationValue = useState(new Animated.Value(-windowWidth))[0];
+  const chooseCategoryValue = useState(new Animated.Value(-windowWidth))[0];
+  const descriptionValue = useState(new Animated.Value(-windowWidth))[0];
 
   const moveIn = (data) => {
     Animated.timing(data, {
@@ -494,7 +482,7 @@ const Admin = (props) => {
 
   const moveOut = (data) => {
     Animated.timing(data, {
-      toValue: -Dimensions.get('window').width,
+      toValue: -windowWidth,
       duration: 200,
       useNativeDriver: true,
     }).start();
@@ -717,26 +705,29 @@ const Admin = (props) => {
           <Text style={styles.headerAdminTitle}>Профиль заведения</Text>
           <View>
             {pickerImageMime && pickerImageData ? (
-              <Image
-                style={styles.pickerImageStyle}
-                source={{
-                  uri: `data:${pickerImageMime};base64,${pickerImageData}`,
-                }}
-              />
+              <>
+                <Image
+                  style={styles.pickerImageStyle}
+                  source={{
+                    uri: `data:${pickerImageMime};base64,${pickerImageData}`,
+                  }}
+                />
+                <View>
+                  <TouchableOpacity onPress={() => {}}>
+                    <Text>Изменить</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => {}}>
+                    <Text>Удалить</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
             ) : (
-              <TouchableOpacity style={styles.noPickerImageStyle}>
-                <Text
-                  style={styles.noPickerImageText}
-                  onPress={() => goToPickImage()}>
-                  Загрузить фото
-                </Text>
+              <TouchableOpacity
+                style={styles.noPickerImageStyle}
+                onPress={() => goToPickImage()}>
+                <Text style={styles.noPickerImageText}>Загрузить фото</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity
-              style={styles.imageUploader}
-              onPress={() => goToPickImage()}>
-              <Text style={styles.changePhotoText}>Редактировать фото</Text>
-            </TouchableOpacity>
           </View>
 
           <View style={styles.textInputWrap}>
@@ -1328,11 +1319,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  changePhotoText: {
-    color: '#e32a6c',
-  },
   noPickerImageText: {
     color: '#aeaeae',
+    fontSize: 18,
   },
   pickerImageStyle: {
     alignSelf: 'center',
