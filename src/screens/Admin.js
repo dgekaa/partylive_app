@@ -28,6 +28,7 @@ import {
   SHORT_DAY_OF_WEEK,
   EN_SHORT_TO_NUMBER,
 } from '../constants';
+import {numberDayNow} from '../calculateTime.js';
 import Header from '../components/Header';
 import {
   GET_PLACE,
@@ -39,7 +40,115 @@ import {
   CREATE_STREAMS_SCHEDULE,
   GET_CATEGORIES,
   UPDATE_IMAGE,
+  UPDATE_SEE_YOU_TOMORROW,
+  UPDATE_STREAM,
+  CREATE_STREAM,
 } from '../QUERYES';
+
+const AdminHeader = ({
+  cancel,
+  ready,
+  moveOut,
+  who,
+  videoPause,
+  navigation,
+  saveFunction,
+  cancelFunction,
+}) => {
+  return (
+    <View style={headerStyles.header}>
+      <TouchableOpacity
+        onPress={() => {
+          moveOut(who);
+          videoPause && videoPause();
+          cancelFunction && cancelFunction();
+        }}>
+        {!cancel ? (
+          <Image
+            style={headerStyles.goBack}
+            source={require('../img/arrow.png')}
+          />
+        ) : (
+          <Text style={headerStyles.headerBtn}>Отмена</Text>
+        )}
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+        <View style={headerStyles.PLLogo}>
+          <Text style={headerStyles.party}>PARTY</Text>
+          <View style={headerStyles.partyWrap}>
+            <Text style={headerStyles.live}>.LIVE</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+      {!ready ? (
+        <TouchableOpacity
+          style={headerStyles.burgerWrap}
+          onPress={() => navigation.openDrawer()}>
+          <View style={headerStyles.burgerOne} />
+          <View style={headerStyles.burgerOne} />
+          <View style={headerStyles.burgerOne} />
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          onPress={() => {
+            moveOut(who);
+            videoPause && videoPause();
+            saveFunction && saveFunction();
+          }}>
+          <Text style={headerStyles.headerBtn}>Готово</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
+
+const headerStyles = StyleSheet.create({
+  header: {
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomColor: '#ededed',
+    borderBottomWidth: 1,
+    backgroundColor: '#fff',
+  },
+  goBack: {},
+  headerBtn: {
+    fontSize: 16,
+    color: '#e32a6c',
+  },
+  PLLogo: {
+    flexDirection: 'row',
+  },
+  partyWrap: {
+    backgroundColor: 'rgb(227, 42, 108)',
+    borderRadius: 5,
+  },
+  party: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    lineHeight: 25,
+    marginRight: 5,
+  },
+  live: {
+    fontSize: 20,
+    lineHeight: 25,
+    fontWeight: 'bold',
+    color: 'white',
+    paddingHorizontal: 5,
+  },
+  burgerWrap: {
+    width: 30,
+    height: 20,
+    justifyContent: 'space-between',
+  },
+  burgerOne: {
+    height: 2,
+    backgroundColor: '#000',
+    borderRadius: 2,
+  },
+});
 
 const Admin = (props) => {
   const {streams} = props.navigation.state.params.item;
@@ -57,7 +166,8 @@ const Admin = (props) => {
   const [pickerImageMime, setpPickerImageMime] = useState('');
   const [pickerImageData, setpPickerImageData] = useState('');
   const [inputName, setInputName] = useState('');
-  const [inputPseudonim, setInputPseudonim] = useState('');
+  const [inputCameraAddress, setInputCameraAddress] = useState('');
+  const [inputAlias, setInputAlias] = useState('');
   const [inputDescription, setInputDescription] = useState(
     data && data.place && data.place.description && data.place.description,
   );
@@ -79,23 +189,72 @@ const Admin = (props) => {
       data.place &&
       data.place.description &&
       setInputDescription(data.place.description);
+
+    data && data.place && data.place.alias && setInputAlias(data.place.alias);
+    data && data.place && data.place.name && setInputName(data.place.name);
   }, []);
 
-  const {loading, error, data, refetch} = useQuery(GET_PLACE, {
+  const dateNow = new Date()
+    .toLocaleDateString()
+    .split('.')
+    .reverse()
+    .join('-');
+
+  useEffect(() => {
+    data &&
+      data.place &&
+      data.place.streams &&
+      data.place.streams[0] &&
+      data.place.streams[0].see_you_tomorrow &&
+      setIsStreamOff(data.place.streams[0].see_you_tomorrow === dateNow);
+  }, [data, dateNow]);
+
+  const {loading, error, data} = useQuery(GET_PLACE, {
     variables: {id: props.navigation.state.params.item.id},
   });
 
-  const [CREATE_WORK_TIME_mutation] = useMutation(CREATE_WORK_TIME);
-  const [UPDATE_WORK_SCHEDULE_mutation] = useMutation(UPDATE_WORK_SCHEDULE);
-  const [DELETE_SCHEDULE_mutation] = useMutation(DELETE_SCHEDULE);
+  const refreshObject = {
+    refetchQueries: [
+      {
+        query: GET_PLACE,
+        variables: {id: props.navigation.state.params.item.id},
+      },
+    ],
+    awaitRefetchQueries: true,
+  };
+
+  const [CREATE_WORK_TIME_mutation] = useMutation(
+    CREATE_WORK_TIME,
+    refreshObject,
+  );
+  const [UPDATE_WORK_SCHEDULE_mutation] = useMutation(
+    UPDATE_WORK_SCHEDULE,
+    refreshObject,
+  );
+  const [DELETE_SCHEDULE_mutation] = useMutation(
+    DELETE_SCHEDULE,
+    refreshObject,
+  );
   const [UPDATE_STREAMS_SCHEDULE_mutation] = useMutation(
     UPDATE_STREAMS_SCHEDULE,
+    refreshObject,
   );
   const [CREATE_STREAMS_SCHEDULE_mutation] = useMutation(
     CREATE_STREAMS_SCHEDULE,
+    refreshObject,
   );
-  const [UPDATE_PLACE_DATA_mutation] = useMutation(UPDATE_PLACE_DATA);
+  const [UPDATE_PLACE_DATA_mutation] = useMutation(
+    UPDATE_PLACE_DATA,
+    refreshObject,
+  );
   const [UPDATE_IMAGE_mutation] = useMutation(UPDATE_IMAGE);
+  const [UPDATE_SEE_YOU_TOMORROW_mutation] = useMutation(
+    UPDATE_SEE_YOU_TOMORROW,
+    refreshObject,
+  );
+
+  const [UPDATE_STREAM_mutation] = useMutation(UPDATE_STREAM, refreshObject);
+  const [CREATE_STREAM_mutation] = useMutation(CREATE_STREAM, refreshObject);
 
   const SetNewTimeObject = (data) => {
     const timeObject = {};
@@ -116,7 +275,6 @@ const Admin = (props) => {
         },
         optimisticResponse: null,
       });
-      setTimeout(() => refetch(), 300);
     }
   };
 
@@ -124,6 +282,7 @@ const Admin = (props) => {
     if (!selectedDay.id) {
       if (pickedStartTime && pickedEndTime) {
         setPopupVisible(false);
+
         CREATE_WORK_TIME_mutation({
           variables: {
             id: props.navigation.state.params.item.id,
@@ -137,6 +296,7 @@ const Admin = (props) => {
     } else {
       if ((pickedStartTime && pickedEndTime) || selectedDay.start_time) {
         setPopupVisible(false);
+
         UPDATE_WORK_SCHEDULE_mutation({
           variables: {
             id: selectedDay.id,
@@ -199,14 +359,15 @@ const Admin = (props) => {
     setShow(Platform.OS === 'ios');
     setDate(currentDate);
 
+    const hours = selectedTime.getHours(),
+      minutes = selectedTime.getMinutes();
+
     const time =
       '' +
       (hours > 9 ? hours : '0' + hours) +
       ':' +
       (minutes > 9 ? minutes : '0' + minutes);
 
-    const hours = selectedTime.getHours(),
-      minutes = selectedTime.getMinutes();
     if (isPickStartTime) {
       setPickedStartTime(time);
     } else {
@@ -250,33 +411,47 @@ const Admin = (props) => {
   };
 
   const saveNewData = () => {
-    !typeOfCompanyId
-      ? UPDATE_PLACE_DATA_mutation({
-          variables: {
-            id: data.place.id,
-            name: inputName || data.place.name,
-            description: inputDescription || data.place.description,
-          },
-          optimisticResponse: null,
-        }).then(
-          (res) => console.log(res, 'RES'),
-          (err) => console.log(err, 'ERR'),
+    UPDATE_PLACE_DATA_mutation({
+      variables: {
+        id: data.place.id,
+        name: inputName || data.place.name,
+        alias: inputAlias || data.place.alias,
+      },
+      optimisticResponse: null,
+    }).then(
+      (res) => console.log(res, 'RES'),
+      (err) => console.log(err, 'ERR'),
+    );
+  };
+
+  const saveDescription = () => {
+    UPDATE_PLACE_DATA_mutation({
+      variables: {
+        id: data.place.id,
+        description: inputDescription || data.place.description,
+      },
+      optimisticResponse: null,
+    }).then(
+      (res) => console.log(res, 'desc RES'),
+      (err) => console.log(err, 'desc ERR'),
+    );
+  };
+
+  const disableStream = (see_you_tomorrow) => {
+    if (data.place.streams[0]) {
+      UPDATE_SEE_YOU_TOMORROW_mutation({
+        variables: {
+          id: data.place.streams[0].id,
+          see_you_tomorrow: see_you_tomorrow,
+        },
+        optimisticResponse: null,
+      })
+        .then(
+          (res) => console.log(res, 'RES__'),
+          (err) => console.log(err, '___ERR___'),
         )
-      : UPDATE_PLACE_DATA_mutation({
-          variables: {
-            id: data.place.id,
-            name: inputName || data.place.name,
-            description: inputDescription || data.place.description,
-            categories: {
-              disconnect: data.place.categories[0].id,
-              connect: typeOfCompanyId,
-            },
-          },
-          optimisticResponse: null,
-        }).then(
-          (res) => console.log(res, 'RES'),
-          (err) => console.log(err, 'ERR'),
-        );
+        .catch((err) => console.log(err, '______err_1'));
+    }
   };
 
   const tomorrowFromDay = (day) => {
@@ -302,6 +477,12 @@ const Admin = (props) => {
   const translationValue = useState(
     new Animated.Value(-Dimensions.get('window').width),
   )[0];
+  const chooseCategoryValue = useState(
+    new Animated.Value(-Dimensions.get('window').width),
+  )[0];
+  const descriptionValue = useState(
+    new Animated.Value(-Dimensions.get('window').width),
+  )[0];
 
   const moveIn = (data) => {
     Animated.timing(data, {
@@ -323,32 +504,88 @@ const Admin = (props) => {
   const [publishBtnTitle, setPublishBtnTitle] = useState('Начать трансляцию');
   const [isPublish, setIsPublish] = useState(false);
 
-  // const requestCameraPermission = async () => {
-  //   try {
-  //     const granted = await PermissionsAndroid.requestMultiple(
-  //       [
-  //         PermissionsAndroid.PERMISSIONS.CAMERA,
-  //         PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-  //       ],
-  //       {
-  //         title: 'Cool Photo App Camera And Microphone Permission',
-  //         message:
-  //           'Cool Photo App needs access to your camera ' +
-  //           'so you can take awesome pictures.',
-  //         buttonNeutral: 'Ask Me Later',
-  //         buttonNegative: 'Cancel',
-  //         buttonPositive: 'OK',
-  //       },
-  //     );
-  //     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //       console.log('You can use the camera');
-  //     } else {
-  //       console.log('Camera permission denied');
-  //     }
-  //   } catch (err) {
-  //     console.warn(err);
-  //   }
-  // };
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.requestMultiple(
+        [
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        ],
+        {
+          title: 'Cool Photo App Camera And Microphone Permission',
+          message:
+            'Cool Photo App needs access to your camera ' +
+            'so you can take awesome pictures.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the camera');
+      } else {
+        console.log('Camera permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  const videoPause = () => {
+    !videoRef.current.state.paused &&
+      videoRef.current.methods.togglePlayPause();
+  };
+
+  const updateStream = (inputCameraAddress) => {
+    UPDATE_STREAM_mutation({
+      variables: {
+        id: data.place.streams[0].id,
+        url: `https://partycamera.org/${inputCameraAddress}/index.m3u8`,
+        preview: `http://partycamera.org/${inputCameraAddress}/preview.jpg`,
+      },
+      optimisticResponse: null,
+    })
+      .then(
+        (res) => console.log(res, 'stream RES__'),
+        (err) => console.log(err, 'stream ERR___'),
+      )
+      .catch((err) => console.log(err, '______err_1'));
+  };
+
+  const createStream = (inputCameraAddress) => {
+    CREATE_STREAM_mutation({
+      variables: {
+        name: data.place.name,
+        url: `https://partycamera.org/${inputCameraAddress}/index.m3u8`,
+        preview: `http://partycamera.org/${inputCameraAddress}/preview.jpg`,
+        place: {
+          connect: '' + data.place.id,
+        },
+      },
+      optimisticResponse: null,
+    })
+      .then(
+        (res) => console.log(res, 'create stream RES__'),
+        (err) => console.log(err, 'create stream ERR___'),
+      )
+      .catch((err) => console.log(err, '______err_1'));
+  };
+
+  const chooseCategory = () => {
+    UPDATE_PLACE_DATA_mutation({
+      variables: {
+        id: data.place.id,
+        categories: {
+          disconnect: data.place.categories[0].id,
+          connect: typeOfCompanyId,
+        },
+      },
+      optimisticResponse: null,
+    }).then(
+      (res) => console.log(res, 'RES'),
+      (err) => console.log(err, 'ERR'),
+    );
+  };
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
@@ -395,21 +632,40 @@ const Admin = (props) => {
       </View>
       <Animated.ScrollView
         style={[styles.sliderAdminMenu, {translateX: streamValue}]}>
-        <TouchableOpacity
-          onPress={() => {
-            moveOut(streamValue);
-            !videoRef.current.state.paused &&
-              videoRef.current.methods.togglePlayPause();
-          }}>
-          <Text>{'<'} ВЕРНУТЬСЯ</Text>
-        </TouchableOpacity>
+        <AdminHeader
+          cancel
+          ready
+          saveFunction={() => {
+            disableStream(isStreamOff ? dateNow : null);
+            if (inputCameraAddress) {
+              if (!data.place.streams[0]) {
+                createStream(inputCameraAddress);
+              } else {
+                updateStream(inputCameraAddress);
+              }
+            }
+          }}
+          cancelFunction={() => {
+            data &&
+            data.place &&
+            data.place.streams &&
+            data.place.streams[0] &&
+            data.place.streams[0].see_you_tomorrow
+              ? setIsStreamOff(data.place.streams[0].see_you_tomorrow)
+              : setIsStreamOff(false);
+          }}
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={streamValue}
+          videoPause={videoPause}
+        />
         <Text style={styles.headerAdminTitle}>Стрим</Text>
         <View style={styles.videoWrap}>
           <VideoPlayer
             ref={videoRef}
-            poster={streams[0].preview}
+            poster={streams[0] && streams[0].preview}
             paused={true}
-            source={{uri: streams[0].url}}
+            source={{uri: streams[0] && streams[0].url}}
             disableSeekbar
             disableTimer
             disableBack
@@ -417,39 +673,7 @@ const Admin = (props) => {
             toggleResizeModeOnFullscreen={false}
           />
         </View>
-      </Animated.ScrollView>
-
-      <Animated.ScrollView
-        style={[styles.sliderAdminMenu, {translateX: profileValue}]}>
-        <TouchableOpacity onPress={() => moveOut(profileValue)}>
-          <Text>{'<'} ВЕРНУТЬСЯ</Text>
-        </TouchableOpacity>
-        <View style={styles.profileWrap}>
-          <Text style={styles.headerAdminTitle}>Профиль заведения</Text>
-          <View>
-            {pickerImageMime && pickerImageData ? (
-              <Image
-                style={styles.pickerImageStyle}
-                source={{
-                  uri: `data:${pickerImageMime};base64,${pickerImageData}`,
-                }}
-              />
-            ) : (
-              <View style={styles.noPickerImageStyle}>
-                <Text
-                  style={styles.noPickerImageText}
-                  onPress={() => goToPickImage()}>
-                  Загрузить фото
-                </Text>
-                <Text style={styles.noPickerImageText}>250 X 250</Text>
-              </View>
-            )}
-            <TouchableOpacity
-              style={styles.imageUploader}
-              onPress={() => goToPickImage()}>
-              <Text style={styles.changePhotoText}>Сменить фото профиля</Text>
-            </TouchableOpacity>
-          </View>
+        {data && data.place && data.place.streams && data.place.streams[0] && (
           <View style={styles.streamOffMainWrap}>
             <View style={styles.streamOffWrap}>
               <Text style={styles.streamOffMainText}>Отключить стрим</Text>
@@ -464,8 +688,59 @@ const Admin = (props) => {
               value={isStreamOff}
             />
           </View>
+        )}
+
+        <View style={styles.cameraAddress}>
+          <Text>Адрес камеры:</Text>
+          <TextInput
+            style={styles.textInputStyle}
+            onChangeText={(text) => setInputCameraAddress(text)}
+            value={inputCameraAddress}
+            placeholder={
+              (data.place.streams &&
+                data.place.streams[0] &&
+                data.place.streams[0].url) ||
+              'Введите адрес стрима'
+            }
+          />
+        </View>
+      </Animated.ScrollView>
+
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: profileValue}]}>
+        <AdminHeader
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={profileValue}
+        />
+        <View style={styles.profileWrap}>
+          <Text style={styles.headerAdminTitle}>Профиль заведения</Text>
+          <View>
+            {pickerImageMime && pickerImageData ? (
+              <Image
+                style={styles.pickerImageStyle}
+                source={{
+                  uri: `data:${pickerImageMime};base64,${pickerImageData}`,
+                }}
+              />
+            ) : (
+              <TouchableOpacity style={styles.noPickerImageStyle}>
+                <Text
+                  style={styles.noPickerImageText}
+                  onPress={() => goToPickImage()}>
+                  Загрузить фото
+                </Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={styles.imageUploader}
+              onPress={() => goToPickImage()}>
+              <Text style={styles.changePhotoText}>Редактировать фото</Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.textInputWrap}>
-            <Text style={styles.textInputTitleText}>Название заведения:</Text>
+            <Text style={styles.textInputTitleText}>Название:</Text>
             <TextInput
               style={styles.textInputStyle}
               onChangeText={(text) => setInputName(text)}
@@ -477,107 +752,46 @@ const Admin = (props) => {
             <Text style={styles.textInputTitleText}>Псевдоним:</Text>
             <TextInput
               style={styles.textInputStyle}
-              onChangeText={(text) => setInputPseudonim(text)}
-              value={inputPseudonim}
-              placeholder={data.place.name}
+              onChangeText={(text) => setInputAlias(text)}
+              value={inputAlias}
+              placeholder={data.place.alias}
             />
           </View>
           <View style={styles.textInputWrap}>
             <Text style={styles.textInputTitleText}>Категория:</Text>
             <View style={styles.btnCategoryWrap}>
-              <Query query={GET_CATEGORIES}>
-                {(prop) => {
-                  if (prop.loading) {
-                    return (
-                      <View>
-                        <ActivityIndicator size="large" color="#0000ff" />
-                      </View>
-                    );
-                  }
-                  if (prop.error) {
-                    return <Text>Error! ${prop.error.message}</Text>;
-                  }
-                  return prop.data.categories.map((el, i) => (
-                    <TouchableOpacity
-                      key={i}
-                      style={[
-                        styles.btnCategory,
-                        typeOfCompany && typeOfCompany === el.name
-                          ? styles.bacgrBtn
-                          : !typeOfCompany &&
-                            el.name &&
-                            data.place.categories &&
-                            data.place.categories[0] &&
-                            data.place.categories[0].name === el.name
-                          ? styles.bacgrBtn
-                          : {},
-                      ]}
-                      onPress={() => {
-                        setTypeOfCompany(el.name);
-                        setTypeOfCompanyId(el.id);
-                      }}>
-                      <Text
-                        style={
-                          (styles.btnCategory,
-                          typeOfCompany && typeOfCompany === el.name
-                            ? {
-                                color: '#fff',
-                              }
-                            : !typeOfCompany &&
-                              el.name &&
-                              data.place.categories &&
-                              data.place.categories[0] &&
-                              data.place.categories[0].name === el.name
-                            ? {
-                                color: '#fff',
-                              }
-                            : {})
-                        }>
-                        {el.name}
-                      </Text>
-                    </TouchableOpacity>
-                  ));
-                }}
-              </Query>
+              <View style={styles.btnCategoryOuter}>
+                <Text style={styles.btnCategoryInner}>
+                  {data.place.categories[0].name}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => moveIn(chooseCategoryValue)}>
+                <Text style={styles.chooseNewCategory}>Выбрать...</Text>
+              </TouchableOpacity>
             </View>
           </View>
           <View style={styles.textInputWrap}>
-            <Text style={styles.textInputTitleText}>Адрес заведения:</Text>
-            <TextInput
-              style={styles.textInputStyle}
-              value={data.place.address}
-              contextMenuHidden={true}
-              editable={false}
-            />
-            <TouchableOpacity style={styles.pinkBtn} onPress={() => {}}>
-              <Text style={styles.pinkBtnText}>ВЫБРАТЬ АДРЕС НА КАРТЕ</Text>
+            <Text style={styles.textInputTitleText}>Адрес:</Text>
+            <TouchableOpacity style={{flex: 2.5}}>
+              <TextInput
+                style={styles.textInputStyle}
+                value={data.place.address}
+                contextMenuHidden={true}
+                editable={false}
+              />
             </TouchableOpacity>
           </View>
           <View style={styles.textInputWrap}>
-            <Text style={styles.textInputTitleText}>Описание:</Text>
-            <Text
-              style={[
-                styles.textDescLimit,
-                inputDescription
-                  ? inputDescription.length === decriptionLengthLimit
-                    ? {color: 'red'}
-                    : {color: 'green'}
-                  : data.place.description.length === decriptionLengthLimit
-                  ? {color: 'red'}
-                  : {color: 'green'},
-              ]}>
-              {inputDescription
-                ? inputDescription.length
-                : data.place.description.length}
-              / {decriptionLengthLimit}
-            </Text>
-            <TextInput
-              maxLength={decriptionLengthLimit}
-              multiline={true}
-              style={styles.textInputMultilineStyle}
-              onChangeText={(text) => setInputDescription(text)}
-              value={inputDescription}
-            />
+            <View style={styles.textInputTitleText}>
+              <Text style={styles.textInputText}>Описание:</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.textInputMultilineStyleWrap}
+              onPress={() => moveIn(descriptionValue)}>
+              <Text style={styles.textInputMultilineStyle} numberOfLines={2}>
+                {inputDescription}
+              </Text>
+            </TouchableOpacity>
           </View>
           <TouchableOpacity
             style={styles.pinkBtn}
@@ -588,18 +802,153 @@ const Admin = (props) => {
       </Animated.ScrollView>
 
       <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: chooseCategoryValue}]}>
+        <AdminHeader
+          cancel
+          ready
+          saveFunction={() => chooseCategory()}
+          cancelFunction={() => {}}
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={chooseCategoryValue}
+        />
+        <Text style={styles.headerAdminTitle}>Тип заведения</Text>
+        <View style={styles.categoryBtnsRow}>
+          <Query query={GET_CATEGORIES}>
+            {(prop) => {
+              if (prop.loading) {
+                return (
+                  <View>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  </View>
+                );
+              }
+              if (prop.error) {
+                return <Text>Error! ${prop.error.message}</Text>;
+              }
+              return prop.data.categories.map((el, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={[
+                    styles.btnCategoryOuter,
+                    styles.btnCategoryInNewWindow,
+                    typeOfCompany && typeOfCompany === el.name
+                      ? styles.bacgrBtn
+                      : !typeOfCompany &&
+                        el.name &&
+                        data.place.categories &&
+                        data.place.categories[0] &&
+                        data.place.categories[0].name === el.name
+                      ? styles.bacgrBtn
+                      : {},
+                  ]}
+                  onPress={() => {
+                    setTypeOfCompany(el.name);
+                    setTypeOfCompanyId(el.id);
+                  }}>
+                  <Text
+                    style={
+                      typeOfCompany && typeOfCompany === el.name
+                        ? {
+                            color: '#fff',
+                            textTransform: 'uppercase',
+                            fontWeight: 'bold',
+                          }
+                        : !typeOfCompany &&
+                          el.name &&
+                          data.place.categories &&
+                          data.place.categories[0] &&
+                          data.place.categories[0].name === el.name
+                        ? {
+                            color: '#fff',
+                            textTransform: 'uppercase',
+                            fontWeight: 'bold',
+                          }
+                        : {
+                            color: '#000',
+                            textTransform: 'uppercase',
+
+                            fontWeight: 'bold',
+                          }
+                    }>
+                    {el.name}
+                  </Text>
+                </TouchableOpacity>
+              ));
+            }}
+          </Query>
+        </View>
+      </Animated.ScrollView>
+
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: descriptionValue}]}>
+        <AdminHeader
+          cancel
+          ready
+          saveFunction={() => saveDescription()}
+          cancelFunction={() => {
+            data && data.place && data.place.description
+              ? setInputDescription(data.place.description)
+              : setInputDescription('');
+          }}
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={descriptionValue}
+        />
+        <Text style={styles.headerAdminTitle}>Описание</Text>
+        <TextInput
+          maxLength={decriptionLengthLimit}
+          multiline={true}
+          style={styles.textInputDesc}
+          onChangeText={(text) => setInputDescription(text)}
+          value={inputDescription}
+        />
+        <Text
+          style={[
+            styles.textDescLimit,
+            inputDescription
+              ? inputDescription.length === decriptionLengthLimit
+                ? {color: 'red'}
+                : {color: 'green'}
+              : data.place.description.length === decriptionLengthLimit
+              ? {color: 'red'}
+              : {color: 'green'},
+          ]}>
+          {inputDescription
+            ? inputDescription.length
+            : data.place.description.length}
+          / {decriptionLengthLimit}
+        </Text>
+        <View></View>
+      </Animated.ScrollView>
+
+      <Animated.ScrollView
         style={[styles.sliderAdminMenu, {translateX: workScheduleValue}]}>
-        <TouchableOpacity onPress={() => moveOut(workScheduleValue)}>
-          <Text>{'<'} ВЕРНУТЬСЯ</Text>
-        </TouchableOpacity>
+        <AdminHeader
+          cancel
+          ready
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={workScheduleValue}
+        />
         <Text style={styles.headerAdminTitle}>График работы</Text>
         {EN_SHORT_DAY_OF_WEEK.map((el, i) => {
           let oneDay = SetNewTimeObject(data.place.schedules)[el.day];
           return (
-            <View key={i} style={styles.graphRow}>
-              <Text style={styles.graphDay}>
+            <View
+              key={i}
+              style={[
+                styles.graphRow,
+                i === 6 && {borderBottomColor: '#e3e3e3', borderBottomWidth: 2},
+              ]}>
+              <Text
+                style={[
+                  styles.graphDay,
+                  numberDayNow === i && {color: '#e32a6c'},
+                ]}>
                 {EN_SHORT_TO_RU_SHORT[el.day]}
-                {oneDay.start_time &&
+                {oneDay &&
+                  oneDay.start_time &&
                   (oneDay.start_time.split(':')[0] * 3600 +
                     oneDay.start_time.split(':')[1] * 60 <=
                   oneDay.end_time.split(':')[0] * 3600 +
@@ -615,16 +964,21 @@ const Admin = (props) => {
                   setPopupVisible(true);
                   setIsClickedWorkTime(true);
                 }}>
-                <Text style={styles.graphTimeText}>
+                <Text
+                  style={[
+                    styles.graphTimeText,
+                    numberDayNow === i && {fontWeight: 'bold'},
+                  ]}>
                   {oneDay && oneDay.id
                     ? oneDay.start_time + '-' + oneDay.end_time
                     : '-'}
                 </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.graphDayOf}
                 onPress={() => setAsDayOf(oneDay)}>
-                <Text style={styles.graphTimeText}>Вых</Text>
+                {oneDay && oneDay.id && <Text style={styles.onOff}>Вых</Text>}
               </TouchableOpacity>
             </View>
           );
@@ -633,9 +987,14 @@ const Admin = (props) => {
 
       <Animated.ScrollView
         style={[styles.sliderAdminMenu, {translateX: streamScheduleValue}]}>
-        <TouchableOpacity onPress={() => moveOut(streamScheduleValue)}>
-          <Text>{'<'} ВЕРНУТЬСЯ</Text>
-        </TouchableOpacity>
+        <AdminHeader
+          cancel
+          ready
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={streamScheduleValue}
+        />
+
         <Text style={styles.headerAdminTitle}>График трансляций</Text>
         {EN_SHORT_DAY_OF_WEEK.map((el, i) => {
           let oneDay = SetNewTimeObject(
@@ -643,10 +1002,20 @@ const Admin = (props) => {
           )[el.day];
 
           return (
-            <View key={i} style={styles.graphRow}>
-              <Text style={styles.graphDay}>
+            <View
+              key={i}
+              style={[
+                styles.graphRow,
+                i === 6 && {borderBottomColor: '#e3e3e3', borderBottomWidth: 2},
+              ]}>
+              <Text
+                style={[
+                  styles.graphDay,
+                  numberDayNow === i && {color: '#e32a6c'},
+                ]}>
                 {EN_SHORT_TO_RU_SHORT[el.day]}
-                {oneDay.start_time &&
+                {oneDay &&
+                  oneDay.start_time &&
                   (oneDay.start_time.split(':')[0] * 3600 +
                     oneDay.start_time.split(':')[1] * 60 <=
                   oneDay.end_time.split(':')[0] * 3600 +
@@ -666,7 +1035,11 @@ const Admin = (props) => {
                     setIsClickedWorkTime(false);
                   }
                 }}>
-                <Text style={styles.graphTimeText}>
+                <Text
+                  style={[
+                    styles.graphTimeText,
+                    numberDayNow === i && {fontWeight: 'bold'},
+                  ]}>
                   {oneDay && oneDay.id
                     ? oneDay.start_time + '-' + oneDay.end_time
                     : '-'}
@@ -681,7 +1054,7 @@ const Admin = (props) => {
                     setAsDayOf(oneDay);
                   }
                 }}>
-                <Text style={styles.graphTimeText}>Откл</Text>
+                {oneDay && oneDay.id && <Text style={styles.onOff}>Откл</Text>}
               </TouchableOpacity>
             </View>
           );
@@ -690,10 +1063,12 @@ const Admin = (props) => {
 
       <Animated.ScrollView
         style={[styles.sliderAdminMenu, {translateX: translationValue}]}>
-        <TouchableOpacity onPress={() => moveOut(translationValue)}>
-          <Text>{'<'} ВЕРНУТЬСЯ</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerAdminTitle}>ТРАНСЛЯЦИЯ</Text>
+        <AdminHeader
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={translationValue}
+        />
+
         <NodeCameraView
           style={styles.nodeCameraStyle}
           ref={vbRef}
@@ -709,11 +1084,8 @@ const Admin = (props) => {
           }}
           autopreview={true}
         />
-        {/* <TouchableOpacity
-          style={{backgroundColor: 'gold'}}
-          onPress={requestCameraPermission}>
-          <Text>Запрос на сьемку</Text>
-        </TouchableOpacity> */}
+        <Text style={styles.headerTranslTitle}>ТРАНСЛЯЦИЯ</Text>
+
         {/* <TouchableOpacity
           style={{height: 50}}
           onPress={() => {
@@ -721,8 +1093,11 @@ const Admin = (props) => {
           }}>
           <Text>SWITCH CAMERA</Text>
         </TouchableOpacity> */}
+
         <TouchableOpacity
+          style={styles.translStartStopBtn}
           onPress={() => {
+            requestCameraPermission();
             if (isPublish) {
               setPublishBtnTitle('Начать трансляцию');
               setIsPublish(false);
@@ -808,7 +1183,6 @@ const Admin = (props) => {
                   } else {
                     saveStreamTime();
                   }
-                  setTimeout(() => refetch(), 500);
                 }}>
                 <Text style={styles.saveBtnText}>Сохранить</Text>
               </TouchableOpacity>
@@ -865,6 +1239,15 @@ const styles = StyleSheet.create({
     translateX: -Dimensions.get('window').width,
     flex: 1,
   },
+  headerTranslTitle: {
+    width: '100%',
+    position: 'absolute',
+    fontSize: 18,
+    fontWeight: 'bold',
+    top: 60,
+    color: '#fff',
+    textAlign: 'center',
+  },
   profileWrap: {
     padding: 20,
   },
@@ -873,10 +1256,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     padding: 15,
+    fontSize: 18,
+  },
+  textInputDesc: {
+    margin: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+    fontWeight: '300',
+    fontSize: 16,
+    color: '#4f4f4f',
+    lineHeight: 24,
+  },
+  categoryBtnsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   nodeCameraStyle: {
-    height: 173,
+    height: Dimensions.get('window').height - 74,
     width: '100%',
+  },
+  translStartStopBtn: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
   },
   startTranslBtn: {
     height: 50,
@@ -914,11 +1316,13 @@ const styles = StyleSheet.create({
   imageUploader: {
     alignSelf: 'center',
     paddingTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   noPickerImageStyle: {
     alignSelf: 'center',
-    width: 125,
-    height: 125,
+    width: Dimensions.get('window').width * 0.8,
+    height: Dimensions.get('window').width * 0.8 * 0.56,
     backgroundColor: '#f2f2f7',
     borderRadius: 5,
     justifyContent: 'center',
@@ -931,15 +1335,16 @@ const styles = StyleSheet.create({
     color: '#aeaeae',
   },
   pickerImageStyle: {
-    width: 125,
-    height: 125,
     alignSelf: 'center',
     borderRadius: 5,
+    width: Dimensions.get('window').width * 0.8,
+    height: Dimensions.get('window').width * 0.8 * 0.56,
   },
   streamOffMainWrap: {
     flexDirection: 'row',
     paddingTop: 20,
     alignItems: 'center',
+    paddingHorizontal: 10,
     justifyContent: 'space-between',
   },
   streamOffMainText: {
@@ -950,39 +1355,85 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
   },
+  cameraAddress: {
+    margin: 10,
+  },
   textInputWrap: {
     marginVertical: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textInputText: {
+    fontSize: 16,
+    color: '#4F4F4F',
+    fontWeight: 'bold',
   },
   textInputTitleText: {
     fontSize: 16,
     color: '#4F4F4F',
+    fontWeight: 'bold',
+    flex: 1,
   },
   textDescLimit: {
     textAlign: 'right',
     fontSize: 12,
+    marginRight: 10,
   },
   textInputStyle: {
     borderBottomColor: '#999',
     borderBottomWidth: 1,
+    flex: 2.5,
+    fontSize: 16,
+    fontWeight: '300',
   },
   btnCategoryWrap: {
     marginTop: 10,
+    flex: 2.5,
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
-  },
-  btnCategory: {
-    borderColor: '#C4C4C4',
-    borderRadius: 4,
-    borderWidth: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  btnCategoryOuter: {
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: '#C4C4C4',
+    borderWidth: 1,
     width: 70,
     height: 35,
   },
+  btnCategoryInNewWindow: {
+    width: Dimensions.get('window').width / 2 - 20,
+    height: 50,
+    margin: 10,
+  },
+  btnCategoryText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  btnCategoryInner: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+  },
+  chooseNewCategory: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#e32a6c',
+  },
+  textInputMultilineStyleWrap: {
+    flex: 2.5,
+  },
   textInputMultilineStyle: {
-    borderBottomColor: '#999',
+    borderBottomColor: '#4f4f4f',
     borderBottomWidth: 1,
+    fontWeight: '300',
+    fontSize: 16,
+    lineHeight: 24,
+    paddingLeft: 5,
+    paddingBottom: 12,
   },
   pinkBtn: {
     backgroundColor: '#E32A6C',
@@ -998,25 +1449,27 @@ const styles = StyleSheet.create({
   },
   graphRow: {
     flexDirection: 'row',
-    borderWidth: 1,
+    borderTopWidth: 1,
     borderColor: '#e3e3e3',
     marginBottom: -1,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+
   graphDay: {
-    borderColor: '#e3e3e3',
-    borderRightWidth: 1,
     textAlign: 'center',
     flex: 1,
     padding: 5,
+    fontSize: 16,
   },
   graphTime: {
     padding: 5,
     flex: 3,
-    borderRightWidth: 1,
-    borderRightColor: '#e3e3e3',
   },
   graphTimeText: {
     textAlign: 'center',
+    fontSize: 18,
   },
   dayOfBtn: {
     color: '#e32a6c',
@@ -1073,6 +1526,9 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRightColor: '#e3e3e3',
     borderRightWidth: 1,
+  },
+  onOff: {
+    fontSize: 16,
   },
   graphSave: {
     padding: 5,

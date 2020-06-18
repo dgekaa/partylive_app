@@ -40,7 +40,9 @@ const Map = (props) => {
           return <CompanyTypeNav data={data} clickedType={clickedType} />;
         }}
       </Query>
-      <View style={styles.content}>{<GoogleMap places={companyData} />}</View>
+      <View style={styles.content}>
+        {<GoogleMap places={companyData} navigation={props.navigation} />}
+      </View>
     </View>
   );
 };

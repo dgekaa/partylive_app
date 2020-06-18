@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, View, Text, Image} from 'react-native';
+import {StyleSheet, View, Text, Image, TouchableOpacity} from 'react-native';
 import VideoPlayer from 'react-native-video-controls';
 
 import {EN_SHORT_TO_RU_LONG_V_P} from '../constants';
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 import Header from '../components/Header';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+
+import GoogleMap from '../components/GoogleMap';
 
 import bar from '../img/bar.png';
 import karaoke from '../img/karaoke.png';
@@ -131,7 +132,9 @@ const Company = (props) => {
           </View>
 
           <View style={styles.mapBlockWrap}>
-            <View style={styles.mapWrap} />
+            <View style={styles.mapWrap}>
+              <GoogleMap onePlace={dataCompany} />
+            </View>
             <View style={styles.locationBlock}>
               <Image
                 style={styles.icon}
@@ -226,8 +229,6 @@ const styles = StyleSheet.create({
   mapBlockWrap: {
     flex: 1,
     margin: 10,
-    borderColor: '#ededed',
-    borderWidth: 1,
     borderRadius: 5,
     backgroundColor: '#fff',
   },
@@ -235,10 +236,12 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 5,
     backgroundColor: '#999',
+    overflow: 'hidden',
   },
   locationBlock: {
     flexDirection: 'row',
     padding: 5,
+    paddingLeft: 0,
     alignItems: 'center',
   },
   icon: {

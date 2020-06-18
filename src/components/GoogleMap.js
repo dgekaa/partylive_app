@@ -1,6 +1,15 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, View, ImageBackground, Text, Image} from 'react-native';
-import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
+import {
+  StyleSheet,
+  View,
+  ImageBackground,
+  Text,
+  Image,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
+import MapView from 'react-native-map-clustering';
 import LinearGradient from 'react-native-linear-gradient';
 
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
@@ -14,7 +23,7 @@ import klub from '../img/klub_w.png';
 import launge from '../img/launge_w.png';
 import pab from '../img/pab_w.png';
 
-const CustomMarker = ({marker}) => {
+const CustomMarker = ({place, getDistanceTo}) => {
   const [showStream, setShowStream] = useState();
   const [nextStreamTime, setNextStreamTime] = useState();
   const [workTime, setWorkTime] = useState();
@@ -29,22 +38,22 @@ const CustomMarker = ({marker}) => {
   }, []);
 
   useEffect(() => {
-    isShowStreamNow(marker, setShowStream, setNextStreamTime);
-    isWorkTimeNow(marker, setWorkTime, setIsWork, setNextWorkTime);
-  }, [marker]);
+    isShowStreamNow(place, setShowStream, setNextStreamTime);
+    isWorkTimeNow(place, setWorkTime, setIsWork, setNextWorkTime);
+  }, [place]);
 
   useEffect(() => {
-    if (lon && lat && marker && marker.coordinates) {
-      setDistanceTo(
-        getDistanceFromLatLonInKm(
-          lat,
-          lon,
-          marker.coordinates.split(',')[0],
-          marker.coordinates.split(',')[1],
-        ).toFixed(1),
-      );
+    if (lon && lat && place && place.coordinates) {
+      const dist = getDistanceFromLatLonInKm(
+        lat,
+        lon,
+        place.coordinates.split(',')[0],
+        place.coordinates.split(',')[1],
+      ).toFixed(1);
+      getDistanceTo(dist);
+      setDistanceTo(dist);
     }
-  }, [lon, lat, marker]);
+  }, [lon, lat, place]);
 
   const whenIsTranslationTime = () => {
     if (
@@ -82,7 +91,7 @@ const CustomMarker = ({marker}) => {
   };
 
   const getImg = () => {
-    switch (marker.categories[0].slug) {
+    switch (place.categories[0].slug) {
       case 'bar':
         return bar;
       case 'klub':
@@ -102,9 +111,9 @@ const CustomMarker = ({marker}) => {
       source={{
         uri:
           showStream &&
-          marker.streams &&
-          marker.streams[0] &&
-          marker.streams[0].preview,
+          place.streams &&
+          place.streams[0] &&
+          place.streams[0].preview,
       }}>
       {!showStream && (
         <View style={styles.noVideo}>
@@ -139,7 +148,7 @@ const CustomMarker = ({marker}) => {
         <View style={styles.nameRow}>
           <Image style={styles.imgType} source={getImg()} />
           <Text style={styles.name} numberOfLines={1}>
-            {marker.name}
+            {place.name}
           </Text>
         </View>
         <View style={styles.bottomRow}>
@@ -157,14 +166,14 @@ const CustomMarker = ({marker}) => {
           {distanceTo && <Text style={styles.km}>{distanceTo} km.</Text>}
         </View>
       </LinearGradient>
-      {/* <Text style={styles.arrow}>&#9660;</Text> */}
     </ImageBackground>
   );
 };
 
-const GoogleMap = ({places}) => {
+const GoogleMap = ({places, navigation, onePlace}) => {
   const [lon, setLon] = useState('');
   const [lat, setLat] = useState('');
+  const [distanceTo, setDistanceTo] = useState('');
 
   useEffect(() => {
     requestLocationPermission(setLon, setLat);
@@ -173,20 +182,24 @@ const GoogleMap = ({places}) => {
   const [initialRegion, setInitialRegion] = useState({
     latitude: 53.9097,
     longitude: 27.556,
-    latitudeDelta: 0.25,
-    longitudeDelta: 0.25,
+    latitudeDelta: onePlace ? 0.12 : 0.25,
+    longitudeDelta: onePlace ? 0.12 : 0.25,
   });
+
+  const getDistanceTo = (dist) => {
+    setDistanceTo(dist);
+  };
 
   return (
     <View style={styles.container}>
       <MapView
+        clusterColor="#e32a6c"
+        radius={onePlace ? 1 : 60}
+        clusterTextColor="#fff"
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={initialRegion}
-        // region={region}
-        onRegionChange={(data) => {
-          console.log(data);
-        }}>
+        onRegionChange={(data) => {}}>
         {!!lat && (
           <Marker coordinate={{latitude: +lat, longitude: +lon}}>
             <Image
@@ -196,16 +209,41 @@ const GoogleMap = ({places}) => {
           </Marker>
         )}
 
-        {places.map((marker) => {
-          const location = marker.coordinates.split(',');
-          return (
-            <Marker
-              id={marker.id}
-              coordinate={{latitude: +location[0], longitude: +location[1]}}>
-              <CustomMarker marker={marker} />
-            </Marker>
-          );
-        })}
+        {!!onePlace && (
+          <Marker
+            coordinate={{
+              latitude: +onePlace.coordinates.split(',')[0],
+              longitude: +onePlace.coordinates.split(',')[1],
+            }}>
+            {/* <Image
+              source={require('../img/dancer.png')}
+              style={styles.dancer}
+            /> */}
+          </Marker>
+        )}
+
+        {!!places &&
+          !!places.length &&
+          places.map((place) => {
+            const location = place.coordinates.split(',');
+            return (
+              <Marker
+                onPress={() => {
+                  navigation.navigate('Company', {
+                    data: place,
+                    distanceTo,
+                  });
+                }}
+                id={place.id}
+                coordinate={{latitude: +location[0], longitude: +location[1]}}>
+                <CustomMarker
+                  place={place}
+                  navigation={navigation}
+                  getDistanceTo={getDistanceTo}
+                />
+              </Marker>
+            );
+          })}
       </MapView>
     </View>
   );

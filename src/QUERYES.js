@@ -101,6 +101,7 @@ export const GET_PLACE = gql`
       description
       logo
       menu
+      alias
       actions
       coordinates
       streams {
@@ -108,6 +109,7 @@ export const GET_PLACE = gql`
         name
         id
         preview
+        see_you_tomorrow
         schedules {
           id
           day
@@ -149,6 +151,24 @@ export const CREATE_WORK_TIME = gql`
   }
 `;
 
+export const UPDATE_SEE_YOU_TOMORROW = gql`
+  mutation UPDATESEEYOU($id: ID!, $see_you_tomorrow: String) {
+    updateStream(input: {id: $id, see_you_tomorrow: $see_you_tomorrow}) {
+      id
+      see_you_tomorrow
+    }
+  }
+`;
+
+// export const UPDATE_SEE_YOU_TOMORROW = gql`
+//   mutation UPDATESEEYOU($id: ID!) {
+//     updateStream(input: {id: $id}) {
+//       id
+//       see_you_tomorrow
+//     }
+//   }
+// `;
+
 export const UPDATE_WORK_SCHEDULE = gql`
   mutation UPDATEWORKSCHEDULE(
     $id: ID!
@@ -168,7 +188,8 @@ export const UPDATE_PLACE_DATA = gql`
     $id: ID!
     $name: String
     $description: String
-    $categories: CreateCategoryMorphToMany
+    $categories: UpdateCategoryMorphToMany
+    $alias: String
   ) {
     updatePlace(
       input: {
@@ -176,11 +197,13 @@ export const UPDATE_PLACE_DATA = gql`
         name: $name
         description: $description
         categories: $categories
+        alias: $alias
       }
     ) {
       id
       name
       description
+      alias
       categories {
         id
         name
@@ -196,6 +219,33 @@ export const DELETE_SCHEDULE = gql`
     }
   }
 `;
+export const UPDATE_STREAM = gql`
+  mutation UPDATESTREAM($id: ID!, $url: String, $preview: String) {
+    updateStream(input: {id: $id, url: $url, preview: $preview}) {
+      id
+      url
+      preview
+    }
+  }
+`;
+
+export const CREATE_STREAM = gql`
+  mutation CREATESTREAM(
+    $name: String!
+    $url: String!
+    $preview: String
+    $place: CreatePlaceToOne!
+  ) {
+    createStream(
+      input: {name: $name, url: $url, preview: $preview, place: $place}
+    ) {
+      id
+      url
+      preview
+    }
+  }
+`;
+
 export const UPDATE_STREAMS_SCHEDULE = gql`
   mutation UPDATESTREAMSSCHEDULE($id: ID!, $update: [UpdateScheduleInput!]) {
     updateStream(input: {id: $id, schedules: {update: $update}}) {
