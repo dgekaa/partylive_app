@@ -279,3 +279,42 @@ export const UPDATE_IMAGE = gql`
     placeImage(file: $file)
   }
 `;
+
+export const CREATE_PLACE = gql`
+  mutation CREATEPLACE(
+    $name: String!
+    $address: String!
+    $description: String!
+    $coordinates: String!
+    $alias: String!
+    $categories: CreateCategoryMorphToMany!
+  ) {
+    createPlace(
+      input: {
+        alias: $alias
+        name: $name
+        address: $address
+        description: $description
+        coordinates: $coordinates
+        categories: $categories
+      }
+    ) {
+      alias
+      address
+      name
+      description
+      coordinates
+      categories {
+        id
+      }
+    }
+  }
+`;
+
+export const DELETE_PLACE = gql`
+  mutation DELETEPLACE($id: ID!) {
+    deletePlace(id: $id) {
+      id
+    }
+  }
+`;

@@ -4,55 +4,95 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import {Query} from 'react-apollo';
+import {useMutation, useQuery} from 'react-apollo';
 
 import Header from '../components/Header';
-import {GET_PLACES} from '../QUERYES';
+import {GET_PLACES, CREATE_PLACE, DELETE_PLACE} from '../QUERYES';
 
 const EditCompany = (props) => {
+  const {data} = useQuery(GET_PLACES);
+
+  const refreshObject = {
+    refetchQueries: [
+      {
+        query: GET_PLACES,
+      },
+    ],
+    awaitRefetchQueries: true,
+  };
+
+  const [CREATE_PLACE_mutation] = useMutation(CREATE_PLACE, refreshObject);
+  const [DELETE_PLACE_mutation] = useMutation(DELETE_PLACE, refreshObject);
+
+  const create = () => {
+    CREATE_PLACE_mutation({
+      variables: {
+        name: 'Стандартное название',
+        address: 'улица Ленина 8, Минск, Беларусь',
+        description: 'введите описание',
+        coordinates: '53.9006799,27.5582599',
+        alias: 'pseudonim',
+        categories: {
+          connect: 2,
+        },
+      },
+      optimisticResponse: null,
+    }).then(
+      (res) => console.log(res, 'RES'),
+      (err) => console.log(err, 'ERR'),
+    );
+  };
+
+  const deleteOne = (id) => {
+    DELETE_PLACE_mutation({
+      variables: {
+        id: id,
+      },
+      optimisticResponse: null,
+    }).then(
+      (res) => console.log(res, 'RES'),
+      (err) => console.log(err, 'ERR'),
+    );
+  };
+
   return (
     <View style={styles.EditCompany}>
       <Header props={props} />
       <Text style={styles.headerText}>Список заведений</Text>
       <ScrollView>
-        <Query query={GET_PLACES}>
-          {({loading, error, data}) => {
-            if (loading) {
-              return <ActivityIndicator size="large" color="#0000ff" />;
-            } else if (error) {
-              return <Text>Error! ${error.message}</Text>;
-            }
-
-            return data.places.map((el) => (
-              <View style={styles.row} key={el.id}>
-                <TouchableOpacity style={styles.delete} onPress={() => {}}>
-                  <Text style={styles.deleteText} numberOfLines={1}>
-                    &#215;
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.textRowName}
-                  onPress={() =>
-                    props.navigation.navigate('Admin', {item: el})
-                  }>
-                  <Text style={styles.textRowInnerName} numberOfLines={1}>
-                    {el.name}
-                  </Text>
-                </TouchableOpacity>
-                <Text style={styles.textRowAlias} numberOfLines={1}>
-                  {el.alias}
-                </Text>
-                <Text style={styles.textRowType}>
-                  {el.categories[0] && el.categories[0].name.toLowerCase()}
-                </Text>
-              </View>
-            ));
-          }}
-        </Query>
-        <TouchableOpacity style={styles.createCompany} onPress={() => {}}>
+        {data.places.map((el) => (
+          <View style={styles.row} key={el.id}>
+            <TouchableOpacity
+              style={styles.delete}
+              onPress={() => {
+                deleteOne(el.id);
+              }}>
+              <Text style={styles.deleteText} numberOfLines={1}>
+                &#215;
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.textRowName}
+              onPress={() => props.navigation.navigate('Admin', {item: el})}>
+              <Text style={styles.textRowInnerName} numberOfLines={1}>
+                {el.name}
+              </Text>
+            </TouchableOpacity>
+            <Text style={styles.textRowAlias} numberOfLines={1}>
+              {el.alias}
+            </Text>
+            <Text style={styles.textRowType}>
+              {el.categories[0] && el.categories[0].name.toLowerCase()}
+            </Text>
+          </View>
+        ))}
+        <TouchableOpacity
+          style={styles.createCompany}
+          onPress={() => {
+            create();
+          }}>
           <Text style={styles.createCompanyText}>СОЗДАТЬ ЗАВЕДЕНИЕ</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -63,7 +103,6 @@ const EditCompany = (props) => {
 const styles = StyleSheet.create({
   EditCompany: {
     flex: 1,
-    padding: 10,
   },
   headerText: {
     fontSize: 20,

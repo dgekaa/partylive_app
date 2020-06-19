@@ -26,6 +26,7 @@
     "apollo-link-http": "^1.5.16",
     "aws-appsync": "^3.0.2",
     "aws-appsync-react": "^3.0.2",
+    "axios": "^0.19.2",
     "graphql": "^15.0.0",
     "graphql-tag": "^2.10.3",
     "native-base": "^2.13.12",

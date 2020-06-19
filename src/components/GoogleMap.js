@@ -170,7 +170,7 @@ const CustomMarker = ({place, getDistanceTo}) => {
   );
 };
 
-const GoogleMap = ({places, navigation, onePlace}) => {
+const GoogleMap = ({places, navigation, onePlace, regionChange}) => {
   const [lon, setLon] = useState('');
   const [lat, setLat] = useState('');
   const [distanceTo, setDistanceTo] = useState('');
@@ -199,7 +199,7 @@ const GoogleMap = ({places, navigation, onePlace}) => {
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={initialRegion}
-        onRegionChange={(data) => {}}>
+        onRegionChange={regionChange}>
         {!!lat && (
           <Marker coordinate={{latitude: +lat, longitude: +lon}}>
             <Image

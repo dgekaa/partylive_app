@@ -15,8 +15,9 @@ import {
   Animated,
   PermissionsAndroid,
 } from 'react-native';
+import {getToken} from '../util';
 import {NodeCameraView} from 'react-native-nodemediaclient';
-
+import axios from 'axios';
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import VideoPlayer from 'react-native-video-controls';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -44,6 +45,7 @@ import {
   UPDATE_STREAM,
   CREATE_STREAM,
 } from '../QUERYES';
+import GoogleMap from '../components/GoogleMap';
 
 const AdminHeader = ({
   cancel,
@@ -390,22 +392,74 @@ const Admin = (props) => {
       includeBase64: true,
     })
       .then((image) => {
-        const imgData = {
-          uri: image.path,
-          type: image.mime,
-          name: 'photo.jpg',
-        };
-        var formData = new FormData();
-        formData.append('image', imgData);
+        fetch(image.path)
+          .then((res) => res.blob())
+          .then((blob) => {
+            const getAsyncToken = async () => {
+              const token = await getToken();
+              return token;
+            };
 
-        UPDATE_IMAGE_mutation({
-          variables: {
-            file: imgData,
-          },
-          optimisticResponse: null,
-        })
-          .then((data) => console.log(data, '_____data'))
-          .catch((err) => console.log(err, '______err'));
+            getAsyncToken().then((token) => {
+              // let formData = new FormData();
+              // formData.append('picture', {
+              //   uri: image.path,
+              //   name: 'selfie.jpg',
+              //   type: 'image/jpg',
+              // });
+              const data = {
+                file: null,
+              };
+              const query = `
+              mutation ($file: Upload!) {
+                placeImage(file: $file)
+              }
+            `;
+              const operations = JSON.stringify({
+                query,
+                variables: {
+                  data,
+                },
+              });
+
+              let formData = new FormData();
+              formData.append('operations', operations);
+              const map = {
+                '0': ['variables.file'],
+              };
+              formData.append('map', JSON.stringify(map));
+              formData.append('0', image);
+              const config = {
+                method: 'POST',
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'multipart/form-data;',
+                  Authorization: 'Bearer ' + token,
+                },
+                body: formData,
+              };
+              fetch('https://backend.partylive.by/graphql', config)
+                .then((responseData) => {
+                  // Log the response form the server
+                  // Here we get what we sent to Postman back
+                  console.log(responseData, 'RESPOSE');
+                })
+                .catch((err) => {
+                  console.log(err, 'ERRROR');
+                });
+            });
+
+            // UPDATE_IMAGE_mutation({
+            //   variables: {
+            //     file: blob._data,
+            //   },
+            //   optimisticResponse: null,
+            // })
+            //   .then((data) => console.log(data, '_____data'))
+            //   .catch((err) => console.log(err, '______err'));
+          })
+          .catch((err) => console.log(err, 'ERR +++++'));
+
         setpPickerImageMime(image.mime);
         setpPickerImageData(image.data);
       })
@@ -471,6 +525,7 @@ const Admin = (props) => {
   const translationValue = useState(new Animated.Value(-windowWidth))[0];
   const chooseCategoryValue = useState(new Animated.Value(-windowWidth))[0];
   const descriptionValue = useState(new Animated.Value(-windowWidth))[0];
+  const addressValue = useState(new Animated.Value(-windowWidth))[0];
 
   const moveIn = (data) => {
     Animated.timing(data, {
@@ -573,6 +628,10 @@ const Admin = (props) => {
       (res) => console.log(res, 'RES'),
       (err) => console.log(err, 'ERR'),
     );
+  };
+
+  const regionChange = (data) => {
+    console.log(data, 'PPPPPP REGION');
   };
 
   if (loading) {
@@ -713,7 +772,7 @@ const Admin = (props) => {
                   }}
                 />
                 <View>
-                  <TouchableOpacity onPress={() => {}}>
+                  <TouchableOpacity onPress={() => goToPickImage()}>
                     <Text>Изменить</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => {}}>
@@ -763,7 +822,9 @@ const Admin = (props) => {
           </View>
           <View style={styles.textInputWrap}>
             <Text style={styles.textInputTitleText}>Адрес:</Text>
-            <TouchableOpacity style={{flex: 2.5}}>
+            <TouchableOpacity
+              style={styles.addressText}
+              onPress={() => moveIn(addressValue)}>
               <TextInput
                 style={styles.textInputStyle}
                 value={data.place.address}
@@ -910,7 +971,25 @@ const Admin = (props) => {
             : data.place.description.length}
           / {decriptionLengthLimit}
         </Text>
-        <View></View>
+      </Animated.ScrollView>
+
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: addressValue}]}>
+        <AdminHeader
+          cancel
+          ready
+          saveFunction={() => {}}
+          cancelFunction={() => {}}
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={addressValue}
+        />
+        <View style={styles.mapWrap}>
+          <GoogleMap
+            onePlace={props.navigation.state.params.item}
+            regionChange={regionChange}
+          />
+        </View>
       </Animated.ScrollView>
 
       <Animated.ScrollView
@@ -1363,6 +1442,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     flex: 1,
   },
+  addressText: {
+    flex: 2.5,
+  },
   textDescLimit: {
     textAlign: 'right',
     fontSize: 12,
@@ -1528,6 +1610,14 @@ const styles = StyleSheet.create({
   },
   bacgrBtn: {
     backgroundColor: '#e32a6c',
+  },
+  mapWrap: {
+    flex: 1,
+    borderRadius: 5,
+    backgroundColor: '#999',
+    overflow: 'hidden',
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
   },
 });
 
