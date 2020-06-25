@@ -7,10 +7,12 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  Dimensions,
 } from 'react-native';
 import {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import MapView from 'react-native-map-clustering';
 import LinearGradient from 'react-native-linear-gradient';
+import Geocoder from 'react-native-geocoding';
 
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 import {EN_SHORT_TO_RU_LONG_V_P, EN_SHORT_TO_RU_LONG} from '../constants';
@@ -22,6 +24,7 @@ import karaoke from '../img/karaoke_w.png';
 import klub from '../img/klub_w.png';
 import launge from '../img/launge_w.png';
 import pab from '../img/pab_w.png';
+import {add} from 'react-native-reanimated';
 
 const CustomMarker = ({place, getDistanceTo}) => {
   const [showStream, setShowStream] = useState();
@@ -170,14 +173,24 @@ const CustomMarker = ({place, getDistanceTo}) => {
   );
 };
 
-const GoogleMap = ({places, navigation, onePlace, regionChange}) => {
+const GoogleMap = ({
+  places,
+  navigation,
+  onePlace,
+  regionChange,
+  ADDRESSfromCOORD,
+}) => {
   const [lon, setLon] = useState('');
   const [lat, setLat] = useState('');
   const [distanceTo, setDistanceTo] = useState('');
+  const [newRegion, setNewRegion] = useState('');
+  const [addressFromCoord, setAddresFromCoord] = useState('');
 
   useEffect(() => {
     requestLocationPermission(setLon, setLat);
   }, []);
+
+  Geocoder.init('AIzaSyAAcvrFmEi8o7u-zXHe6geXvjRey4Qj6tg', {language: 'ru'});
 
   const [initialRegion, setInitialRegion] = useState({
     latitude: 53.9097,
@@ -186,12 +199,28 @@ const GoogleMap = ({places, navigation, onePlace, regionChange}) => {
     longitudeDelta: onePlace ? 0.12 : 0.25,
   });
 
+  useEffect(() => {
+    if (ADDRESSfromCOORD) {
+      Geocoder.from(newRegion.latitude, newRegion.longitude)
+        .then((json) => {
+          setAddresFromCoord(json.results[0].formatted_address);
+        })
+        .catch((error) => console.log(error, 'GEO'));
+    }
+  }, [newRegion]);
+
   const getDistanceTo = (dist) => {
     setDistanceTo(dist);
   };
 
   return (
     <View style={styles.container}>
+      {ADDRESSfromCOORD && (
+        <Image
+          source={require('../img/location.png')}
+          style={styles.newLocation}
+        />
+      )}
       <MapView
         clusterColor="#e32a6c"
         radius={onePlace ? 1 : 60}
@@ -199,7 +228,11 @@ const GoogleMap = ({places, navigation, onePlace, regionChange}) => {
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={initialRegion}
-        onRegionChange={regionChange}>
+        onRegionChangeComplete={(data) => setNewRegion(data)}
+        onRegionChange={(data) => {}}
+        ADDRESSfromCOORD={
+          ADDRESSfromCOORD && ADDRESSfromCOORD(addressFromCoord, newRegion)
+        }>
         {!!lat && (
           <Marker coordinate={{latitude: +lat, longitude: +lon}}>
             <Image
@@ -255,6 +288,15 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'flex-end',
     alignItems: 'center',
+    position: 'relative',
+  },
+  newLocation: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    top: Dimensions.get('window').height / 2,
+    left: Dimensions.get('window').width / 2,
+    zIndex: 100,
   },
   map: {
     ...StyleSheet.absoluteFillObject,

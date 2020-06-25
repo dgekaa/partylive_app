@@ -44,6 +44,7 @@ import {
   UPDATE_SEE_YOU_TOMORROW,
   UPDATE_STREAM,
   CREATE_STREAM,
+  SAVE_ADDRESS,
 } from '../QUERYES';
 import GoogleMap from '../components/GoogleMap';
 
@@ -177,6 +178,9 @@ const Admin = (props) => {
   const [typeOfCompanyId, setTypeOfCompanyId] = useState('');
   const [isStreamOff, setIsStreamOff] = useState(false);
 
+  const [ADDRESS, setADDRESS] = useState(null);
+  const [COORD, setCOORD] = useState(null);
+
   const windowWidth = Dimensions.get('window').width;
 
   const videoRef = useRef(null);
@@ -252,6 +256,7 @@ const Admin = (props) => {
     refreshObject,
   );
   const [UPDATE_IMAGE_mutation] = useMutation(UPDATE_IMAGE, refreshObject);
+  const [SAVE_ADDRESS_mutation] = useMutation(SAVE_ADDRESS, refreshObject);
   const [UPDATE_SEE_YOU_TOMORROW_mutation] = useMutation(
     UPDATE_SEE_YOU_TOMORROW,
     refreshObject,
@@ -395,68 +400,52 @@ const Admin = (props) => {
         fetch(image.path)
           .then((res) => res.blob())
           .then((blob) => {
+            console.log(blob, 'blob');
+
             const getAsyncToken = async () => {
               const token = await getToken();
               return token;
             };
 
             getAsyncToken().then((token) => {
-              // let formData = new FormData();
-              // formData.append('picture', {
-              //   uri: image.path,
-              //   name: 'selfie.jpg',
-              //   type: 'image/jpg',
-              // });
+              const query = `
+                  mutation ($file: Upload!) {
+                    placeImage(file: $file)
+                  }
+                `;
               const data = {
                 file: null,
               };
-              const query = `
-              mutation ($file: Upload!) {
-                placeImage(file: $file)
-              }
-            `;
               const operations = JSON.stringify({
                 query,
                 variables: {
                   data,
                 },
               });
-
               let formData = new FormData();
               formData.append('operations', operations);
               const map = {
                 '0': ['variables.file'],
               };
               formData.append('map', JSON.stringify(map));
-              formData.append('0', image);
-              const config = {
+              formData.append('0', blob);
+
+              axios({
+                url: 'https://backend.partylive.by/graphql',
                 method: 'POST',
                 headers: {
-                  Accept: 'application/json',
-                  'Content-Type': 'multipart/form-data;',
+                  'Content-Type': 'multipart/form-data',
                   Authorization: 'Bearer ' + token,
                 },
-                body: formData,
-              };
-              fetch('https://backend.partylive.by/graphql', config)
-                .then((responseData) => {
-                  // Log the response form the server
-                  // Here we get what we sent to Postman back
-                  console.log(responseData, 'RESPOSE');
+                data: blob,
+              })
+                .then(function (res) {
+                  console.log(res, 'RESSSSSS');
                 })
-                .catch((err) => {
-                  console.log(err, 'ERRROR');
+                .catch(function (err) {
+                  console.log(err, ' ERR');
                 });
             });
-
-            // UPDATE_IMAGE_mutation({
-            //   variables: {
-            //     file: blob._data,
-            //   },
-            //   optimisticResponse: null,
-            // })
-            //   .then((data) => console.log(data, '_____data'))
-            //   .catch((err) => console.log(err, '______err'));
           })
           .catch((err) => console.log(err, 'ERR +++++'));
 
@@ -630,10 +619,29 @@ const Admin = (props) => {
     );
   };
 
-  const regionChange = (data) => {
-    console.log(data, 'PPPPPP REGION');
+  const ADDRESSfromCOORD = (address, coord) => {
+    setADDRESS(address);
+    setCOORD(coord);
   };
 
+  const saveNewAddress = () => {
+    if (ADDRESS) {
+      const coordinate = COORD.latitude + ',' + COORD.longitude;
+      SAVE_ADDRESS_mutation({
+        variables: {
+          id: data.place.id,
+          address: ADDRESS,
+          coordinates: coordinate,
+        },
+        optimisticResponse: null,
+      })
+        .then(
+          (res) => console.log(res, 'RES__'),
+          (err) => console.log(err, '___ERR___'),
+        )
+        .catch((err) => console.log(err, '______err_1'));
+    }
+  };
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
@@ -825,6 +833,7 @@ const Admin = (props) => {
             <TouchableOpacity
               style={styles.addressText}
               onPress={() => moveIn(addressValue)}>
+              {/* ######################################3 */}
               <TextInput
                 style={styles.textInputStyle}
                 value={data.place.address}
@@ -978,7 +987,7 @@ const Admin = (props) => {
         <AdminHeader
           cancel
           ready
-          saveFunction={() => {}}
+          saveFunction={() => saveNewAddress()}
           cancelFunction={() => {}}
           navigation={props.navigation}
           moveOut={moveOut}
@@ -987,8 +996,11 @@ const Admin = (props) => {
         <View style={styles.mapWrap}>
           <GoogleMap
             onePlace={props.navigation.state.params.item}
-            regionChange={regionChange}
+            ADDRESSfromCOORD={(data, coord) => ADDRESSfromCOORD(data, coord)}
           />
+          <Text style={styles.addressStyle}>
+            {ADDRESS && ADDRESS.split(',')[0]}
+          </Text>
         </View>
       </Animated.ScrollView>
 
@@ -1138,11 +1150,10 @@ const Admin = (props) => {
           moveOut={moveOut}
           who={translationValue}
         />
-
         <NodeCameraView
           style={styles.nodeCameraStyle}
           ref={vbRef}
-          outputUrl={'rtmp://194.87.235.18/streaming/123'}
+          outputUrl={'rtmp://194.87.235.18/streaming/klever'}
           camera={{cameraId: 1, cameraFrontMirror: true}}
           audio={{bitrate: 60000, profile: 1, samplerate: 44100}}
           video={{
@@ -1612,12 +1623,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#e32a6c',
   },
   mapWrap: {
+    position: 'relative',
     flex: 1,
     borderRadius: 5,
     backgroundColor: '#999',
     overflow: 'hidden',
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
+  },
+  addressStyle: {
+    position: 'absolute',
+    width: Dimensions.get('window').width - 30,
+    top: 15,
+    left: 15,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 5,
   },
 });
 

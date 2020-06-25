@@ -5,6 +5,7 @@ import {
   Text,
   ActivityIndicator,
   FlatList,
+  SafeAreaView,
 } from 'react-native';
 import {Query} from 'react-apollo';
 
@@ -35,53 +36,55 @@ const Home = (props) => {
   };
 
   return (
-    <View style={styles.home}>
-      <Header props={props} />
-      <Query query={GET_CATEGORIES}>
-        {({loading, error, data}) => {
-          if (loading) {
-            return <></>;
-          } else if (error) {
-            return <Text>Error! ${error.message}</Text>;
-          }
-          return <CompanyTypeNav data={data} clickedType={clickedType} />;
-        }}
-      </Query>
-      <View style={styles.content}>
-        <Query query={GET_PLACES}>
+    <SafeAreaView style={{backgroundColor: 'red'}}>
+      <View style={styles.home}>
+        <Header props={props} />
+        <Query query={GET_CATEGORIES}>
           {({loading, error, data}) => {
             if (loading) {
-              return (
-                <View>
-                  <ActivityIndicator size="large" color="#0000ff" />
-                </View>
-              );
+              return <></>;
             } else if (error) {
               return <Text>Error! ${error.message}</Text>;
             }
-            setDATA(data);
-
-            if (companyData.length) {
-              return (
-                <FlatList
-                  data={companyData}
-                  numColumns={2}
-                  renderItem={({item}) => (
-                    <SmallCompanyBlock
-                      item={item}
-                      navigation={props.navigation}
-                    />
-                  )}
-                  keyExtractor={(item) => item.id}
-                />
-              );
-            } else {
-              return <Text style={styles.nullFilter}>Нет заведений</Text>;
-            }
+            return <CompanyTypeNav data={data} clickedType={clickedType} />;
           }}
         </Query>
+        <View style={styles.content}>
+          <Query query={GET_PLACES}>
+            {({loading, error, data}) => {
+              if (loading) {
+                return (
+                  <View>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  </View>
+                );
+              } else if (error) {
+                return <Text>Error! ${error.message}</Text>;
+              }
+              setDATA(data);
+
+              if (companyData.length) {
+                return (
+                  <FlatList
+                    data={companyData}
+                    numColumns={2}
+                    renderItem={({item}) => (
+                      <SmallCompanyBlock
+                        item={item}
+                        navigation={props.navigation}
+                      />
+                    )}
+                    keyExtractor={(item) => item.id}
+                  />
+                );
+              } else {
+                return <Text style={styles.nullFilter}>Нет заведений</Text>;
+              }
+            }}
+          </Query>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

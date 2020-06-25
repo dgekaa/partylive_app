@@ -160,15 +160,6 @@ export const UPDATE_SEE_YOU_TOMORROW = gql`
   }
 `;
 
-// export const UPDATE_SEE_YOU_TOMORROW = gql`
-//   mutation UPDATESEEYOU($id: ID!) {
-//     updateStream(input: {id: $id}) {
-//       id
-//       see_you_tomorrow
-//     }
-//   }
-// `;
-
 export const UPDATE_WORK_SCHEDULE = gql`
   mutation UPDATEWORKSCHEDULE(
     $id: ID!
@@ -315,6 +306,18 @@ export const DELETE_PLACE = gql`
   mutation DELETEPLACE($id: ID!) {
     deletePlace(id: $id) {
       id
+    }
+  }
+`;
+
+export const SAVE_ADDRESS = gql`
+  mutation SAVEADDRESS($id: ID!, $address: String, $coordinates: String) {
+    updatePlace(
+      input: {id: $id, address: $address, coordinates: $coordinates}
+    ) {
+      id
+      address
+      coordinates
     }
   }
 `;
