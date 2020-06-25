@@ -36,7 +36,7 @@ const Home = (props) => {
   };
 
   return (
-    <SafeAreaView style={{backgroundColor: 'red'}}>
+    <SafeAreaView style={{backgroundColor: '#eee'}}>
       <View style={styles.home}>
         <Header props={props} />
         <Query query={GET_CATEGORIES}>

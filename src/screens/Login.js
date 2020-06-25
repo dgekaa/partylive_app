@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
+  SafeAreaView,
 } from 'react-native';
 import {Mutation} from 'react-apollo';
 
@@ -23,57 +24,59 @@ const Login = (props) => {
   };
 
   return (
-    <View style={styles.loginWrap}>
-      <Header props={props} />
-      <View style={styles.login}>
-        <Mutation mutation={LOGIN}>
-          {(addMutation) => {
-            return (
-              <View style={styles.loginForm}>
-                <Text style={styles.headText}>Авторизация</Text>
-                <TextInput
-                  placeholder="email"
-                  style={[styles.input, validationError && styles.borderErr]}
-                  onChangeText={(em) => setEmail(em)}
-                  value={email}
-                />
-                <TextInput
-                  placeholder="password"
-                  style={[styles.input, validationError && styles.borderErr]}
-                  secureTextEntry
-                  onChangeText={(pass) => setPassword(pass)}
-                  value={password}
-                />
-                <Text style={styles.validationError}>{validationError}</Text>
-                <TouchableOpacity
-                  style={styles.btn}
-                  onPress={() => {
-                    addMutation({
-                      variables: {
-                        username: email,
-                        password,
-                      },
-                    })
-                      .then((res) => {
-                        props.navigation.state.params.changeLoginState(
-                          true,
-                          res.data.login.access_token,
-                        );
-                        props.navigation.navigate('Home');
-                        clearAllInputs();
+    <SafeAreaView style={{backgroundColor: '#eee'}}>
+      <View style={styles.loginWrap}>
+        <Header props={props} />
+        <View style={styles.login}>
+          <Mutation mutation={LOGIN}>
+            {(addMutation) => {
+              return (
+                <View style={styles.loginForm}>
+                  <Text style={styles.headText}>Авторизация</Text>
+                  <TextInput
+                    placeholder="email"
+                    style={[styles.input, validationError && styles.borderErr]}
+                    onChangeText={(em) => setEmail(em)}
+                    value={email}
+                  />
+                  <TextInput
+                    placeholder="password"
+                    style={[styles.input, validationError && styles.borderErr]}
+                    secureTextEntry
+                    onChangeText={(pass) => setPassword(pass)}
+                    value={password}
+                  />
+                  <Text style={styles.validationError}>{validationError}</Text>
+                  <TouchableOpacity
+                    style={styles.btn}
+                    onPress={() => {
+                      addMutation({
+                        variables: {
+                          username: email,
+                          password,
+                        },
                       })
-                      .catch(() => {
-                        setValidationError('Неверный логин либо пароль');
-                      });
-                  }}>
-                  <Text style={styles.btnText}>Вход</Text>
-                </TouchableOpacity>
-              </View>
-            );
-          }}
-        </Mutation>
+                        .then((res) => {
+                          props.navigation.state.params.changeLoginState(
+                            true,
+                            res.data.login.access_token,
+                          );
+                          props.navigation.navigate('Home');
+                          clearAllInputs();
+                        })
+                        .catch(() => {
+                          setValidationError('Неверный логин либо пароль');
+                        });
+                    }}>
+                    <Text style={styles.btnText}>Вход</Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+          </Mutation>
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
