@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react';
 import {
   Dimensions,
   ScrollView,
-  SafeAreaView,
   Text,
   StyleSheet,
   Image,
@@ -175,54 +174,51 @@ const App = () => {
   const SideMenu = (props) => {
     return (
       <ScrollView>
-        <SafeAreaView style={{backgroundColor: 'green'}}>
-          <List>
-            <ListItem onPress={() => props.navigation.navigate('Home')}>
-              <Text>Список</Text>
-            </ListItem>
-            <ListItem onPress={() => props.navigation.navigate('Map')}>
-              <Text>Карта</Text>
-            </ListItem>
-            {props.loggedIn && (
-              <ListItem
-                onPress={() => props.navigation.navigate('EditCompany')}>
-                <Text>Список заведений</Text>
-              </ListItem>
-            )}
-            {!props.loggedIn && (
-              <ListItem
-                onPress={() =>
-                  props.navigation.navigate('Login', {
-                    changeLoginState: props.changeLoginState,
-                  })
-                }>
-                <Text>Вход</Text>
-              </ListItem>
-            )}
-            {!props.loggedIn && (
-              <ListItem
-                onPress={() =>
-                  props.navigation.navigate('Registration', {
-                    changeLoginState: props.changeLoginState,
-                  })
-                }>
-                <Text>Регистрация</Text>
-              </ListItem>
-            )}
-          </List>
+        <List>
+          <ListItem onPress={() => props.navigation.navigate('Home')}>
+            <Text>Список</Text>
+          </ListItem>
+          <ListItem onPress={() => props.navigation.navigate('Map')}>
+            <Text>Карта</Text>
+          </ListItem>
           {props.loggedIn && (
-            <List style={styles.logoutBtn}>
-              <ListItem
-                noBorder
-                onPress={() => {
-                  props.changeLoginState(false);
-                  props.navigation.navigate('Home');
-                }}>
-                <Text style={styles.logoutBtnText}>Выход</Text>
-              </ListItem>
-            </List>
+            <ListItem onPress={() => props.navigation.navigate('EditCompany')}>
+              <Text>Список заведений</Text>
+            </ListItem>
           )}
-        </SafeAreaView>
+          {!props.loggedIn && (
+            <ListItem
+              onPress={() =>
+                props.navigation.navigate('Login', {
+                  changeLoginState: props.changeLoginState,
+                })
+              }>
+              <Text>Вход</Text>
+            </ListItem>
+          )}
+          {!props.loggedIn && (
+            <ListItem
+              onPress={() =>
+                props.navigation.navigate('Registration', {
+                  changeLoginState: props.changeLoginState,
+                })
+              }>
+              <Text>Регистрация</Text>
+            </ListItem>
+          )}
+        </List>
+        {props.loggedIn && (
+          <List style={styles.logoutBtn}>
+            <ListItem
+              noBorder
+              onPress={() => {
+                props.changeLoginState(false);
+                props.navigation.navigate('Home');
+              }}>
+              <Text style={styles.logoutBtnText}>Выход</Text>
+            </ListItem>
+          </List>
+        )}
       </ScrollView>
     );
   };
