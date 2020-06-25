@@ -185,6 +185,7 @@ const GoogleMap = ({
   const [distanceTo, setDistanceTo] = useState('');
   const [newRegion, setNewRegion] = useState('');
   const [addressFromCoord, setAddresFromCoord] = useState('');
+  const [isMapReady, setIsMapReady] = useState(false);
 
   useEffect(() => {
     requestLocationPermission(setLon, setLat);
@@ -213,6 +214,10 @@ const GoogleMap = ({
     setDistanceTo(dist);
   };
 
+  const onMapLayout = () => {
+    setIsMapReady(true);
+  };
+
   return (
     <View style={styles.container}>
       {ADDRESSfromCOORD && (
@@ -230,33 +235,32 @@ const GoogleMap = ({
         initialRegion={initialRegion}
         onRegionChangeComplete={(data) => setNewRegion(data)}
         onRegionChange={(data) => {}}
+        onLayout={onMapLayout}
         ADDRESSfromCOORD={
           ADDRESSfromCOORD && ADDRESSfromCOORD(addressFromCoord, newRegion)
         }>
-        {!!lat && (
+        {/* {!!lat && isMapReady && (
           <Marker coordinate={{latitude: +lat, longitude: +lon}}>
             <Image
               source={require('../img/dancer.png')}
               style={styles.dancer}
             />
           </Marker>
-        )}
+        )} */}
 
-        {!!onePlace && (
+        {/* {!!onePlace && isMapReady && (
           <Marker
             coordinate={{
               latitude: +onePlace.coordinates.split(',')[0],
               longitude: +onePlace.coordinates.split(',')[1],
             }}>
-            {/* <Image
-              source={require('../img/dancer.png')}
-              style={styles.dancer}
-            /> */}
+           
           </Marker>
-        )}
+        )} */}
 
-        {!!places &&
+        {/* {!!places &&
           !!places.length &&
+          isMapReady &&
           places.map((place) => {
             const location = place.coordinates.split(',');
             return (
@@ -276,7 +280,7 @@ const GoogleMap = ({
                 />
               </Marker>
             );
-          })}
+          })} */}
       </MapView>
     </View>
   );
@@ -300,6 +304,7 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+    // backgroundColor: 'red',
   },
   dancer: {
     width: 30,

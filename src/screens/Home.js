@@ -36,55 +36,55 @@ const Home = (props) => {
   };
 
   return (
-    <SafeAreaView style={{backgroundColor: '#eee'}}>
-      <View style={styles.home}>
-        <Header props={props} />
-        <Query query={GET_CATEGORIES}>
+    // <SafeAreaView style={{backgroundColor: '#eee'}}>
+    <View style={styles.home}>
+      <Header props={props} />
+      <Query query={GET_CATEGORIES}>
+        {({loading, error, data}) => {
+          if (loading) {
+            return <></>;
+          } else if (error) {
+            return <Text>Error! ${error.message}</Text>;
+          }
+          return <CompanyTypeNav data={data} clickedType={clickedType} />;
+        }}
+      </Query>
+      <View style={styles.content}>
+        <Query query={GET_PLACES}>
           {({loading, error, data}) => {
             if (loading) {
-              return <></>;
+              return (
+                <View>
+                  <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+              );
             } else if (error) {
               return <Text>Error! ${error.message}</Text>;
             }
-            return <CompanyTypeNav data={data} clickedType={clickedType} />;
+            setDATA(data);
+
+            if (companyData.length) {
+              return (
+                <FlatList
+                  data={companyData}
+                  numColumns={2}
+                  renderItem={({item}) => (
+                    <SmallCompanyBlock
+                      item={item}
+                      navigation={props.navigation}
+                    />
+                  )}
+                  keyExtractor={(item) => item.id}
+                />
+              );
+            } else {
+              return <Text style={styles.nullFilter}>Нет заведений</Text>;
+            }
           }}
         </Query>
-        <View style={styles.content}>
-          <Query query={GET_PLACES}>
-            {({loading, error, data}) => {
-              if (loading) {
-                return (
-                  <View>
-                    <ActivityIndicator size="large" color="#0000ff" />
-                  </View>
-                );
-              } else if (error) {
-                return <Text>Error! ${error.message}</Text>;
-              }
-              setDATA(data);
-
-              if (companyData.length) {
-                return (
-                  <FlatList
-                    data={companyData}
-                    numColumns={2}
-                    renderItem={({item}) => (
-                      <SmallCompanyBlock
-                        item={item}
-                        navigation={props.navigation}
-                      />
-                    )}
-                    keyExtractor={(item) => item.id}
-                  />
-                );
-              } else {
-                return <Text style={styles.nullFilter}>Нет заведений</Text>;
-              }
-            }}
-          </Query>
-        </View>
       </View>
-    </SafeAreaView>
+    </View>
+    // </SafeAreaView>
   );
 };
 

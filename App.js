@@ -174,8 +174,8 @@ const App = () => {
   // БОКОВОЕ МЕНЮ
   const SideMenu = (props) => {
     return (
-      <SafeAreaView style={{flex: 1}}>
-        <ScrollView>
+      <ScrollView>
+        <SafeAreaView style={{backgroundColor: 'green'}}>
           <List>
             <ListItem onPress={() => props.navigation.navigate('Home')}>
               <Text>Список</Text>
@@ -222,8 +222,8 @@ const App = () => {
               </ListItem>
             </List>
           )}
-        </ScrollView>
-      </SafeAreaView>
+        </SafeAreaView>
+      </ScrollView>
     );
   };
   const AppDrawer = createDrawerNavigator(

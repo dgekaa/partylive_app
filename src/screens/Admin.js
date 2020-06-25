@@ -650,534 +650,532 @@ const Admin = (props) => {
     return <Text>`Error! ${error.message}`</Text>;
   }
   return (
-    <SafeAreaView style={{backgroundColor: '#eee'}}>
-      <View style={styles.Admin}>
-        <Header props={props} />
-        <View style={styles.AdminInner}>
+    // <SafeAreaView style={{backgroundColor: '#eee'}}>
+    <View style={styles.Admin}>
+      <Header props={props} />
+      <View style={styles.AdminInner}>
+        <TouchableOpacity
+          style={styles.oneBlock}
+          onPress={() => moveIn(streamValue)}>
+          <Text style={styles.oneBlockText}>Стрим</Text>
+          <Text style={styles.oneBlockArrow}>&#62;</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.oneBlock}
+          onPress={() => moveIn(profileValue)}>
+          <Text style={styles.oneBlockText}>Профиль заведения</Text>
+          <Text style={styles.oneBlockArrow}>&#62;</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.oneBlock}
+          onPress={() => moveIn(workScheduleValue)}>
+          <Text style={styles.oneBlockText}>График работы</Text>
+          <Text style={styles.oneBlockArrow}>&#62;</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.oneBlock}
+          onPress={() => moveIn(streamScheduleValue)}>
+          <Text style={styles.oneBlockText}>График стримов</Text>
+          <Text style={styles.oneBlockArrow}>&#62;</Text>
+        </TouchableOpacity>
+        <View>
           <TouchableOpacity
             style={styles.oneBlock}
-            onPress={() => moveIn(streamValue)}>
-            <Text style={styles.oneBlockText}>Стрим</Text>
+            onPress={() => moveIn(translationValue)}>
+            <Text style={styles.oneBlockText}>Трансляции</Text>
             <Text style={styles.oneBlockArrow}>&#62;</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.oneBlock}
-            onPress={() => moveIn(profileValue)}>
-            <Text style={styles.oneBlockText}>Профиль заведения</Text>
-            <Text style={styles.oneBlockArrow}>&#62;</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.oneBlock}
-            onPress={() => moveIn(workScheduleValue)}>
-            <Text style={styles.oneBlockText}>График работы</Text>
-            <Text style={styles.oneBlockArrow}>&#62;</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.oneBlock}
-            onPress={() => moveIn(streamScheduleValue)}>
-            <Text style={styles.oneBlockText}>График стримов</Text>
-            <Text style={styles.oneBlockArrow}>&#62;</Text>
-          </TouchableOpacity>
-          <View>
-            <TouchableOpacity
-              style={styles.oneBlock}
-              onPress={() => moveIn(translationValue)}>
-              <Text style={styles.oneBlockText}>Трансляции</Text>
-              <Text style={styles.oneBlockArrow}>&#62;</Text>
-            </TouchableOpacity>
-          </View>
         </View>
-        <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: streamValue}]}>
-          <AdminHeader
-            cancel
-            ready
-            saveFunction={() => {
-              disableStream(isStreamOff ? dateNow : null);
-              if (inputCameraAddress) {
-                if (!data.place.streams[0]) {
-                  createStream(inputCameraAddress);
-                } else {
-                  updateStream(inputCameraAddress);
-                }
+      </View>
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: streamValue}]}>
+        <AdminHeader
+          cancel
+          ready
+          saveFunction={() => {
+            disableStream(isStreamOff ? dateNow : null);
+            if (inputCameraAddress) {
+              if (!data.place.streams[0]) {
+                createStream(inputCameraAddress);
+              } else {
+                updateStream(inputCameraAddress);
               }
-            }}
-            cancelFunction={() => {
-              data &&
-              data.place &&
-              data.place.streams &&
-              data.place.streams[0] &&
-              data.place.streams[0].see_you_tomorrow
-                ? setIsStreamOff(data.place.streams[0].see_you_tomorrow)
-                : setIsStreamOff(false);
-            }}
-            navigation={props.navigation}
-            moveOut={moveOut}
-            who={streamValue}
-            videoPause={videoPause}
+            }
+          }}
+          cancelFunction={() => {
+            data &&
+            data.place &&
+            data.place.streams &&
+            data.place.streams[0] &&
+            data.place.streams[0].see_you_tomorrow
+              ? setIsStreamOff(data.place.streams[0].see_you_tomorrow)
+              : setIsStreamOff(false);
+          }}
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={streamValue}
+          videoPause={videoPause}
+        />
+        <Text style={styles.headerAdminTitle}>Стрим</Text>
+        <View style={styles.videoWrap}>
+          <VideoPlayer
+            ref={videoRef}
+            poster={streams[0] && streams[0].preview}
+            paused={true}
+            source={{uri: streams[0] && streams[0].url}}
+            disableSeekbar
+            disableTimer
+            disableBack
+            disableFullscreen
+            toggleResizeModeOnFullscreen={false}
           />
-          <Text style={styles.headerAdminTitle}>Стрим</Text>
-          <View style={styles.videoWrap}>
-            <VideoPlayer
-              ref={videoRef}
-              poster={streams[0] && streams[0].preview}
-              paused={true}
-              source={{uri: streams[0] && streams[0].url}}
-              disableSeekbar
-              disableTimer
-              disableBack
-              disableFullscreen
-              toggleResizeModeOnFullscreen={false}
+        </View>
+        {data && data.place && data.place.streams && data.place.streams[0] && (
+          <View style={styles.streamOffMainWrap}>
+            <View style={styles.streamOffWrap}>
+              <Text style={styles.streamOffMainText}>Отключить стрим</Text>
+              <Text style={styles.streamOffText}>
+                Выключается до следующего дня
+              </Text>
+            </View>
+            <Switch
+              trackColor={{false: '#aeaeae', true: '#e32a6c'}}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={setIsStreamOff}
+              value={isStreamOff}
             />
           </View>
-          {data && data.place && data.place.streams && data.place.streams[0] && (
-            <View style={styles.streamOffMainWrap}>
-              <View style={styles.streamOffWrap}>
-                <Text style={styles.streamOffMainText}>Отключить стрим</Text>
-                <Text style={styles.streamOffText}>
-                  Выключается до следующего дня
-                </Text>
-              </View>
-              <Switch
-                trackColor={{false: '#aeaeae', true: '#e32a6c'}}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={setIsStreamOff}
-                value={isStreamOff}
-              />
-            </View>
-          )}
+        )}
 
-          <View style={styles.cameraAddress}>
-            <Text>Адрес камеры:</Text>
+        <View style={styles.cameraAddress}>
+          <Text>Адрес камеры:</Text>
+          <TextInput
+            style={styles.textInputStyle}
+            onChangeText={(text) => setInputCameraAddress(text)}
+            value={inputCameraAddress}
+            placeholder={
+              (data.place.streams &&
+                data.place.streams[0] &&
+                data.place.streams[0].url) ||
+              'Введите адрес стрима'
+            }
+          />
+        </View>
+      </Animated.ScrollView>
+
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: profileValue}]}>
+        <AdminHeader
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={profileValue}
+        />
+        <View style={styles.profileWrap}>
+          <Text style={styles.headerAdminTitle}>Профиль заведения</Text>
+          <View>
+            {pickerImageMime && pickerImageData ? (
+              <>
+                <Image
+                  style={styles.pickerImageStyle}
+                  source={{
+                    uri: `data:${pickerImageMime};base64,${pickerImageData}`,
+                  }}
+                />
+                <View>
+                  <TouchableOpacity onPress={() => goToPickImage()}>
+                    <Text>Изменить</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => {}}>
+                    <Text>Удалить</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <TouchableOpacity
+                style={styles.noPickerImageStyle}
+                onPress={() => goToPickImage()}>
+                <Text style={styles.noPickerImageText}>Загрузить фото</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <View style={styles.textInputWrap}>
+            <Text style={styles.textInputTitleText}>Название:</Text>
             <TextInput
               style={styles.textInputStyle}
-              onChangeText={(text) => setInputCameraAddress(text)}
-              value={inputCameraAddress}
-              placeholder={
-                (data.place.streams &&
-                  data.place.streams[0] &&
-                  data.place.streams[0].url) ||
-                'Введите адрес стрима'
-              }
+              onChangeText={(text) => setInputName(text)}
+              value={inputName}
+              placeholder={data.place.name}
             />
           </View>
-        </Animated.ScrollView>
-
-        <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: profileValue}]}>
-          <AdminHeader
-            navigation={props.navigation}
-            moveOut={moveOut}
-            who={profileValue}
-          />
-          <View style={styles.profileWrap}>
-            <Text style={styles.headerAdminTitle}>Профиль заведения</Text>
-            <View>
-              {pickerImageMime && pickerImageData ? (
-                <>
-                  <Image
-                    style={styles.pickerImageStyle}
-                    source={{
-                      uri: `data:${pickerImageMime};base64,${pickerImageData}`,
-                    }}
-                  />
-                  <View>
-                    <TouchableOpacity onPress={() => goToPickImage()}>
-                      <Text>Изменить</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {}}>
-                      <Text>Удалить</Text>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              ) : (
-                <TouchableOpacity
-                  style={styles.noPickerImageStyle}
-                  onPress={() => goToPickImage()}>
-                  <Text style={styles.noPickerImageText}>Загрузить фото</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <View style={styles.textInputWrap}>
-              <Text style={styles.textInputTitleText}>Название:</Text>
-              <TextInput
-                style={styles.textInputStyle}
-                onChangeText={(text) => setInputName(text)}
-                value={inputName}
-                placeholder={data.place.name}
-              />
-            </View>
-            <View style={styles.textInputWrap}>
-              <Text style={styles.textInputTitleText}>Псевдоним:</Text>
-              <TextInput
-                style={styles.textInputStyle}
-                onChangeText={(text) => setInputAlias(text)}
-                value={inputAlias}
-                placeholder={data.place.alias}
-              />
-            </View>
-            <View style={styles.textInputWrap}>
-              <Text style={styles.textInputTitleText}>Категория:</Text>
-              <View style={styles.btnCategoryWrap}>
-                <View style={styles.btnCategoryOuter}>
-                  <Text style={styles.btnCategoryInner}>
-                    {data.place.categories[0].name}
-                  </Text>
-                </View>
-                <TouchableOpacity onPress={() => moveIn(chooseCategoryValue)}>
-                  <Text style={styles.chooseNewCategory}>Выбрать...</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <View style={styles.textInputWrap}>
-              <Text style={styles.textInputTitleText}>Адрес:</Text>
-              <TouchableOpacity
-                style={styles.addressText}
-                onPress={() => moveIn(addressValue)}>
-                {/* ######################################3 */}
-                <TextInput
-                  style={styles.textInputStyle}
-                  value={data.place.address}
-                  contextMenuHidden={true}
-                  editable={false}
-                />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.textInputWrap}>
-              <View style={styles.textInputTitleText}>
-                <Text style={styles.textInputText}>Описание:</Text>
-              </View>
-              <TouchableOpacity
-                style={styles.textInputMultilineStyleWrap}
-                onPress={() => moveIn(descriptionValue)}>
-                <Text style={styles.textInputMultilineStyle} numberOfLines={2}>
-                  {inputDescription}
+          <View style={styles.textInputWrap}>
+            <Text style={styles.textInputTitleText}>Псевдоним:</Text>
+            <TextInput
+              style={styles.textInputStyle}
+              onChangeText={(text) => setInputAlias(text)}
+              value={inputAlias}
+              placeholder={data.place.alias}
+            />
+          </View>
+          <View style={styles.textInputWrap}>
+            <Text style={styles.textInputTitleText}>Категория:</Text>
+            <View style={styles.btnCategoryWrap}>
+              <View style={styles.btnCategoryOuter}>
+                <Text style={styles.btnCategoryInner}>
+                  {data.place.categories[0].name}
                 </Text>
+              </View>
+              <TouchableOpacity onPress={() => moveIn(chooseCategoryValue)}>
+                <Text style={styles.chooseNewCategory}>Выбрать...</Text>
               </TouchableOpacity>
             </View>
+          </View>
+          <View style={styles.textInputWrap}>
+            <Text style={styles.textInputTitleText}>Адрес:</Text>
             <TouchableOpacity
-              style={styles.pinkBtn}
-              onPress={() => saveNewData()}>
-              <Text style={styles.pinkBtnText}>СОХРАНИТЬ</Text>
+              style={styles.addressText}
+              onPress={() => moveIn(addressValue)}>
+              {/* ######################################3 */}
+              <TextInput
+                style={styles.textInputStyle}
+                value={data.place.address}
+                contextMenuHidden={true}
+                editable={false}
+              />
             </TouchableOpacity>
           </View>
-        </Animated.ScrollView>
+          <View style={styles.textInputWrap}>
+            <View style={styles.textInputTitleText}>
+              <Text style={styles.textInputText}>Описание:</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.textInputMultilineStyleWrap}
+              onPress={() => moveIn(descriptionValue)}>
+              <Text style={styles.textInputMultilineStyle} numberOfLines={2}>
+                {inputDescription}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={styles.pinkBtn}
+            onPress={() => saveNewData()}>
+            <Text style={styles.pinkBtnText}>СОХРАНИТЬ</Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.ScrollView>
 
-        <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: chooseCategoryValue}]}>
-          <AdminHeader
-            cancel
-            ready
-            saveFunction={() => chooseCategory()}
-            cancelFunction={() => {}}
-            navigation={props.navigation}
-            moveOut={moveOut}
-            who={chooseCategoryValue}
-          />
-          <Text style={styles.headerAdminTitle}>Тип заведения</Text>
-          <View style={styles.categoryBtnsRow}>
-            <Query query={GET_CATEGORIES}>
-              {(prop) => {
-                if (prop.loading) {
-                  return (
-                    <View>
-                      <ActivityIndicator size="large" color="#0000ff" />
-                    </View>
-                  );
-                }
-                if (prop.error) {
-                  return <Text>Error! ${prop.error.message}</Text>;
-                }
-                return prop.data.categories.map((el, i) => (
-                  <TouchableOpacity
-                    key={i}
-                    style={[
-                      styles.btnCategoryOuter,
-                      styles.btnCategoryInNewWindow,
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: chooseCategoryValue}]}>
+        <AdminHeader
+          cancel
+          ready
+          saveFunction={() => chooseCategory()}
+          cancelFunction={() => {}}
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={chooseCategoryValue}
+        />
+        <Text style={styles.headerAdminTitle}>Тип заведения</Text>
+        <View style={styles.categoryBtnsRow}>
+          <Query query={GET_CATEGORIES}>
+            {(prop) => {
+              if (prop.loading) {
+                return (
+                  <View>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  </View>
+                );
+              }
+              if (prop.error) {
+                return <Text>Error! ${prop.error.message}</Text>;
+              }
+              return prop.data.categories.map((el, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={[
+                    styles.btnCategoryOuter,
+                    styles.btnCategoryInNewWindow,
+                    typeOfCompany && typeOfCompany === el.name
+                      ? styles.bacgrBtn
+                      : !typeOfCompany &&
+                        el.name &&
+                        data.place.categories &&
+                        data.place.categories[0] &&
+                        data.place.categories[0].name === el.name
+                      ? styles.bacgrBtn
+                      : {},
+                  ]}
+                  onPress={() => {
+                    setTypeOfCompany(el.name);
+                    setTypeOfCompanyId(el.id);
+                  }}>
+                  <Text
+                    style={
                       typeOfCompany && typeOfCompany === el.name
-                        ? styles.bacgrBtn
+                        ? {
+                            color: '#fff',
+                            textTransform: 'uppercase',
+                            fontWeight: 'bold',
+                          }
                         : !typeOfCompany &&
                           el.name &&
                           data.place.categories &&
                           data.place.categories[0] &&
                           data.place.categories[0].name === el.name
-                        ? styles.bacgrBtn
-                        : {},
-                    ]}
-                    onPress={() => {
-                      setTypeOfCompany(el.name);
-                      setTypeOfCompanyId(el.id);
-                    }}>
-                    <Text
-                      style={
-                        typeOfCompany && typeOfCompany === el.name
-                          ? {
-                              color: '#fff',
-                              textTransform: 'uppercase',
-                              fontWeight: 'bold',
-                            }
-                          : !typeOfCompany &&
-                            el.name &&
-                            data.place.categories &&
-                            data.place.categories[0] &&
-                            data.place.categories[0].name === el.name
-                          ? {
-                              color: '#fff',
-                              textTransform: 'uppercase',
-                              fontWeight: 'bold',
-                            }
-                          : {
-                              color: '#000',
-                              textTransform: 'uppercase',
+                        ? {
+                            color: '#fff',
+                            textTransform: 'uppercase',
+                            fontWeight: 'bold',
+                          }
+                        : {
+                            color: '#000',
+                            textTransform: 'uppercase',
 
-                              fontWeight: 'bold',
-                            }
-                      }>
-                      {el.name}
-                    </Text>
-                  </TouchableOpacity>
-                ));
-              }}
-            </Query>
-          </View>
-        </Animated.ScrollView>
-
-        <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: descriptionValue}]}>
-          <AdminHeader
-            cancel
-            ready
-            saveFunction={() => saveDescription()}
-            cancelFunction={() => {
-              data && data.place && data.place.description
-                ? setInputDescription(data.place.description)
-                : setInputDescription('');
+                            fontWeight: 'bold',
+                          }
+                    }>
+                    {el.name}
+                  </Text>
+                </TouchableOpacity>
+              ));
             }}
-            navigation={props.navigation}
-            moveOut={moveOut}
-            who={descriptionValue}
-          />
-          <Text style={styles.headerAdminTitle}>Описание</Text>
-          <TextInput
-            maxLength={decriptionLengthLimit}
-            multiline={true}
-            style={styles.textInputDesc}
-            onChangeText={(text) => setInputDescription(text)}
-            value={inputDescription}
-          />
-          <Text
-            style={[
-              styles.textDescLimit,
-              inputDescription
-                ? inputDescription.length === decriptionLengthLimit
-                  ? {color: 'red'}
-                  : {color: 'green'}
-                : data.place.description.length === decriptionLengthLimit
+          </Query>
+        </View>
+      </Animated.ScrollView>
+
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: descriptionValue}]}>
+        <AdminHeader
+          cancel
+          ready
+          saveFunction={() => saveDescription()}
+          cancelFunction={() => {
+            data && data.place && data.place.description
+              ? setInputDescription(data.place.description)
+              : setInputDescription('');
+          }}
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={descriptionValue}
+        />
+        <Text style={styles.headerAdminTitle}>Описание</Text>
+        <TextInput
+          maxLength={decriptionLengthLimit}
+          multiline={true}
+          style={styles.textInputDesc}
+          onChangeText={(text) => setInputDescription(text)}
+          value={inputDescription}
+        />
+        <Text
+          style={[
+            styles.textDescLimit,
+            inputDescription
+              ? inputDescription.length === decriptionLengthLimit
                 ? {color: 'red'}
-                : {color: 'green'},
-            ]}>
-            {inputDescription
-              ? inputDescription.length
-              : data.place.description.length}
-            / {decriptionLengthLimit}
+                : {color: 'green'}
+              : data.place.description.length === decriptionLengthLimit
+              ? {color: 'red'}
+              : {color: 'green'},
+          ]}>
+          {inputDescription
+            ? inputDescription.length
+            : data.place.description.length}
+          / {decriptionLengthLimit}
+        </Text>
+      </Animated.ScrollView>
+
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: addressValue}]}>
+        <AdminHeader
+          cancel
+          ready
+          saveFunction={() => saveNewAddress()}
+          cancelFunction={() => {}}
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={addressValue}
+        />
+        <View style={styles.mapWrap}>
+          <GoogleMap
+            onePlace={props.navigation.state.params.item}
+            ADDRESSfromCOORD={(data, coord) => ADDRESSfromCOORD(data, coord)}
+          />
+          <Text style={styles.addressStyle}>
+            {ADDRESS && ADDRESS.split(',')[0]}
           </Text>
-        </Animated.ScrollView>
+        </View>
+      </Animated.ScrollView>
 
-        <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: addressValue}]}>
-          <AdminHeader
-            cancel
-            ready
-            saveFunction={() => saveNewAddress()}
-            cancelFunction={() => {}}
-            navigation={props.navigation}
-            moveOut={moveOut}
-            who={addressValue}
-          />
-          <View style={styles.mapWrap}>
-            <GoogleMap
-              onePlace={props.navigation.state.params.item}
-              ADDRESSfromCOORD={(data, coord) => ADDRESSfromCOORD(data, coord)}
-            />
-            <Text style={styles.addressStyle}>
-              {ADDRESS && ADDRESS.split(',')[0]}
-            </Text>
-          </View>
-        </Animated.ScrollView>
-
-        <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: workScheduleValue}]}>
-          <AdminHeader
-            cancel
-            ready
-            navigation={props.navigation}
-            moveOut={moveOut}
-            who={workScheduleValue}
-          />
-          <Text style={styles.headerAdminTitle}>График работы</Text>
-          {EN_SHORT_DAY_OF_WEEK.map((el, i) => {
-            let oneDay = SetNewTimeObject(data.place.schedules)[el.day];
-            return (
-              <View
-                key={i}
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: workScheduleValue}]}>
+        <AdminHeader
+          cancel
+          ready
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={workScheduleValue}
+        />
+        <Text style={styles.headerAdminTitle}>График работы</Text>
+        {EN_SHORT_DAY_OF_WEEK.map((el, i) => {
+          let oneDay = SetNewTimeObject(data.place.schedules)[el.day];
+          return (
+            <View
+              key={i}
+              style={[
+                styles.graphRow,
+                i === 6 && {
+                  borderBottomColor: '#e3e3e3',
+                  borderBottomWidth: 2,
+                },
+              ]}>
+              <Text
                 style={[
-                  styles.graphRow,
-                  i === 6 && {
-                    borderBottomColor: '#e3e3e3',
-                    borderBottomWidth: 2,
-                  },
+                  styles.graphDay,
+                  numberDayNow === i && {color: '#e32a6c'},
                 ]}>
+                {EN_SHORT_TO_RU_SHORT[el.day]}
+                {oneDay &&
+                  oneDay.start_time &&
+                  (oneDay.start_time.split(':')[0] * 3600 +
+                    oneDay.start_time.split(':')[1] * 60 <=
+                  oneDay.end_time.split(':')[0] * 3600 +
+                    oneDay.end_time.split(':')[1] * 60
+                    ? ''
+                    : `-${SHORT_DAY_OF_WEEK[tomorrowFromDay(i)]}`)}
+              </Text>
+              <TouchableOpacity
+                style={styles.graphTime}
+                onPress={() => {
+                  setSelectedDay(oneDay);
+                  setEnumWeekName(el.day);
+                  setPopupVisible(true);
+                  setIsClickedWorkTime(true);
+                }}>
                 <Text
                   style={[
-                    styles.graphDay,
-                    numberDayNow === i && {color: '#e32a6c'},
+                    styles.graphTimeText,
+                    numberDayNow === i && {fontWeight: 'bold'},
                   ]}>
-                  {EN_SHORT_TO_RU_SHORT[el.day]}
-                  {oneDay &&
-                    oneDay.start_time &&
-                    (oneDay.start_time.split(':')[0] * 3600 +
-                      oneDay.start_time.split(':')[1] * 60 <=
-                    oneDay.end_time.split(':')[0] * 3600 +
-                      oneDay.end_time.split(':')[1] * 60
-                      ? ''
-                      : `-${SHORT_DAY_OF_WEEK[tomorrowFromDay(i)]}`)}
+                  {oneDay && oneDay.id
+                    ? oneDay.start_time + '-' + oneDay.end_time
+                    : '-'}
                 </Text>
-                <TouchableOpacity
-                  style={styles.graphTime}
-                  onPress={() => {
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.graphDayOf}
+                onPress={() => setAsDayOf(oneDay)}>
+                {oneDay && oneDay.id && <Text style={styles.onOff}>Вых</Text>}
+              </TouchableOpacity>
+            </View>
+          );
+        })}
+      </Animated.ScrollView>
+
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: streamScheduleValue}]}>
+        <AdminHeader
+          cancel
+          ready
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={streamScheduleValue}
+        />
+
+        <Text style={styles.headerAdminTitle}>График трансляций</Text>
+        {EN_SHORT_DAY_OF_WEEK.map((el, i) => {
+          let oneDay = SetNewTimeObject(
+            data.place.streams[0] ? data.place.streams[0].schedules : [],
+          )[el.day];
+
+          return (
+            <View
+              key={i}
+              style={[
+                styles.graphRow,
+                i === 6 && {
+                  borderBottomColor: '#e3e3e3',
+                  borderBottomWidth: 2,
+                },
+              ]}>
+              <Text
+                style={[
+                  styles.graphDay,
+                  numberDayNow === i && {color: '#e32a6c'},
+                ]}>
+                {EN_SHORT_TO_RU_SHORT[el.day]}
+                {oneDay &&
+                  oneDay.start_time &&
+                  (oneDay.start_time.split(':')[0] * 3600 +
+                    oneDay.start_time.split(':')[1] * 60 <=
+                  oneDay.end_time.split(':')[0] * 3600 +
+                    oneDay.end_time.split(':')[1] * 60
+                    ? ''
+                    : `-${SHORT_DAY_OF_WEEK[tomorrowFromDay(i)]}`)}
+              </Text>
+              <TouchableOpacity
+                style={styles.graphTime}
+                onPress={() => {
+                  if (!data.place.streams[0]) {
+                    Alert.alert('Оповещение', 'Стрим еще не создан');
+                  } else {
                     setSelectedDay(oneDay);
                     setEnumWeekName(el.day);
                     setPopupVisible(true);
-                    setIsClickedWorkTime(true);
-                  }}>
-                  <Text
-                    style={[
-                      styles.graphTimeText,
-                      numberDayNow === i && {fontWeight: 'bold'},
-                    ]}>
-                    {oneDay && oneDay.id
-                      ? oneDay.start_time + '-' + oneDay.end_time
-                      : '-'}
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.graphDayOf}
-                  onPress={() => setAsDayOf(oneDay)}>
-                  {oneDay && oneDay.id && <Text style={styles.onOff}>Вых</Text>}
-                </TouchableOpacity>
-              </View>
-            );
-          })}
-        </Animated.ScrollView>
-
-        <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: streamScheduleValue}]}>
-          <AdminHeader
-            cancel
-            ready
-            navigation={props.navigation}
-            moveOut={moveOut}
-            who={streamScheduleValue}
-          />
-
-          <Text style={styles.headerAdminTitle}>График трансляций</Text>
-          {EN_SHORT_DAY_OF_WEEK.map((el, i) => {
-            let oneDay = SetNewTimeObject(
-              data.place.streams[0] ? data.place.streams[0].schedules : [],
-            )[el.day];
-
-            return (
-              <View
-                key={i}
-                style={[
-                  styles.graphRow,
-                  i === 6 && {
-                    borderBottomColor: '#e3e3e3',
-                    borderBottomWidth: 2,
-                  },
-                ]}>
+                    setIsClickedWorkTime(false);
+                  }
+                }}>
                 <Text
                   style={[
-                    styles.graphDay,
-                    numberDayNow === i && {color: '#e32a6c'},
+                    styles.graphTimeText,
+                    numberDayNow === i && {fontWeight: 'bold'},
                   ]}>
-                  {EN_SHORT_TO_RU_SHORT[el.day]}
-                  {oneDay &&
-                    oneDay.start_time &&
-                    (oneDay.start_time.split(':')[0] * 3600 +
-                      oneDay.start_time.split(':')[1] * 60 <=
-                    oneDay.end_time.split(':')[0] * 3600 +
-                      oneDay.end_time.split(':')[1] * 60
-                      ? ''
-                      : `-${SHORT_DAY_OF_WEEK[tomorrowFromDay(i)]}`)}
+                  {oneDay && oneDay.id
+                    ? oneDay.start_time + '-' + oneDay.end_time
+                    : '-'}
                 </Text>
-                <TouchableOpacity
-                  style={styles.graphTime}
-                  onPress={() => {
-                    if (!data.place.streams[0]) {
-                      Alert.alert('Оповещение', 'Стрим еще не создан');
-                    } else {
-                      setSelectedDay(oneDay);
-                      setEnumWeekName(el.day);
-                      setPopupVisible(true);
-                      setIsClickedWorkTime(false);
-                    }
-                  }}>
-                  <Text
-                    style={[
-                      styles.graphTimeText,
-                      numberDayNow === i && {fontWeight: 'bold'},
-                    ]}>
-                    {oneDay && oneDay.id
-                      ? oneDay.start_time + '-' + oneDay.end_time
-                      : '-'}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.graphDayOf}
-                  onPress={() => {
-                    if (!data.place.streams[0]) {
-                      Alert.alert('Оповещение', 'Стрим еще не создан');
-                    } else {
-                      setAsDayOf(oneDay);
-                    }
-                  }}>
-                  {oneDay && oneDay.id && (
-                    <Text style={styles.onOff}>Откл</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            );
-          })}
-        </Animated.ScrollView>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.graphDayOf}
+                onPress={() => {
+                  if (!data.place.streams[0]) {
+                    Alert.alert('Оповещение', 'Стрим еще не создан');
+                  } else {
+                    setAsDayOf(oneDay);
+                  }
+                }}>
+                {oneDay && oneDay.id && <Text style={styles.onOff}>Откл</Text>}
+              </TouchableOpacity>
+            </View>
+          );
+        })}
+      </Animated.ScrollView>
 
-        <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: translationValue}]}>
-          <AdminHeader
-            navigation={props.navigation}
-            moveOut={moveOut}
-            who={translationValue}
-          />
-          <NodeCameraView
-            style={styles.nodeCameraStyle}
-            ref={vbRef}
-            outputUrl={'rtmp://194.87.235.18/streaming/klever'}
-            camera={{cameraId: 1, cameraFrontMirror: true}}
-            audio={{bitrate: 60000, profile: 1, samplerate: 44100}}
-            video={{
-              preset: 12,
-              bitrate: 300000,
-              profile: 1,
-              fps: 15,
-              videoFrontMirror: false,
-            }}
-            autopreview={true}
-          />
-          <Text style={styles.headerTranslTitle}>ТРАНСЛЯЦИЯ</Text>
+      <Animated.ScrollView
+        style={[styles.sliderAdminMenu, {translateX: translationValue}]}>
+        <AdminHeader
+          navigation={props.navigation}
+          moveOut={moveOut}
+          who={translationValue}
+        />
+        <NodeCameraView
+          style={styles.nodeCameraStyle}
+          ref={vbRef}
+          outputUrl={'rtmp://194.87.235.18/streaming/klever'}
+          camera={{cameraId: 1, cameraFrontMirror: true}}
+          audio={{bitrate: 60000, profile: 1, samplerate: 44100}}
+          video={{
+            preset: 12,
+            bitrate: 300000,
+            profile: 1,
+            fps: 15,
+            videoFrontMirror: false,
+          }}
+          autopreview={true}
+        />
+        <Text style={styles.headerTranslTitle}>ТРАНСЛЯЦИЯ</Text>
 
-          {/* <TouchableOpacity
+        {/* <TouchableOpacity
           style={{height: 50}}
           onPress={() => {
             vbRef.current.switchCamera();
@@ -1185,115 +1183,115 @@ const Admin = (props) => {
           <Text>SWITCH CAMERA</Text>
         </TouchableOpacity> */}
 
-          <TouchableOpacity
-            style={styles.translStartStopBtn}
-            onPress={() => {
-              requestCameraPermission();
-              if (isPublish) {
-                setPublishBtnTitle('Начать трансляцию');
-                setIsPublish(false);
-                vbRef.current.stop();
-              } else {
-                setPublishBtnTitle('Остановить трансляцию');
-                setIsPublish(true);
-                vbRef.current.start();
-              }
-            }}>
-            <Text
-              style={[
-                styles.startTranslBtn,
-                isPublish
-                  ? styles.startTranslBtnClicked
-                  : styles.startTranslBtnNotClicked,
-              ]}>
-              {publishBtnTitle}
-            </Text>
-          </TouchableOpacity>
-        </Animated.ScrollView>
+        <TouchableOpacity
+          style={styles.translStartStopBtn}
+          onPress={() => {
+            requestCameraPermission();
+            if (isPublish) {
+              setPublishBtnTitle('Начать трансляцию');
+              setIsPublish(false);
+              vbRef.current.stop();
+            } else {
+              setPublishBtnTitle('Остановить трансляцию');
+              setIsPublish(true);
+              vbRef.current.start();
+            }
+          }}>
+          <Text
+            style={[
+              styles.startTranslBtn,
+              isPublish
+                ? styles.startTranslBtnClicked
+                : styles.startTranslBtnNotClicked,
+            ]}>
+            {publishBtnTitle}
+          </Text>
+        </TouchableOpacity>
+      </Animated.ScrollView>
 
-        <Dialog
-          visible={popupVisible}
-          onTouchOutside={() => setPopupVisible(false)}
-          dialogAnimation={
-            new ScaleAnimation({
-              initialValue: 0,
-              useNativeDriver: true,
-            })
-          }>
-          <DialogContent>
-            {selectedDay && (
-              <View style={styles.dialogContent}>
-                <View style={styles.dialogContentDays}>
-                  <Text>{EN_SHORT_TO_RU_SHORT[enumWeekName]}</Text>
+      <Dialog
+        visible={popupVisible}
+        onTouchOutside={() => setPopupVisible(false)}
+        dialogAnimation={
+          new ScaleAnimation({
+            initialValue: 0,
+            useNativeDriver: true,
+          })
+        }>
+        <DialogContent>
+          {selectedDay && (
+            <View style={styles.dialogContent}>
+              <View style={styles.dialogContentDays}>
+                <Text>{EN_SHORT_TO_RU_SHORT[enumWeekName]}</Text>
 
-                  {selectedDay.start_time ? (
-                    selectedDay.start_time.split(':')[0] * 3600 +
-                      selectedDay.start_time.split(':')[1] * 60 <=
-                    selectedDay.end_time.split(':')[0] * 3600 +
-                      selectedDay.end_time.split(':')[1] * 60 ? (
-                      <Text>{EN_SHORT_TO_RU_SHORT[enumWeekName]}</Text>
-                    ) : (
-                      <Text>
-                        {
-                          SHORT_DAY_OF_WEEK[
-                            tomorrowFromDay(EN_SHORT_TO_NUMBER[enumWeekName])
-                          ]
-                        }
-                      </Text>
-                    )
-                  ) : (
+                {selectedDay.start_time ? (
+                  selectedDay.start_time.split(':')[0] * 3600 +
+                    selectedDay.start_time.split(':')[1] * 60 <=
+                  selectedDay.end_time.split(':')[0] * 3600 +
+                    selectedDay.end_time.split(':')[1] * 60 ? (
                     <Text>{EN_SHORT_TO_RU_SHORT[enumWeekName]}</Text>
-                  )}
-                </View>
-                <View style={styles.dialogTimeBlockWrap}>
-                  <TouchableOpacity
-                    style={styles.dialogTimeBlock}
-                    onPress={() => {
-                      setIsPickStartTime(true);
-                      showTimepicker();
-                    }}>
+                  ) : (
                     <Text>
-                      {pickedStartTime || selectedDay.start_time || '-'}
+                      {
+                        SHORT_DAY_OF_WEEK[
+                          tomorrowFromDay(EN_SHORT_TO_NUMBER[enumWeekName])
+                        ]
+                      }
                     </Text>
-                  </TouchableOpacity>
-                  <View style={styles.space} />
-                  <TouchableOpacity
-                    style={styles.dialogTimeBlock}
-                    onPress={() => {
-                      setIsPickStartTime(false);
-                      showTimepicker();
-                    }}>
-                    <Text>{pickedEndTime || selectedDay.end_time || '-'}</Text>
-                  </TouchableOpacity>
-                </View>
+                  )
+                ) : (
+                  <Text>{EN_SHORT_TO_RU_SHORT[enumWeekName]}</Text>
+                )}
+              </View>
+              <View style={styles.dialogTimeBlockWrap}>
                 <TouchableOpacity
-                  style={styles.saveBtn}
+                  style={styles.dialogTimeBlock}
                   onPress={() => {
-                    if (isClickedWorkTime) {
-                      saveWorkTime();
-                    } else {
-                      saveStreamTime();
-                    }
+                    setIsPickStartTime(true);
+                    showTimepicker();
                   }}>
-                  <Text style={styles.saveBtnText}>Сохранить</Text>
+                  <Text>
+                    {pickedStartTime || selectedDay.start_time || '-'}
+                  </Text>
+                </TouchableOpacity>
+                <View style={styles.space} />
+                <TouchableOpacity
+                  style={styles.dialogTimeBlock}
+                  onPress={() => {
+                    setIsPickStartTime(false);
+                    showTimepicker();
+                  }}>
+                  <Text>{pickedEndTime || selectedDay.end_time || '-'}</Text>
                 </TouchableOpacity>
               </View>
-            )}
-          </DialogContent>
-        </Dialog>
-        {show && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            timeZoneOffsetInMinutes={0}
-            value={date}
-            mode={mode}
-            is24Hour={true}
-            display="spinner"
-            onChange={onChangeTime}
-          />
-        )}
-      </View>
-    </SafeAreaView>
+              <TouchableOpacity
+                style={styles.saveBtn}
+                onPress={() => {
+                  if (isClickedWorkTime) {
+                    saveWorkTime();
+                  } else {
+                    saveStreamTime();
+                  }
+                }}>
+                <Text style={styles.saveBtnText}>Сохранить</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </DialogContent>
+      </Dialog>
+      {show && (
+        <DateTimePicker
+          testID="dateTimePicker"
+          timeZoneOffsetInMinutes={0}
+          value={date}
+          mode={mode}
+          is24Hour={true}
+          display="spinner"
+          onChange={onChangeTime}
+        />
+      )}
+    </View>
+    // </SafeAreaView>
   );
 };
 

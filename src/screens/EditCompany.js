@@ -59,47 +59,47 @@ const EditCompany = (props) => {
   };
 
   return (
-    <SafeAreaView style={{backgroundColor: '#eee'}}>
-      <View style={styles.EditCompany}>
-        <Header props={props} />
-        <Text style={styles.headerText}>Список заведений</Text>
-        <ScrollView>
-          {data.places.map((el) => (
-            <View style={styles.row} key={el.id}>
-              <TouchableOpacity
-                style={styles.delete}
-                onPress={() => {
-                  deleteOne(el.id);
-                }}>
-                <Text style={styles.deleteText} numberOfLines={1}>
-                  &#215;
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.textRowName}
-                onPress={() => props.navigation.navigate('Admin', {item: el})}>
-                <Text style={styles.textRowInnerName} numberOfLines={1}>
-                  {el.name}
-                </Text>
-              </TouchableOpacity>
-              <Text style={styles.textRowAlias} numberOfLines={1}>
-                {el.alias}
+    // <SafeAreaView style={{backgroundColor: '#eee'}}>
+    <View style={styles.EditCompany}>
+      <Header props={props} />
+      <Text style={styles.headerText}>Список заведений</Text>
+      <ScrollView>
+        {data.places.map((el) => (
+          <View style={styles.row} key={el.id}>
+            <TouchableOpacity
+              style={styles.delete}
+              onPress={() => {
+                deleteOne(el.id);
+              }}>
+              <Text style={styles.deleteText} numberOfLines={1}>
+                &#215;
               </Text>
-              <Text style={styles.textRowType}>
-                {el.categories[0] && el.categories[0].name.toLowerCase()}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.textRowName}
+              onPress={() => props.navigation.navigate('Admin', {item: el})}>
+              <Text style={styles.textRowInnerName} numberOfLines={1}>
+                {el.name}
               </Text>
-            </View>
-          ))}
-          <TouchableOpacity
-            style={styles.createCompany}
-            onPress={() => {
-              create();
-            }}>
-            <Text style={styles.createCompanyText}>СОЗДАТЬ ЗАВЕДЕНИЕ</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+            </TouchableOpacity>
+            <Text style={styles.textRowAlias} numberOfLines={1}>
+              {el.alias}
+            </Text>
+            <Text style={styles.textRowType}>
+              {el.categories[0] && el.categories[0].name.toLowerCase()}
+            </Text>
+          </View>
+        ))}
+        <TouchableOpacity
+          style={styles.createCompany}
+          onPress={() => {
+            create();
+          }}>
+          <Text style={styles.createCompanyText}>СОЗДАТЬ ЗАВЕДЕНИЕ</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
+    // </SafeAreaView>
   );
 };
 

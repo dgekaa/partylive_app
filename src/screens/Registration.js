@@ -61,67 +61,67 @@ const Registration = (props) => {
   };
 
   return (
-    <SafeAreaView style={{backgroundColor: '#eee'}}>
-      <View style={styles.loginWrap}>
-        <Header props={props} />
-        <View style={styles.login}>
-          <Mutation mutation={REGISTER}>
-            {(addMutation) => {
-              return (
-                <View style={styles.loginForm}>
-                  <Text style={styles.headText}>Регистрация</Text>
-                  <TextInput
-                    placeholder="name"
-                    style={[styles.input, nameErr && styles.borderErr]}
-                    onChangeText={(n) => setName(n)}
-                    value={name}
-                  />
-                  <TextInput
-                    placeholder="email"
-                    style={[styles.input, emailErr && styles.borderErr]}
-                    onChangeText={(em) => setEmail(em)}
-                    value={email}
-                  />
-                  <TextInput
-                    placeholder="password"
-                    style={[styles.input, passwordErr && styles.borderErr]}
-                    secureTextEntry
-                    onChangeText={(pass) => setPassword(pass)}
-                    value={password}
-                  />
-                  <TextInput
-                    placeholder="repassword"
-                    style={[styles.input, repasswordErr && styles.borderErr]}
-                    secureTextEntry
-                    onChangeText={(repass) => setRepassword(repass)}
-                    value={repassword}
-                  />
-                  <Text style={styles.validationErr}>
-                    {nameErr || emailErr || passwordErr || repasswordErr}
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.btn}
-                    onPress={() => {
-                      addMutation({
-                        variables: {
-                          name,
-                          email,
-                          password,
-                          password_confirmation: repassword,
-                        },
-                      })
-                        .then((res) => registerHandle(res))
-                        .catch((err) => registerErrHandle(err));
-                    }}>
-                    <Text style={styles.btnText}>Зарегистрироваться</Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            }}
-          </Mutation>
-        </View>
+    // <SafeAreaView style={{backgroundColor: '#eee'}}>
+    <View style={styles.loginWrap}>
+      <Header props={props} />
+      <View style={styles.login}>
+        <Mutation mutation={REGISTER}>
+          {(addMutation) => {
+            return (
+              <View style={styles.loginForm}>
+                <Text style={styles.headText}>Регистрация</Text>
+                <TextInput
+                  placeholder="name"
+                  style={[styles.input, nameErr && styles.borderErr]}
+                  onChangeText={(n) => setName(n)}
+                  value={name}
+                />
+                <TextInput
+                  placeholder="email"
+                  style={[styles.input, emailErr && styles.borderErr]}
+                  onChangeText={(em) => setEmail(em)}
+                  value={email}
+                />
+                <TextInput
+                  placeholder="password"
+                  style={[styles.input, passwordErr && styles.borderErr]}
+                  secureTextEntry
+                  onChangeText={(pass) => setPassword(pass)}
+                  value={password}
+                />
+                <TextInput
+                  placeholder="repassword"
+                  style={[styles.input, repasswordErr && styles.borderErr]}
+                  secureTextEntry
+                  onChangeText={(repass) => setRepassword(repass)}
+                  value={repassword}
+                />
+                <Text style={styles.validationErr}>
+                  {nameErr || emailErr || passwordErr || repasswordErr}
+                </Text>
+                <TouchableOpacity
+                  style={styles.btn}
+                  onPress={() => {
+                    addMutation({
+                      variables: {
+                        name,
+                        email,
+                        password,
+                        password_confirmation: repassword,
+                      },
+                    })
+                      .then((res) => registerHandle(res))
+                      .catch((err) => registerErrHandle(err));
+                  }}>
+                  <Text style={styles.btnText}>Зарегистрироваться</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+        </Mutation>
       </View>
-    </SafeAreaView>
+    </View>
+    // </SafeAreaView>
   );
 };
 
