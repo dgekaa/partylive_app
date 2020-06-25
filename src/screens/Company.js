@@ -90,71 +90,73 @@ const Company = (props) => {
   };
 
   return (
-    // <SafeAreaView style={{backgroundColor: '#eee'}}>
     <View style={styles.Company}>
-      <Header props={props} />
-      <View style={styles.content}>
-        <View style={styles.videoWrap}>
-          {showStream ? (
-            <VideoPlayer
-              source={{uri: streams[0].url}}
-              disableSeekbar
-              disableTimer
-              disableBack
-              disableFullscreen
-              toggleResizeModeOnFullscreen={false}
-            />
-          ) : (
-            <View style={styles.backgroundVideo}>
-              <Text style={styles.noVideoText}>{whenIsTranslationTime()}</Text>
+      <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
+        <Header props={props} />
+        <View style={styles.content}>
+          <View style={styles.videoWrap}>
+            {showStream ? (
+              <VideoPlayer
+                source={{uri: streams[0].url}}
+                disableSeekbar
+                disableTimer
+                disableBack
+                disableFullscreen
+                toggleResizeModeOnFullscreen={false}
+              />
+            ) : (
+              <View style={styles.backgroundVideo}>
+                <Text style={styles.noVideoText}>
+                  {whenIsTranslationTime()}
+                </Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.descriptionWrap}>
+            <View style={styles.descBeforeMap}>
+              <View style={styles.descRow}>
+                <Text style={styles.name}>{name}</Text>
+                <TouchableOpacity>
+                  <Image
+                    style={styles.icon}
+                    source={require('../img/back.png')}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.categoryRow}>
+                <Image style={styles.icon} source={getImg()} />
+                <Text style={styles.category}>{categories[0].name}</Text>
+              </View>
+
+              <View style={styles.workTimeRow}>
+                <View
+                  style={[
+                    styles.circle,
+                    isWork
+                      ? {backgroundColor: '#04B000'}
+                      : {backgroundColor: '#e32a6c'},
+                  ]}
+                />
+                <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
+              </View>
             </View>
-          )}
-        </View>
-        <View style={styles.descriptionWrap}>
-          <View style={styles.descBeforeMap}>
-            <View style={styles.descRow}>
-              <Text style={styles.name}>{name}</Text>
-              <TouchableOpacity>
+
+            <View style={styles.mapBlockWrap}>
+              <View style={styles.mapWrap}>
+                <GoogleMap onePlace={dataCompany} />
+              </View>
+              <View style={styles.locationBlock}>
                 <Image
                   style={styles.icon}
-                  source={require('../img/back.png')}
+                  source={require('../img/location.png')}
                 />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.categoryRow}>
-              <Image style={styles.icon} source={getImg()} />
-              <Text style={styles.category}>{categories[0].name}</Text>
-            </View>
-
-            <View style={styles.workTimeRow}>
-              <View
-                style={[
-                  styles.circle,
-                  isWork
-                    ? {backgroundColor: '#04B000'}
-                    : {backgroundColor: '#e32a6c'},
-                ]}
-              />
-              <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
-            </View>
-          </View>
-
-          <View style={styles.mapBlockWrap}>
-            <View style={styles.mapWrap}>
-              <GoogleMap onePlace={dataCompany} />
-            </View>
-            <View style={styles.locationBlock}>
-              <Image
-                style={styles.icon}
-                source={require('../img/location.png')}
-              />
-              <Text style={styles.locationText}>{address}</Text>
+                <Text style={styles.locationText}>{address}</Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     </View>
-    // </SafeAreaView>
   );
 };
 

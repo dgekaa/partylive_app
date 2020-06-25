@@ -239,26 +239,24 @@ const GoogleMap = ({
         ADDRESSfromCOORD={
           ADDRESSfromCOORD && ADDRESSfromCOORD(addressFromCoord, newRegion)
         }>
-        {/* {!!lat && isMapReady && (
+        {!!lat && isMapReady && (
           <Marker coordinate={{latitude: +lat, longitude: +lon}}>
             <Image
               source={require('../img/dancer.png')}
               style={styles.dancer}
             />
           </Marker>
-        )} */}
+        )}
 
-        {/* {!!onePlace && isMapReady && (
+        {!!onePlace && isMapReady && (
           <Marker
             coordinate={{
               latitude: +onePlace.coordinates.split(',')[0],
               longitude: +onePlace.coordinates.split(',')[1],
-            }}>
-           
-          </Marker>
-        )} */}
+            }}></Marker>
+        )}
 
-        {/* {!!places &&
+        {!!places &&
           !!places.length &&
           isMapReady &&
           places.map((place) => {
@@ -280,7 +278,7 @@ const GoogleMap = ({
                 />
               </Marker>
             );
-          })} */}
+          })}
       </MapView>
     </View>
   );
