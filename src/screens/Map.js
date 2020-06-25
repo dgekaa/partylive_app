@@ -34,24 +34,24 @@ const Map = (props) => {
   };
 
   return (
-    // <SafeAreaView style={{backgroundColor: '#eee'}}>
     <View style={styles.Map}>
-      <Header props={props} />
-      <Query query={GET_CATEGORIES}>
-        {({loading, error, data}) => {
-          if (loading) {
-            return <ActivityIndicator size="large" color="#0000ff" />;
-          } else if (error) {
-            return <Text>Error! ${error.message}</Text>;
-          }
-          return <CompanyTypeNav data={data} clickedType={clickedType} />;
-        }}
-      </Query>
-      <View style={styles.content}>
-        {<GoogleMap places={companyData} navigation={props.navigation} />}
-      </View>
+      <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
+        <Header props={props} />
+        <Query query={GET_CATEGORIES}>
+          {({loading, error, data}) => {
+            if (loading) {
+              return <ActivityIndicator size="large" color="#0000ff" />;
+            } else if (error) {
+              return <Text>Error! ${error.message}</Text>;
+            }
+            return <CompanyTypeNav data={data} clickedType={clickedType} />;
+          }}
+        </Query>
+        <View style={styles.content}>
+          {<GoogleMap places={companyData} navigation={props.navigation} />}
+        </View>
+      </SafeAreaView>
     </View>
-    // </SafeAreaView>
   );
 };
 
