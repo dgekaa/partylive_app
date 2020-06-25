@@ -145,13 +145,13 @@ const SmallCompanyBlock = ({item, navigation}) => {
       }}>
       <ImageBackground
         style={styles.backgroundStyle}
-        source={{
-          uri:
+          source={
             showStream &&
             item.streams &&
             item.streams[0] &&
-            item.streams[0].preview,
-        }}>
+            item.streams[0].preview ?
+          {uri: item.streams[0].preview }  : getImg()
+        }>
         <View style={styles.videoWrap}>
           {!showStream && (
             <View style={styles.backgroundVideo}>

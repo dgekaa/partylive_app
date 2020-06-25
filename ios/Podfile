@@ -22,7 +22,11 @@ def flipper_post_install(installer)
 end
 
 target 'party_live_app' do
+	
+
   # Pods for party_live_app
+
+		
   pod 'FBLazyVector', :path => "../node_modules/react-native/Libraries/FBLazyVector"
   pod 'FBReactNativeSpec', :path => "../node_modules/react-native/Libraries/FBReactNativeSpec"
   pod 'RCTRequired', :path => "../node_modules/react-native/Libraries/RCTRequired"
@@ -54,17 +58,11 @@ target 'party_live_app' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
-  pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
 
-  pod 'react-native-safe-area-context', :path => '../node_modules/react-native-safe-area-context'
-
-  pod 'RNReanimated', :path => '../node_modules/react-native-reanimated'
+#pod 'Google-Maps-iOS-Utils' 
 
 
-  pod 'react-native-nodemediaclient', :path => '../node_modules/react-native-nodemediaclient'
-
-  target 'party_live_appTests' do
-    inherit! :complete
+  target 'party_live_appTests' do    inherit! :complete
     # Pods for testing
   end
 
