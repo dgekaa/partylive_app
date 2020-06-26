@@ -1380,7 +1380,7 @@ const styles = StyleSheet.create({
   },
   sliderAdminMenu: {
     position: 'absolute',
-    top: 0,
+    top: 100,
     right: 0,
     bottom: 0,
     left: 0,
