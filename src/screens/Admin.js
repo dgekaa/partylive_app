@@ -520,16 +520,16 @@ const Admin = (props) => {
   const moveIn = (data) => {
     Animated.timing(data, {
       toValue: 0,
-      // duration: 100,
-      // useNativeDriver: true,
+      duration: 100,
+      useNativeDriver: true,
     }).start();
   };
 
   const moveOut = (data) => {
     Animated.timing(data, {
       toValue: -windowWidth,
-      // duration: 200,
-      // useNativeDriver: true,
+      duration: 200,
+      useNativeDriver: true,
     }).start();
   };
 
