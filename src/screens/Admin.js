@@ -527,7 +527,7 @@ const Admin = (props) => {
 
   const moveOut = (data) => {
     Animated.timing(data, {
-      toValue: -windowWidth,
+      toValue: -300,
       duration: 200,
       useNativeDriver: true,
     }).start();
