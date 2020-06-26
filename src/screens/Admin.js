@@ -527,7 +527,8 @@ const Admin = (props) => {
 
   const moveOut = (data) => {
     Animated.timing(data, {
-      toValue: -windowWidth,
+      // toValue: -windowWidth,
+      toValue: -200,
       duration: 200,
       useNativeDriver: true,
     }).start();
@@ -643,8 +644,6 @@ const Admin = (props) => {
         .catch((err) => console.log(err, '______err_1'));
     }
   };
-
-  Alert.alert('Оповещение!!!!!!!!!', translationValue);
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
