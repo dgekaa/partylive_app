@@ -158,7 +158,7 @@ const Admin = (props) => {
   const {streams} = props.navigation.state.params.item;
 
   const [popupVisible, setPopupVisible] = useState(false);
-  const [date, setDate] = useState(new Date().getTime());
+  const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
   const [selectedDay, setSelectedDay] = useState(false);
@@ -1380,7 +1380,7 @@ const styles = StyleSheet.create({
   },
   sliderAdminMenu: {
     position: 'absolute',
-    top: 50,
+    top: 0,
     right: 0,
     bottom: 0,
     left: 0,
