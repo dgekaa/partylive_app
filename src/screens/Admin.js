@@ -643,6 +643,9 @@ const Admin = (props) => {
         .catch((err) => console.log(err, '______err_1'));
     }
   };
+
+  Alert.alert('Оповещение!!!!!!!!!', translationValue);
+
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
@@ -1172,8 +1175,6 @@ const Admin = (props) => {
             })}
           </SafeAreaView>
         </Animated.ScrollView>
-        {Alert.alert('Оповещение!!!!!!!!!', translationValue)}
-
         <Animated.ScrollView
           style={[styles.sliderAdminMenu, {translateX: translationValue}]}>
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
