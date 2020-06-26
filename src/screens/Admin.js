@@ -1172,6 +1172,7 @@ const Admin = (props) => {
             })}
           </SafeAreaView>
         </Animated.ScrollView>
+        {Alert.alert('Оповещение!!!!!!!!!', translationValue)}
 
         <Animated.ScrollView
           style={[styles.sliderAdminMenu, {translateX: translationValue}]}>
