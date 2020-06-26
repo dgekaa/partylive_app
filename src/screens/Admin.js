@@ -1341,6 +1341,12 @@ const Admin = (props) => {
         </Dialog>
         {show && (
           <DateTimePicker
+            style={{
+              zIndex: 100,
+              position: 'absolute',
+              top: 100,
+              left: 100,
+            }}
             testID="dateTimePicker"
             timeZoneOffsetInMinutes={0}
             value={date}
