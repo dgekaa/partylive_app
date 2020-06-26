@@ -1176,7 +1176,10 @@ const Admin = (props) => {
           </SafeAreaView>
         </Animated.ScrollView>
         <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: translationValue}]}>
+          style={[
+            styles.sliderAdminMenu,
+            {transform: [{translateX: translationValue}, {perspective: 1000}]},
+          ]}>
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
             <AdminHeader
               navigation={props.navigation}
