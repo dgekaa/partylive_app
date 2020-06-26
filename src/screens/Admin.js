@@ -651,7 +651,7 @@ const Admin = (props) => {
   }
   return (
     <View style={styles.Admin}>
-      <SafeAreaView style={{backgroundColor: '#eee'}}>
+      <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
         <Header props={props} />
         <View style={styles.AdminInner}>
           <TouchableOpacity
