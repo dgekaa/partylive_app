@@ -691,7 +691,10 @@ const Admin = (props) => {
           </View>
         </View>
         <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: streamValue}]}>
+          style={[
+            styles.sliderAdminMenu,
+            {transform: [{translateX: streamValue}, {perspective: 1000}]},
+          ]}>
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
             <AdminHeader
               cancel
@@ -769,7 +772,10 @@ const Admin = (props) => {
         </Animated.ScrollView>
 
         <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: profileValue}]}>
+          style={[
+            styles.sliderAdminMenu,
+            {transform: [{translateX: profileValue}, {perspective: 1000}]},
+          ]}>
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
             <AdminHeader
               navigation={props.navigation}
@@ -874,7 +880,15 @@ const Admin = (props) => {
         </Animated.ScrollView>
 
         <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: chooseCategoryValue}]}>
+          style={[
+            styles.sliderAdminMenu,
+            {
+              transform: [
+                {translateX: chooseCategoryValue},
+                {perspective: 1000},
+              ],
+            },
+          ]}>
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
             <AdminHeader
               cancel
@@ -955,7 +969,10 @@ const Admin = (props) => {
         </Animated.ScrollView>
 
         <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: descriptionValue}]}>
+          style={[
+            styles.sliderAdminMenu,
+            {transform: [{translateX: descriptionValue}, {perspective: 1000}]},
+          ]}>
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
             <AdminHeader
               cancel
@@ -998,7 +1015,10 @@ const Admin = (props) => {
         </Animated.ScrollView>
 
         <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: addressValue}]}>
+          style={[
+            styles.sliderAdminMenu,
+            {transform: [{translateX: addressValue}, {perspective: 1000}]},
+          ]}>
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
             <AdminHeader
               cancel
@@ -1024,7 +1044,10 @@ const Admin = (props) => {
         </Animated.ScrollView>
 
         <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: workScheduleValue}]}>
+          style={[
+            styles.sliderAdminMenu,
+            {transform: [{translateX: workScheduleValue}, {perspective: 1000}]},
+          ]}>
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
             <AdminHeader
               cancel
@@ -1094,7 +1117,15 @@ const Admin = (props) => {
         </Animated.ScrollView>
 
         <Animated.ScrollView
-          style={[styles.sliderAdminMenu, {translateX: streamScheduleValue}]}>
+          style={[
+            styles.sliderAdminMenu,
+            {
+              transform: [
+                {translateX: streamScheduleValue},
+                {perspective: 1000},
+              ],
+            },
+          ]}>
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
             <AdminHeader
               cancel
