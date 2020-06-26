@@ -1278,6 +1278,23 @@ const Admin = (props) => {
               useNativeDriver: true,
             })
           }>
+          {show && (
+            <DateTimePicker
+              // style={{
+              //   zIndex: 100,
+              //   position: 'absolute',
+              //   top: 100,
+              //   left: 100,
+              // }}
+              testID="dateTimePicker"
+              timeZoneOffsetInMinutes={0}
+              value={date}
+              mode={mode}
+              is24Hour={true}
+              display="spinner"
+              onChange={onChangeTime}
+            />
+          )}
           <DialogContent>
             {selectedDay && (
               <View style={styles.dialogContent}>
@@ -1339,23 +1356,6 @@ const Admin = (props) => {
             )}
           </DialogContent>
         </Dialog>
-        {show && (
-          <DateTimePicker
-            style={{
-              zIndex: 100,
-              position: 'absolute',
-              top: 100,
-              left: 100,
-            }}
-            testID="dateTimePicker"
-            timeZoneOffsetInMinutes={0}
-            value={date}
-            mode={mode}
-            is24Hour={true}
-            display="spinner"
-            onChange={onChangeTime}
-          />
-        )}
       </SafeAreaView>
     </View>
   );
