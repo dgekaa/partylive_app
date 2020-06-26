@@ -512,7 +512,7 @@ const Admin = (props) => {
   const profileValue = useState(new Animated.Value(-windowWidth))[0];
   const workScheduleValue = useState(new Animated.Value(-windowWidth))[0];
   const streamScheduleValue = useState(new Animated.Value(-windowWidth))[0];
-  const translationValue = useState(new Animated.Value(-windowWidth))[0];
+  const translationValue = useState(new Animated.Value(-300))[0];
   const chooseCategoryValue = useState(new Animated.Value(-windowWidth))[0];
   const descriptionValue = useState(new Animated.Value(-windowWidth))[0];
   const addressValue = useState(new Animated.Value(-windowWidth))[0];
@@ -521,7 +521,7 @@ const Admin = (props) => {
     Animated.timing(data, {
       toValue: 0,
       duration: 100,
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start();
   };
 
@@ -529,7 +529,7 @@ const Admin = (props) => {
     Animated.timing(data, {
       toValue: -windowWidth,
       duration: 200,
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start();
   };
 
@@ -1239,7 +1239,7 @@ const Admin = (props) => {
           dialogAnimation={
             new ScaleAnimation({
               initialValue: 0,
-              useNativeDriver: false,
+              useNativeDriver: true,
             })
           }>
           <DialogContent>
