@@ -521,7 +521,7 @@ const Admin = (props) => {
     Animated.timing(data, {
       toValue: 0,
       // duration: 100,
-      useNativeDriver: true,
+      // useNativeDriver: true,
     }).start();
   };
 
@@ -529,7 +529,7 @@ const Admin = (props) => {
     Animated.timing(data, {
       toValue: -windowWidth,
       // duration: 200,
-      useNativeDriver: true,
+      // useNativeDriver: true,
     }).start();
   };
 
