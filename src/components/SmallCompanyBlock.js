@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   PermissionsAndroid,
+  Platform,
   ImageBackground,
   Image,
 } from 'react-native';
@@ -33,32 +34,34 @@ const SmallCompanyBlock = ({item, navigation}) => {
   const [nextWorkTime, setNextWorkTime] = useState(null);
 
   const requestLocationPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Cool location Permission',
-          message: 'Нужен доступ к вашему местоположению.',
-          buttonNeutral: 'Спросить позже',
-          buttonNegative: 'Отмена',
-          buttonPositive: 'OK',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use location');
-        Geolocation.watchPosition(
-          (position) => {
-            setLon(position.coords.longitude);
-            setLat(position.coords.latitude);
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Cool location Permission',
+            message: 'Нужен доступ к вашему местоположению.',
+            buttonNeutral: 'Спросить позже',
+            buttonNegative: 'Отмена',
+            buttonPositive: 'OK',
           },
-          (error) => console.log(error.code, error.message, 'ERR LOCATION'),
-          {enableHighAccuracy: false, timeout: 50000},
         );
-      } else {
-        console.log('Location permission denied');
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('You can use location');
+          Geolocation.watchPosition(
+            (position) => {
+              setLon(position.coords.longitude);
+              setLat(position.coords.latitude);
+            },
+            (error) => console.log(error.code, error.message, 'ERR LOCATION'),
+            {enableHighAccuracy: false, timeout: 50000},
+          );
+        } else {
+          console.log('Location permission denied');
+        }
+      } catch (err) {
+        console.warn(err);
       }
-    } catch (err) {
-      console.warn(err);
     }
   };
 
@@ -145,12 +148,13 @@ const SmallCompanyBlock = ({item, navigation}) => {
       }}>
       <ImageBackground
         style={styles.backgroundStyle}
-          source={
-            showStream &&
-            item.streams &&
-            item.streams[0] &&
-            item.streams[0].preview ?
-          {uri: item.streams[0].preview }  : getImg()
+        source={
+          showStream &&
+          item.streams &&
+          item.streams[0] &&
+          item.streams[0].preview
+            ? {uri: item.streams[0].preview}
+            : getImg()
         }>
         <View style={styles.videoWrap}>
           {!showStream && (
