@@ -146,74 +146,140 @@ const SmallCompanyBlock = ({item, navigation}) => {
           distanceTo,
         });
       }}>
-      <ImageBackground
-        style={styles.backgroundStyle}
-        source={
-          showStream &&
-          item.streams &&
-          item.streams[0] &&
-          item.streams[0].preview
-            ? {uri: item.streams[0].preview}
-            : getImg()
-        }>
-        <View style={styles.videoWrap}>
-          {!showStream && (
-            <View style={styles.backgroundVideo}>
-              <Text style={styles.noVideoText}>
-                {nextWorkTime
-                  ? isWork
+      {showStream &&
+      item.streams &&
+      item.streams[0] &&
+      item.streams[0].preview ? (
+        <ImageBackground
+          style={styles.backgroundStyle}
+          source={{uri: item.streams[0].preview}}>
+          <View style={styles.videoWrap}>
+            {!showStream && (
+              <View style={styles.backgroundVideo}>
+                <Text style={styles.noVideoText}>
+                  {nextWorkTime
+                    ? isWork
+                      ? whenIsTranslationTime()
+                      : 'Откроется:'
+                    : isWork
                     ? whenIsTranslationTime()
-                    : 'Откроется:'
-                  : isWork
-                  ? whenIsTranslationTime()
-                  : 'Закрыто'}
-              </Text>
-              <Text style={styles.noVideoText}>
-                {nextWorkTime && nextWorkTime.start_time
-                  ? `${
-                      nextWorkTime.day.toLowerCase() !== 'сегодня'
-                        ? EN_SHORT_TO_RU_LONG[nextWorkTime.day]
-                        : nextWorkTime.day
-                    }`
-                  : ''}
-              </Text>
-              <Text style={styles.noVideoText}>
-                {nextWorkTime &&
-                  nextWorkTime.start_time &&
-                  nextWorkTime.start_time + '-' + nextWorkTime.end_time}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.description}>
-          <LinearGradient
-            colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.7)']}
-            style={styles.linearGradient}>
-            <View style={styles.nameRow}>
-              <Image style={styles.imgType} source={getImg()} />
-              <Text style={styles.name} numberOfLines={1}>
-                {item.name}
-              </Text>
-            </View>
-
-            <View style={styles.bottomRow}>
-              <View style={styles.workTimeRow}>
-                <View
-                  style={[
-                    !isWork
-                      ? {backgroundColor: '#04b000'}
-                      : {backgroundColor: '#6D6D6D'},
-                    styles.circle,
-                  ]}
-                />
-                <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
+                    : 'Закрыто'}
+                </Text>
+                <Text style={styles.noVideoText}>
+                  {nextWorkTime && nextWorkTime.start_time
+                    ? `${
+                        nextWorkTime.day.toLowerCase() !== 'сегодня'
+                          ? EN_SHORT_TO_RU_LONG[nextWorkTime.day]
+                          : nextWorkTime.day
+                      }`
+                    : ''}
+                </Text>
+                <Text style={styles.noVideoText}>
+                  {nextWorkTime &&
+                    nextWorkTime.start_time &&
+                    nextWorkTime.start_time + '-' + nextWorkTime.end_time}
+                </Text>
               </View>
-              {distanceTo && <Text style={styles.km}>{distanceTo} km.</Text>}
-            </View>
-          </LinearGradient>
+            )}
+          </View>
+
+          <View style={styles.description}>
+            <LinearGradient
+              colors={[
+                'rgba(0,0,0,0.15)',
+                'rgba(0,0,0,0.6)',
+                'rgba(0,0,0,0.7)',
+              ]}
+              style={styles.linearGradient}>
+              <View style={styles.nameRow}>
+                <Image style={styles.imgType} source={getImg()} />
+                <Text style={styles.name} numberOfLines={1}>
+                  {item.name}
+                </Text>
+              </View>
+
+              <View style={styles.bottomRow}>
+                <View style={styles.workTimeRow}>
+                  <View
+                    style={[
+                      !isWork
+                        ? {backgroundColor: '#04b000'}
+                        : {backgroundColor: '#6D6D6D'},
+                      styles.circle,
+                    ]}
+                  />
+                  <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
+                </View>
+                {distanceTo && <Text style={styles.km}>{distanceTo} km.</Text>}
+              </View>
+            </LinearGradient>
+          </View>
+        </ImageBackground>
+      ) : (
+        <View style={styles.backgroundStyle}>
+          <View style={styles.videoWrap}>
+            {!showStream && (
+              <View style={styles.backgroundVideo}>
+                <Text style={styles.noVideoText}>
+                  {nextWorkTime
+                    ? isWork
+                      ? whenIsTranslationTime()
+                      : 'Откроется:'
+                    : isWork
+                    ? whenIsTranslationTime()
+                    : 'Закрыто'}
+                </Text>
+                <Text style={styles.noVideoText}>
+                  {nextWorkTime && nextWorkTime.start_time
+                    ? `${
+                        nextWorkTime.day.toLowerCase() !== 'сегодня'
+                          ? EN_SHORT_TO_RU_LONG[nextWorkTime.day]
+                          : nextWorkTime.day
+                      }`
+                    : ''}
+                </Text>
+                <Text style={styles.noVideoText}>
+                  {nextWorkTime &&
+                    nextWorkTime.start_time &&
+                    nextWorkTime.start_time + '-' + nextWorkTime.end_time}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.description}>
+            <LinearGradient
+              colors={[
+                'rgba(0,0,0,0.15)',
+                'rgba(0,0,0,0.6)',
+                'rgba(0,0,0,0.7)',
+              ]}
+              style={styles.linearGradient}>
+              <View style={styles.nameRow}>
+                <Image style={styles.imgType} source={getImg()} />
+                <Text style={styles.name} numberOfLines={1}>
+                  {item.name}
+                </Text>
+              </View>
+
+              <View style={styles.bottomRow}>
+                <View style={styles.workTimeRow}>
+                  <View
+                    style={[
+                      !isWork
+                        ? {backgroundColor: '#04b000'}
+                        : {backgroundColor: '#6D6D6D'},
+                      styles.circle,
+                    ]}
+                  />
+                  <Text style={styles.workTime}>{whenIsWorkTime()}</Text>
+                </View>
+                {distanceTo && <Text style={styles.km}>{distanceTo} km.</Text>}
+              </View>
+            </LinearGradient>
+          </View>
         </View>
-      </ImageBackground>
+      )}
     </TouchableOpacity>
   );
 };
