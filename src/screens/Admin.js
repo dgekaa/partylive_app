@@ -15,6 +15,7 @@ import {
   Animated,
   PermissionsAndroid,
   SafeAreaView,
+  ScrollView,
 } from 'react-native';
 import {getToken} from '../util';
 import {NodeCameraView} from 'react-native-nodemediaclient';
@@ -1206,10 +1207,13 @@ const Admin = (props) => {
             })}
           </SafeAreaView>
         </Animated.ScrollView>
+
         <Animated.ScrollView
           style={[
             styles.sliderAdminMenu,
-            {transform: [{translateX: translationValue}, {perspective: 1000}]},
+            {
+              transform: [{translateX: translationValue}, {perspective: 1000}],
+            },
           ]}>
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
             <AdminHeader
@@ -1386,7 +1390,7 @@ const styles = StyleSheet.create({
   },
   sliderAdminMenu: {
     position: 'absolute',
-    top: 50,
+    top: 0,
     right: 0,
     bottom: 0,
     left: 0,
