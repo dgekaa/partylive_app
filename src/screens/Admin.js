@@ -415,64 +415,63 @@ const Admin = (props) => {
       height: (windowWidth - 50) * 0.65,
       cropping: true,
       includeBase64: true,
+      mediaType: 'photo',
     })
       .then((image) => {
-        fetch(image.path)
-          .then((res) => res.blob())
-          .then((image) => {
-            const imgObject = {
-              uri: image.path,
-              width: image.width,
-              height: image.height,
-              mime: image.mime,
-            };
-            console.log(imgObject, 'JJJJJ');
-            const getAsyncToken = async () => {
-              const token = await getToken();
-              return token;
-            };
+        console.log(image, 'IMAGE');
+        const getAsyncToken = async () => {
+          const token = await getToken();
+          return token;
+        };
 
-            getAsyncToken().then((token) => {
+        const base64file = `data:image/png;base64,${image.data}`;
+        console.log(base64file, '______base64file');
+
+        getAsyncToken().then((token) => {
+          fetch(base64file)
+            .then((res) => res.blob())
+            .then((blob) => {
               const query = `
-                  mutation ($file: Upload!) {
-                    placeImage(file: $file)
-                  }
-                `;
-              // const data = {
-              //   file: null,
-              // };
-              // const operations = JSON.stringify({
-              //   query,
-              //   variables: {
-              //     data,
-              //   },
-              // });
-              // let formData = new FormData();
-              // formData.append('operations', operations);
-              // const map = {
-              //   '0': ['variables.file'],
-              // };
-              // formData.append('map', JSON.stringify(map));
-              // formData.append('0', blob);
-
-              // axios({
-              //   url: 'https://backend.partylive.by/graphql',
-              //   method: 'POST',
-              //   headers: {
-              //     'Content-Type': 'multipart/form-data',
-              //     Authorization: 'Bearer ' + token,
-              //   },
-              //   data: blob,
-              // })
-              //   .then(function (res) {
-              //     console.log(res, 'RESSSSSS');
-              //   })
-              //   .catch(function (err) {
-              //     console.log(err, ' ERR');
-              //   });
-            });
-          })
-          .catch((err) => console.log(err, 'ERR +++++'));
+            mutation ($file: Upload!) {
+              placeImage(file: $file)
+            }
+          `;
+              const data = {
+                file: null,
+              };
+              const operations = JSON.stringify({
+                query,
+                variables: {
+                  data,
+                },
+              });
+              let formData = new FormData();
+              formData.append('operations', operations);
+              const map = {
+                '0': ['variables.file'],
+              };
+              formData.append('map', JSON.stringify(map));
+              formData.append('0', blob);
+              console.log(blob, 'BLOB_____');
+              console.log(formData, 'FORM___DATA');
+              axios({
+                url: 'https://backend.partylive.by/graphql',
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                  Authorization: token ? 'Bearer ' + token : '',
+                },
+                data: formData,
+              })
+                .then((res) => {
+                  console.log(res, '!!!!!!!!!!!!!!!!!!');
+                })
+                .catch((err) => {
+                  console.log(err, '@@@@@@@@@@@@@@@@@@');
+                });
+            })
+            .catch(() => console.log('not a blob'));
+        });
 
         setpPickerImageMime(image.mime);
         setpPickerImageData(image.data);
