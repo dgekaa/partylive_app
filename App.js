@@ -175,7 +175,7 @@ const App = () => {
   const SideMenu = (props) => {
     return (
       <ScrollView>
-        <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
+        <SafeAreaView>
           <List>
             <ListItem onPress={() => props.navigation.navigate('Home')}>
               <Text>Список</Text>

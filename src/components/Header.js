@@ -6,9 +6,11 @@ const CustomHeader = ({props: {navigation}}) => {
     <View style={styles.header}>
       <TouchableOpacity onPress={() => navigation.goBack()}>
         {navigation.goBack && (
-          <Image
-            style={styles.goBack}
-            source={require('../img/arrow.png')}></Image>
+          <View style={styles.goBackBlock}>
+            <Image
+              style={styles.goBack}
+              source={require('../img/arrow.png')}></Image>
+          </View>
         )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Home')}>
@@ -40,6 +42,10 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ededed',
     borderBottomWidth: 1,
     backgroundColor: '#fff',
+  },
+  goBackBlock: {
+    width: 30,
+    height: 30,
   },
   goBack: {},
   PLLogo: {

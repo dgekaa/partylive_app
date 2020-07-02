@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -8,12 +8,17 @@ import {
   SafeAreaView,
 } from 'react-native';
 import {useMutation, useQuery} from 'react-apollo';
+import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 
 import Header from '../components/Header';
 import {GET_PLACES, CREATE_PLACE, DELETE_PLACE} from '../QUERYES';
 
 const EditCompany = (props) => {
   const {data} = useQuery(GET_PLACES);
+
+  const [isConfirmPopup, setIsConfirmPopup] = useState(false);
+  const [deletElId, setDeleteElId] = useState(null);
+  const [deleteElName, setDeleteElName] = useState(null);
 
   const refreshObject = {
     refetchQueries: [
@@ -69,7 +74,9 @@ const EditCompany = (props) => {
               <TouchableOpacity
                 style={styles.delete}
                 onPress={() => {
-                  deleteOne(el.id);
+                  setDeleteElId(el.id);
+                  setDeleteElName(el.name);
+                  setIsConfirmPopup(true);
                 }}>
                 <Text style={styles.deleteText} numberOfLines={1}>
                   &#215;
@@ -99,6 +106,32 @@ const EditCompany = (props) => {
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
+
+      <Dialog
+        visible={isConfirmPopup}
+        onTouchOutside={() => setIsConfirmPopup(false)}>
+        <DialogContent style={styles.popupConfirmWrap}>
+          <Text style={styles.popupConfirmQuestion}>
+            Действительно удалить "{deleteElName}"?
+          </Text>
+          <View style={styles.popupConfirmBtns}>
+            <TouchableOpacity
+              style={styles.popupConfirmBtn}
+              onPress={() => {
+                console.log(deletElId, '_____deletElId');
+                deleteOne(deletElId);
+                setIsConfirmPopup(false);
+              }}>
+              <Text style={styles.popupConfirmBtnText}>Да</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.popupConfirmBtn}
+              onPress={() => setIsConfirmPopup(false)}>
+              <Text style={styles.popupConfirmBtnText}>Нет</Text>
+            </TouchableOpacity>
+          </View>
+        </DialogContent>
+      </Dialog>
     </View>
   );
 };
@@ -170,6 +203,30 @@ const styles = StyleSheet.create({
   createCompanyText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  popupConfirmWrap: {
+    padding: 15,
+    width: '70%',
+  },
+  popupConfirmQuestion: {
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  popupConfirmBtn: {
+    marginTop: 20,
+    backgroundColor: '#e32a6c',
+    width: 60,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+  },
+  popupConfirmBtns: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  popupConfirmBtnText: {
+    color: '#fff',
   },
 });
 

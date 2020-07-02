@@ -5,8 +5,6 @@ import {
   ImageBackground,
   Text,
   Image,
-  TouchableOpacity,
-  Alert,
   Dimensions,
 } from 'react-native';
 import {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
@@ -24,7 +22,6 @@ import karaoke from '../img/karaoke_w.png';
 import klub from '../img/klub_w.png';
 import launge from '../img/launge_w.png';
 import pab from '../img/pab_w.png';
-import {add} from 'react-native-reanimated';
 
 const CustomMarker = ({place, getDistanceTo}) => {
   const [showStream, setShowStream] = useState();
@@ -173,13 +170,7 @@ const CustomMarker = ({place, getDistanceTo}) => {
   );
 };
 
-const GoogleMap = ({
-  places,
-  navigation,
-  onePlace,
-  regionChange,
-  ADDRESSfromCOORD,
-}) => {
+const GoogleMap = ({places, navigation, onePlace, ADDRESSfromCOORD}) => {
   const [lon, setLon] = useState('');
   const [lat, setLat] = useState('');
   const [distanceTo, setDistanceTo] = useState('');
@@ -208,7 +199,7 @@ const GoogleMap = ({
         })
         .catch((error) => console.log(error, 'GEO'));
     }
-  }, [newRegion]);
+  }, [newRegion, ADDRESSfromCOORD]);
 
   const getDistanceTo = (dist) => {
     setDistanceTo(dist);
@@ -228,7 +219,7 @@ const GoogleMap = ({
       )}
       <MapView
         clusterColor="#e32a6c"
-        radius={onePlace ? 1 : 60}
+        radius={onePlace ? 1 : 100}
         clusterTextColor="#fff"
         provider={PROVIDER_GOOGLE}
         style={styles.map}

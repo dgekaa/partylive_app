@@ -23,7 +23,7 @@ import pab from '../img/pab.png';
 
 const Company = (props) => {
   const {
-    data: {name, address, streams, categories},
+    data: {id, name, address, streams, categories},
     distanceTo,
   } = props.navigation.state.params;
 
@@ -95,21 +95,36 @@ const Company = (props) => {
         <Header props={props} />
         <View style={styles.content}>
           <View style={styles.videoWrap}>
-            {showStream ? (
+            {console.log(streams[0], 'SRTEAMSSSSSS')}
+
+            {streams[0] ? (
+              showStream ? (
+                <VideoPlayer
+                  source={{uri: streams[0].url}}
+                  disableSeekbar
+                  disableTimer
+                  disableBack
+                  disableFullscreen
+                  toggleResizeModeOnFullscreen={false}
+                />
+              ) : (
+                <View style={styles.backgroundVideo}>
+                  <Text style={styles.noVideoText}>
+                    {whenIsTranslationTime()}
+                  </Text>
+                </View>
+              )
+            ) : (
               <VideoPlayer
-                source={{uri: streams[0].url}}
+                source={{
+                  uri: `https://partylivestream.web4net.ru:8080/hls/show/${id}.m3u8`,
+                }}
                 disableSeekbar
                 disableTimer
                 disableBack
                 disableFullscreen
                 toggleResizeModeOnFullscreen={false}
               />
-            ) : (
-              <View style={styles.backgroundVideo}>
-                <Text style={styles.noVideoText}>
-                  {whenIsTranslationTime()}
-                </Text>
-              </View>
             )}
           </View>
           <View style={styles.descriptionWrap}>

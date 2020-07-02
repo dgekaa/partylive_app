@@ -321,3 +321,14 @@ export const SAVE_ADDRESS = gql`
     }
   }
 `;
+
+export const UPDATE_MOBILE_STREAM = gql`
+  mutation UPDATEMOBILESTREAM($id: ID!, $mobile_stream: Boolean) {
+    updatePlace(input: {id: $id, mobile_stream: $mobile_stream}) {
+      id
+      name
+      description
+      mobile_stream
+    }
+  }
+`;

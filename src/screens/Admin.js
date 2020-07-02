@@ -47,6 +47,7 @@ import {
   UPDATE_STREAM,
   CREATE_STREAM,
   SAVE_ADDRESS,
+  UPDATE_MOBILE_STREAM,
 } from '../QUERYES';
 import GoogleMap from '../components/GoogleMap';
 
@@ -59,25 +60,33 @@ const AdminHeader = ({
   navigation,
   saveFunction,
   cancelFunction,
+  disableMobileStream,
 }) => {
   return (
     <View style={headerStyles.header}>
       <TouchableOpacity
         onPress={() => {
           moveOut(who);
+          disableMobileStream && disableMobileStream();
           videoPause && videoPause();
           cancelFunction && cancelFunction();
         }}>
         {!cancel ? (
-          <Image
-            style={headerStyles.goBack}
-            source={require('../img/arrow.png')}
-          />
+          <View style={headerStyles.goBackBlock}>
+            <Image
+              style={headerStyles.goBack}
+              source={require('../img/arrow.png')}
+            />
+          </View>
         ) : (
           <Text style={headerStyles.headerBtn}>Отмена</Text>
         )}
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('Home');
+          disableMobileStream && disableMobileStream();
+        }}>
         <View style={headerStyles.PLLogo}>
           <Text style={headerStyles.party}>PARTY</Text>
           <View style={headerStyles.partyWrap}>
@@ -117,6 +126,10 @@ const headerStyles = StyleSheet.create({
     borderBottomColor: '#ededed',
     borderBottomWidth: 1,
     backgroundColor: '#fff',
+  },
+  goBackBlock: {
+    width: 30,
+    height: 30,
   },
   goBack: {},
   headerBtn: {
@@ -267,6 +280,11 @@ const Admin = (props) => {
   const [UPDATE_STREAM_mutation] = useMutation(UPDATE_STREAM, refreshObject);
   const [CREATE_STREAM_mutation] = useMutation(CREATE_STREAM, refreshObject);
 
+  const [UPDATE_MOBILE_STREAM_mutation] = useMutation(
+    UPDATE_MOBILE_STREAM,
+    refreshObject,
+  );
+
   const SetNewTimeObject = (data) => {
     const timeObject = {};
     EN_SHORT_DAY_OF_WEEK.forEach((e, i) => {
@@ -401,9 +419,14 @@ const Admin = (props) => {
       .then((image) => {
         fetch(image.path)
           .then((res) => res.blob())
-          .then((blob) => {
-            console.log(blob, 'blob');
-
+          .then((image) => {
+            const imgObject = {
+              uri: image.path,
+              width: image.width,
+              height: image.height,
+              mime: image.mime,
+            };
+            console.log(imgObject, 'JJJJJ');
             const getAsyncToken = async () => {
               const token = await getToken();
               return token;
@@ -415,38 +438,38 @@ const Admin = (props) => {
                     placeImage(file: $file)
                   }
                 `;
-              const data = {
-                file: null,
-              };
-              const operations = JSON.stringify({
-                query,
-                variables: {
-                  data,
-                },
-              });
-              let formData = new FormData();
-              formData.append('operations', operations);
-              const map = {
-                '0': ['variables.file'],
-              };
-              formData.append('map', JSON.stringify(map));
-              formData.append('0', blob);
+              // const data = {
+              //   file: null,
+              // };
+              // const operations = JSON.stringify({
+              //   query,
+              //   variables: {
+              //     data,
+              //   },
+              // });
+              // let formData = new FormData();
+              // formData.append('operations', operations);
+              // const map = {
+              //   '0': ['variables.file'],
+              // };
+              // formData.append('map', JSON.stringify(map));
+              // formData.append('0', blob);
 
-              axios({
-                url: 'https://backend.partylive.by/graphql',
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'multipart/form-data',
-                  Authorization: 'Bearer ' + token,
-                },
-                data: blob,
-              })
-                .then(function (res) {
-                  console.log(res, 'RESSSSSS');
-                })
-                .catch(function (err) {
-                  console.log(err, ' ERR');
-                });
+              // axios({
+              //   url: 'https://backend.partylive.by/graphql',
+              //   method: 'POST',
+              //   headers: {
+              //     'Content-Type': 'multipart/form-data',
+              //     Authorization: 'Bearer ' + token,
+              //   },
+              //   data: blob,
+              // })
+              //   .then(function (res) {
+              //     console.log(res, 'RESSSSSS');
+              //   })
+              //   .catch(function (err) {
+              //     console.log(err, ' ERR');
+              //   });
             });
           })
           .catch((err) => console.log(err, 'ERR +++++'));
@@ -647,6 +670,33 @@ const Admin = (props) => {
     }
   };
 
+  const updateMobileStream = (bool) => {
+    UPDATE_MOBILE_STREAM_mutation({
+      variables: {
+        id: data.place.id,
+        mobile_stream: bool,
+      },
+      optimisticResponse: null,
+    }).then(
+      (res) => console.log(res, 'RES mob stream'),
+      (err) => console.log(err, 'ERR'),
+    );
+  };
+
+  const disableMobileStream = () => {
+    setPublishBtnTitle('Начать трансляцию');
+    setIsPublish(false);
+    vbRef.current.stop();
+    updateMobileStream(false);
+  };
+
+  const enableMobileStream = () => {
+    setPublishBtnTitle('Остановить трансляцию');
+    setIsPublish(true);
+    vbRef.current.start();
+    updateMobileStream(true);
+  };
+
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
@@ -682,21 +732,23 @@ const Admin = (props) => {
             <Text style={styles.oneBlockText}>График стримов</Text>
             <Text style={styles.oneBlockArrow}>&#62;</Text>
           </TouchableOpacity>
-          <View>
-            <TouchableOpacity
-              style={styles.oneBlock}
-              onPress={() => moveIn(translationValue)}>
-              <Text style={styles.oneBlockText}>Трансляции</Text>
-              <Text style={styles.oneBlockArrow}>&#62;</Text>
-            </TouchableOpacity>
-          </View>
+          {!data.place.streams[0] && (
+            <View>
+              <TouchableOpacity
+                style={styles.oneBlock}
+                onPress={() => moveIn(translationValue)}>
+                <Text style={styles.oneBlockText}>Трансляции</Text>
+                <Text style={styles.oneBlockArrow}>&#62;</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
         <Animated.ScrollView
           style={[
             styles.sliderAdminMenu,
             {transform: [{translateX: streamValue}, {perspective: 1000}]},
           ]}>
-          <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
+          <SafeAreaView style={{flex: 1}}>
             <AdminHeader
               cancel
               ready
@@ -1049,7 +1101,7 @@ const Admin = (props) => {
             styles.sliderAdminMenu,
             {transform: [{translateX: workScheduleValue}, {perspective: 1000}]},
           ]}>
-          <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
+          <SafeAreaView style={{flex: 1}}>
             <AdminHeader
               cancel
               ready
@@ -1127,7 +1179,7 @@ const Admin = (props) => {
               ],
             },
           ]}>
-          <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
+          <SafeAreaView style={{flex: 1}}>
             <AdminHeader
               cancel
               ready
@@ -1218,13 +1270,14 @@ const Admin = (props) => {
           <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
             <AdminHeader
               navigation={props.navigation}
+              disableMobileStream={disableMobileStream}
               moveOut={moveOut}
               who={translationValue}
             />
             <NodeCameraView
               style={styles.nodeCameraStyle}
               ref={vbRef}
-              outputUrl={'rtmp://194.87.235.18/streaming/klever'}
+              outputUrl={`rtmp://partylivestream.web4net.ru/streaming/${data.place.id}`}
               camera={{cameraId: 1, cameraFrontMirror: true}}
               audio={{bitrate: 60000, profile: 1, samplerate: 44100}}
               video={{
@@ -1237,39 +1290,42 @@ const Admin = (props) => {
               autopreview={true}
             />
             <Text style={styles.headerTranslTitle}>ТРАНСЛЯЦИЯ</Text>
+            <View style={styles.mobStreamBtnsBlock}>
+              <TouchableOpacity
+                style={[styles.translStartStopBtn]}
+                onPress={() => {
+                  vbRef.current.switchCamera();
+                }}>
+                <Text
+                  style={[
+                    styles.startTranslBtn,
+                    styles.startTranslBtnNotClicked,
+                  ]}>
+                  Переключить камеру
+                </Text>
+              </TouchableOpacity>
 
-            {/* <TouchableOpacity
-          style={{height: 50}}
-          onPress={() => {
-            vbRef.current.switchCamera();
-          }}>
-          <Text>SWITCH CAMERA</Text>
-        </TouchableOpacity> */}
-
-            <TouchableOpacity
-              style={styles.translStartStopBtn}
-              onPress={() => {
-                requestCameraPermission();
-                if (isPublish) {
-                  setPublishBtnTitle('Начать трансляцию');
-                  setIsPublish(false);
-                  vbRef.current.stop();
-                } else {
-                  setPublishBtnTitle('Остановить трансляцию');
-                  setIsPublish(true);
-                  vbRef.current.start();
-                }
-              }}>
-              <Text
-                style={[
-                  styles.startTranslBtn,
-                  isPublish
-                    ? styles.startTranslBtnClicked
-                    : styles.startTranslBtnNotClicked,
-                ]}>
-                {publishBtnTitle}
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.translStartStopBtn}
+                onPress={() => {
+                  requestCameraPermission();
+                  if (isPublish) {
+                    disableMobileStream();
+                  } else {
+                    enableMobileStream();
+                  }
+                }}>
+                <Text
+                  style={[
+                    styles.startTranslBtn,
+                    isPublish
+                      ? styles.startTranslBtnClicked
+                      : styles.startTranslBtnNotClicked,
+                  ]}>
+                  {publishBtnTitle}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </SafeAreaView>
         </Animated.ScrollView>
 
@@ -1435,9 +1491,12 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height - 74,
     width: '100%',
   },
-  translStartStopBtn: {
+  mobStreamBtnsBlock: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 30,
+    width: '100%',
+  },
+  translStartStopBtn: {
     alignSelf: 'center',
   },
   startTranslBtn: {
@@ -1530,7 +1589,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#4F4F4F',
     fontWeight: 'bold',
-    flex: 1,
+    flex: 1.2,
   },
   addressText: {
     flex: 2.5,
