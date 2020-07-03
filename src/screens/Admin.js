@@ -17,6 +17,8 @@ import {
   SafeAreaView,
   ScrollView,
 } from 'react-native';
+import base64 from 'react-native-base64';
+
 import {getToken} from '../util';
 import {NodeCameraView} from 'react-native-nodemediaclient';
 import axios from 'axios';
@@ -428,49 +430,56 @@ const Admin = (props) => {
         console.log(base64file, '______base64file');
 
         getAsyncToken().then((token) => {
-          fetch(base64file)
-            .then((res) => res.blob())
-            .then((blob) => {
-              const query = `
+          // fetch(base64file)
+          //   .then((res) => res.blob())
+          //   .then((blob) => {
+          // var Buffer = require('buffer/').Buffer;
+          // const MY_BUFFER = Buffer.from(base64file, 'base64');
+
+          // var BLOBBER = new Blob([MY_BUFFER], {type: image.mime});
+
+          // console.log(BLOBBER, 'blobbber---');
+
+          const query = `
             mutation ($file: Upload!) {
               placeImage(file: $file)
             }
           `;
-              const data = {
-                file: null,
-              };
-              const operations = JSON.stringify({
-                query,
-                variables: {
-                  data,
-                },
-              });
-              let formData = new FormData();
-              formData.append('operations', operations);
-              const map = {
-                '0': ['variables.file'],
-              };
-              formData.append('map', JSON.stringify(map));
-              formData.append('0', blob);
-              console.log(blob, 'BLOB_____');
-              console.log(formData, 'FORM___DATA');
-              axios({
-                url: 'https://backend.partylive.by/graphql',
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'multipart/form-data',
-                  Authorization: token ? 'Bearer ' + token : '',
-                },
-                data: formData,
-              })
-                .then((res) => {
-                  console.log(res, '!!!!!!!!!!!!!!!!!!');
-                })
-                .catch((err) => {
-                  console.log(err, '@@@@@@@@@@@@@@@@@@');
-                });
+          const data = {
+            file: null,
+          };
+          const operations = JSON.stringify({
+            query,
+            variables: {
+              data,
+            },
+          });
+          let formData = new FormData();
+          formData.append('operations', operations);
+          const map = {
+            '0': ['variables.file'],
+          };
+          formData.append('map', JSON.stringify(map));
+          formData.append('0', BLOBBER);
+          // console.log(blob, 'BLOB_____');
+          console.log(formData, 'FORM___DATA');
+          axios({
+            url: 'https://backend.partylive.by/graphql',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: token ? 'Bearer ' + token : '',
+            },
+            data: formData,
+          })
+            .then((res) => {
+              console.log(res, 'ОТВЕТ ПОЛОЖИТЕЛЬНЫЙ');
             })
-            .catch(() => console.log('not a blob'));
+            .catch((err) => {
+              console.log(err, 'ОТВЕТ ОТРИЦАТЕЛЬНЫЙ');
+            });
+          // })
+          // .catch(() => console.log('not a blob'));
         });
 
         setpPickerImageMime(image.mime);
