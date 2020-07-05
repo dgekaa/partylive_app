@@ -17,7 +17,9 @@ import {
   SafeAreaView,
   ScrollView,
 } from 'react-native';
-import base64 from 'react-native-base64';
+import RNFetchBlob from 'react-native-fetch-blob';
+import {useMutation as UM} from '@apollo/react-hooks';
+const gql = require('graphql-tag');
 
 import {getToken} from '../util';
 import {NodeCameraView} from 'react-native-nodemediaclient';
@@ -52,6 +54,7 @@ import {
   UPDATE_MOBILE_STREAM,
 } from '../QUERYES';
 import GoogleMap from '../components/GoogleMap';
+import {ReactNativeFile} from 'apollo-upload-client';
 
 const AdminHeader = ({
   cancel,
@@ -420,66 +423,22 @@ const Admin = (props) => {
       mediaType: 'photo',
     })
       .then((image) => {
-        console.log(image, 'IMAGE');
         const getAsyncToken = async () => {
           const token = await getToken();
           return token;
         };
 
-        const base64file = `data:image/png;base64,${image.data}`;
-        console.log(base64file, '______base64file');
+        const base64file = `data:image/jpeg;base64,${image.data}`;
 
         getAsyncToken().then((token) => {
-          // fetch(base64file)
-          //   .then((res) => res.blob())
-          //   .then((blob) => {
-          // var Buffer = require('buffer/').Buffer;
-          // const MY_BUFFER = Buffer.from(base64file, 'base64');
-
-          // var BLOBBER = new Blob([MY_BUFFER], {type: image.mime});
-
-          // console.log(BLOBBER, 'blobbber---');
-
-          const query = `
-            mutation ($file: Upload!) {
-              placeImage(file: $file)
-            }
-          `;
-          const data = {
-            file: null,
-          };
-          const operations = JSON.stringify({
-            query,
-            variables: {
-              data,
-            },
-          });
-          let formData = new FormData();
-          formData.append('operations', operations);
-          const map = {
-            '0': ['variables.file'],
-          };
-          formData.append('map', JSON.stringify(map));
-          formData.append('0', BLOBBER);
-          // console.log(blob, 'BLOB_____');
-          console.log(formData, 'FORM___DATA');
-          axios({
-            url: 'https://backend.partylive.by/graphql',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              Authorization: token ? 'Bearer ' + token : '',
-            },
-            data: formData,
-          })
-            .then((res) => {
-              console.log(res, 'ОТВЕТ ПОЛОЖИТЕЛЬНЫЙ');
-            })
-            .catch((err) => {
-              console.log(err, 'ОТВЕТ ОТРИЦАТЕЛЬНЫЙ');
-            });
-          // })
-          // .catch(() => console.log('not a blob'));
+          console.log(image, 'IMAGE');
+          console.log(base64file, '______base64file');
+          // 'https://backend.partylive.by/graphql'
+          // const query = `
+          //   mutation ($file: Upload!) {
+          //     placeImage(file: $file)
+          //   }
+          // `;
         });
 
         setpPickerImageMime(image.mime);

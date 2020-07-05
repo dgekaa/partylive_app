@@ -24,6 +24,7 @@ import com.reactcommunity.rndatetimepicker.RNDateTimePickerPackage;
 import com.reactnative.ivpusic.imagepicker.PickerPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
+import com.RNFetchBlob.RNFetchBlobPackage;
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =
@@ -56,7 +57,8 @@ protected List<ReactPackage> getPackages() {
             new RNDateTimePickerPackage(),
             new PickerPackage(),
             new ReactNativePushNotificationPackage(),
-            new LinearGradientPackage()
+            new LinearGradientPackage(),
+            new RNFetchBlobPackage()
     );
 }
 
