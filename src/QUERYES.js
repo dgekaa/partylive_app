@@ -332,3 +332,12 @@ export const UPDATE_MOBILE_STREAM = gql`
     }
   }
 `;
+
+export const UPDATE_PLACE_IMAGE = gql`
+  mutation UPDATEPLACE($id: ID!, $profile_image: String) {
+    updatePlace(input: {id: $id, profile_image: $profile_image}) {
+      id
+      profile_image
+    }
+  }
+`;

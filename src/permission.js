@@ -7,6 +7,7 @@ export const requestCameraAndAudioPermission = async () => {
       const granted = await PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.CAMERA,
         PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
       ]);
       if (
         granted['android.permission.RECORD_AUDIO'] ===

@@ -17,7 +17,6 @@ import {
   SafeAreaView,
   ScrollView,
 } from 'react-native';
-import RNFetchBlob from 'react-native-fetch-blob';
 import {useMutation as UM} from '@apollo/react-hooks';
 const gql = require('graphql-tag');
 
@@ -52,6 +51,7 @@ import {
   CREATE_STREAM,
   SAVE_ADDRESS,
   UPDATE_MOBILE_STREAM,
+  UPDATE_PLACE_IMAGE,
 } from '../QUERYES';
 import GoogleMap from '../components/GoogleMap';
 import {ReactNativeFile} from 'apollo-upload-client';
@@ -290,6 +290,11 @@ const Admin = (props) => {
     refreshObject,
   );
 
+  const [UPDATE_PLACE_IMAGE_mutation] = useMutation(
+    UPDATE_PLACE_IMAGE,
+    refreshObject,
+  );
+
   const SetNewTimeObject = (data) => {
     const timeObject = {};
     EN_SHORT_DAY_OF_WEEK.forEach((e, i) => {
@@ -414,39 +419,6 @@ const Admin = (props) => {
     setMode('time');
   };
 
-  const goToPickImage = () => {
-    ImagePicker.openPicker({
-      width: windowWidth - 50,
-      height: (windowWidth - 50) * 0.65,
-      cropping: true,
-      includeBase64: true,
-      mediaType: 'photo',
-    })
-      .then((image) => {
-        const getAsyncToken = async () => {
-          const token = await getToken();
-          return token;
-        };
-
-        const base64file = `data:image/jpeg;base64,${image.data}`;
-
-        getAsyncToken().then((token) => {
-          console.log(image, 'IMAGE');
-          console.log(base64file, '______base64file');
-          // 'https://backend.partylive.by/graphql'
-          // const query = `
-          //   mutation ($file: Upload!) {
-          //     placeImage(file: $file)
-          //   }
-          // `;
-        });
-
-        setpPickerImageMime(image.mime);
-        setpPickerImageData(image.data);
-      })
-      .catch((err) => console.log(err, ' ERR ERR'));
-  };
-
   const saveNewData = () => {
     UPDATE_PLACE_DATA_mutation({
       variables: {
@@ -535,6 +507,7 @@ const Admin = (props) => {
           [
             PermissionsAndroid.PERMISSIONS.CAMERA,
             PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
           ],
           {
             title: 'Cool Photo App Camera And Microphone Permission',
@@ -546,6 +519,7 @@ const Admin = (props) => {
             buttonPositive: 'OK',
           },
         );
+
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           console.log('You can use the camera');
         } else {
@@ -662,6 +636,149 @@ const Admin = (props) => {
     setIsPublish(true);
     vbRef.current.start();
     updateMobileStream(true);
+  };
+
+  let [singleFile, setSingleFile] = useState(null);
+
+  const getAsyncToken = async () => {
+    const token = await getToken();
+    return token;
+  };
+
+  const goToPickImage = (token) => {
+    // ImagePicker.openCamera({
+    //   width: 300,
+    //   height: 400,
+    //   cropping: true,
+    // }).then((image) => {
+    //  const base64file = `data:image/jpeg;base64,${image.data}`;
+    //     console.log(image, 'IMG !!!');
+    //     const X = {
+    //       name: 'images.jpeg',
+    //       type: image.mime,
+    //       uri: Platform.OS === 'ios' ? `file:///${image.path}` : image.path,
+    //     };
+    //     console.log(
+    //       Platform.OS === 'ios' ? `file:///${image.path}` : image.path,
+    //       '________________________________',
+    //     );
+
+    //     uploadImage(null, X);
+
+    //     setpPickerImageMime(image.mime);
+    //     setpPickerImageData(image.data);
+    // });
+    const granted = PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    );
+
+    ImagePicker.openPicker({
+      width: windowWidth - 50,
+      height: (windowWidth - 50) * 0.65,
+      cropping: true,
+      includeBase64: true,
+      mediaType: 'photo',
+    })
+      .then((image) => {
+        const base64file = `data:image/jpeg;base64,${image.data}`;
+        console.log(image, 'IMG !!!');
+        const X = {
+          name: 'images.jpeg',
+          type: image.mime,
+          uri: Platform.OS === 'ios' ? `file:///${image.path}` : image.path,
+        };
+        console.log(
+          Platform.OS === 'ios' ? `file:///${image.path}` : image.path,
+          '________________________________',
+        );
+
+        uploadImage(null, X);
+
+        setpPickerImageMime(image.mime);
+        setpPickerImageData(image.data);
+      })
+      .catch((err) => console.log(err, ' ERR ERR'));
+  };
+
+  let uploadImage = async (token, image) => {
+    const formData = new FormData();
+    const operations = `{"query": "mutation ($file: Upload!){ placeImage(file: $file) }", "variables": { "file": null }}`;
+    formData.append('operations', operations);
+    const map = '{"0": ["variables.file"]}';
+    formData.append('map', map);
+    formData.append('0', image);
+    // formData.append('0', singleFile);
+    // console.log(singleFile, '__________________singleFile');
+
+    fetch('https://backend.partylive.by/graphql', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'multipart/form-data;',
+        authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log(res, 'upload DATA____________');
+        UPDATE_PLACE_IMAGE_mutation({
+          variables: {
+            id: data.place.id,
+            profile_image: res.data.placeImage,
+          },
+          optimisticResponse: null,
+        })
+          .then((res) => console.log(res, 'RES mob profile_image'))
+          .catch((err) => console.log(err, 'ERR mob profile_image'));
+      })
+      .catch((err) => console.log(err, 'ERR mob profile_image'));
+
+    // let res = await fetch('https://backend.partylive.by/graphql', {
+    //   method: 'post',
+    //   headers: {
+    //     'Content-Type': 'multipart/form-data;',
+    //     authorization: `Bearer ${token}`,
+    //   },
+    //   body: formData,
+    // });
+    // console.log(res, 'sssssssssssss');
+    // let responseJson = await res.json();
+    // console.log(responseJson, '________-responseJson');
+    // console.log('+++++++++++++++++++++++++++++++++++++++++');
+
+    // 2 ВАРИАНТ
+    // const formData = new FormData();
+
+    // const operations = `{"query": "mutation ($file: Upload!){ placeImage(file: $file) }", "variables": { "file": null }}`;
+    // formData.append('operations', operations);
+    // const map = '{"0": ["variables.file"]}';
+    // formData.append('map', map);
+    // formData.append('0', singleFile);
+
+    // console.log(formData, '______________data');
+    // console.log(singleFile, '___________fileToUpload');
+
+    // let res = await fetch('https://backend.partylive.by/graphql', {
+    //   method: 'post',
+    //   headers: {
+    //     'Content-Type': 'multipart/form-data;',
+    //     authorization: `Bearer ${token}`,
+    //   },
+    //   body: formData,
+    // });
+    // let responseJson = await res.json();
+    // console.log(responseJson.data, '________-responseJson');
+
+    // UPDATE_PLACE_IMAGE_mutation({
+    //   variables: {
+    //     id: data.place.id,
+    //     profile_image: responseJson.data.placeImage,
+    //   },
+    //   optimisticResponse: null,
+    // }).then(
+    //   (res) => console.log(res, 'RES mob profile_image'),
+    //   (err) => console.log(err, 'ERR mob profile_image'),
+    // );
   };
 
   if (loading) {
@@ -814,20 +931,59 @@ const Admin = (props) => {
                       }}
                     />
                     <View>
-                      <TouchableOpacity onPress={() => goToPickImage()}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          getAsyncToken().then((token) => {
+                            goToPickImage(token);
+                          });
+                        }}>
                         <Text>Изменить</Text>
                       </TouchableOpacity>
                       <TouchableOpacity onPress={() => {}}>
                         <Text>Удалить</Text>
                       </TouchableOpacity>
                     </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        // ImagePicker.openCamera({
+                        //   width: 300,
+                        //   height: 400,
+                        //   cropping: true,
+                        // }).then((image) => {
+                        //   console.log(image);
+                        // });
+                        requestCameraPermission();
+                      }}>
+                      <Text>UPLOAD</Text>
+                    </TouchableOpacity>
                   </>
                 ) : (
-                  <TouchableOpacity
-                    style={styles.noPickerImageStyle}
-                    onPress={() => goToPickImage()}>
-                    <Text style={styles.noPickerImageText}>Загрузить фото</Text>
-                  </TouchableOpacity>
+                  <>
+                    <TouchableOpacity
+                      style={styles.noPickerImageStyle}
+                      onPress={() => {
+                        getAsyncToken().then((token) => {
+                          goToPickImage(token);
+                        });
+                      }}>
+                      <Text style={styles.noPickerImageText}>
+                        Загрузить фото
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        // ImagePicker.openCamera({
+                        //   width: 300,
+                        //   height: 400,
+                        //   cropping: true,
+                        // }).then((image) => {
+                        //   console.log(image);
+                        // });
+                        requestCameraPermission();
+                      }}>
+                      <Text>UPLOAD</Text>
+                    </TouchableOpacity>
+                  </>
                 )}
               </View>
 

@@ -37,7 +37,7 @@ const authLink = setContext(async (req, {headers}) => {
   return {
     ...headers,
     headers: {
-      authorization: token ? `Bearer ${token}` : null,
+      authorization: `Bearer ${token}`,
     },
   };
 });
