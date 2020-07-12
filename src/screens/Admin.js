@@ -646,28 +646,6 @@ const Admin = (props) => {
   };
 
   const goToPickImage = (token) => {
-    // ImagePicker.openCamera({
-    //   width: 300,
-    //   height: 400,
-    //   cropping: true,
-    // }).then((image) => {
-    //  const base64file = `data:image/jpeg;base64,${image.data}`;
-    //     console.log(image, 'IMG !!!');
-    //     const X = {
-    //       name: 'images.jpeg',
-    //       type: image.mime,
-    //       uri: Platform.OS === 'ios' ? `file:///${image.path}` : image.path,
-    //     };
-    //     console.log(
-    //       Platform.OS === 'ios' ? `file:///${image.path}` : image.path,
-    //       '________________________________',
-    //     );
-
-    //     uploadImage(null, X);
-
-    //     setpPickerImageMime(image.mime);
-    //     setpPickerImageData(image.data);
-    // });
     const granted = PermissionsAndroid.check(
       PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
     );
