@@ -62,6 +62,10 @@ target 'party_live_app' do
 #pod 'Google-Maps-iOS-Utils' 
 
 
+  pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
+
+  pod 'react-native-image-editor', :path => '../node_modules/@react-native-community/image-editor'
+
   target 'party_live_appTests' do    inherit! :complete
     # Pods for testing
   end
