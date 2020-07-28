@@ -1,9 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
-// import ImagePicker from 'react-native-image-crop-picker';
-import ImagePicker from 'react-native-image-picker';
-// import ImageEditor from '@react-native-community/image-editor';
+import ImagePicker from 'react-native-image-crop-picker';
 
-// import 'react-image-crop/dist/ReactCrop.css';
 import {
   StyleSheet,
   View,
@@ -180,76 +177,6 @@ const headerStyles = StyleSheet.create({
 
 const Admin = (props) => {
   const {streams} = props.navigation.state.params.item;
-
-  let options = {
-    storageOptions: {
-      skipBackup: true,
-      path: 'images',
-    },
-  };
-
-  const [filePath, setFilePath] = useState(null);
-  const [fileData, setFileData] = useState(null);
-  const [fileUri, setFileUri] = useState(null);
-
-  function cropImage(uri, cropData) {
-    return new Promise((resolve, reject) =>
-      ImageEditor.cropImage(uri, cropData, resolve, reject),
-    );
-  }
-  function getSize(uri) {
-    return new Promise((resolve, reject) =>
-      Image.getSize(uri, (w, h) => resolve({width: w, height: h}), reject),
-    );
-  }
-
-  const width = 2160;
-  const height = 3840;
-  const displaySize = {width: 16, height: 16};
-
-  const zagruzitFoto = () => {
-    ImagePicker.launchImageLibrary(options, (response) => {
-      console.log('Response = ', response);
-
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else if (response.customButton) {
-        console.log('User tapped custom button: ', response.customButton);
-        alert(response.customButton);
-      } else {
-        const source = {uri: response.uri};
-
-        // setFilePath(response);
-        // setFileData(response.data);
-        // setFileUri(response.uri);
-        // console.log(response, '___RESPONSE');
-        // const cropData = {
-        //   offset: {x: 0, y: 0},
-        //   size: {width: 100, height: 100},
-        //   displaySize: {width: 200, height: 200},
-        //   resizeMode: 'contain',
-        // };
-        // cropImage(response.uri, {
-        //   offset: {x: 0, y: 0},
-        //   size: {width, height},
-        //   displaySize,
-        //   resizeMode: 'cover',
-        // })
-        //   .then((resizedUri) => getSize(resizedUri))
-        //   .then((resizedDimensions) => console.log(resizedDimensions));
-      }
-    });
-  };
-
-  //  const handleFile = e => {
-  //     const fileReader = new FileReader()
-  //     fileReader.onloadend = () => {
-  //         this.setState({src: fileReader.result })
-  //     }
-  //     fileReader.readAsDataURL(e.target.files[0])
-  // }
 
   const [popupVisible, setPopupVisible] = useState(false);
   const [date, setDate] = useState(new Date());
@@ -975,11 +902,7 @@ const Admin = (props) => {
             <View style={styles.profileWrap}>
               <Text style={styles.headerAdminTitle}>Профиль заведения</Text>
 
-              <TouchableOpacity onPress={() => zagruzitFoto()}>
-                <Text>Загрузить фото</Text>
-              </TouchableOpacity>
-
-              {/* <View>
+              <View>
                 {pickerImageMime && pickerImageData ? (
                   <>
                     <Image
@@ -1001,19 +924,6 @@ const Admin = (props) => {
                         <Text>Удалить</Text>
                       </TouchableOpacity>
                     </View>
-                    <TouchableOpacity
-                      onPress={() => {
-                        // ImagePicker.openCamera({
-                        //   width: 300,
-                        //   height: 400,
-                        //   cropping: true,
-                        // }).then((image) => {
-                        //   console.log(image);
-                        // });
-                        requestCameraPermission();
-                      }}>
-                      <Text>UPLOAD</Text>
-                    </TouchableOpacity>
                   </>
                 ) : (
                   <>
@@ -1028,22 +938,9 @@ const Admin = (props) => {
                         Загрузить фото
                       </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        // ImagePicker.openCamera({
-                        //   width: 300,
-                        //   height: 400,
-                        //   cropping: true,
-                        // }).then((image) => {
-                        //   console.log(image);
-                        // });
-                        requestCameraPermission();
-                      }}>
-                      <Text>UPLOAD</Text>
-                    </TouchableOpacity>
                   </>
                 )}
-              </View> */}
+              </View>
 
               <View style={styles.textInputWrap}>
                 <Text style={styles.textInputTitleText}>Название:</Text>
