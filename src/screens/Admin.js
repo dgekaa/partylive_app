@@ -25,7 +25,6 @@ const gql = require('graphql-tag');
 
 import {getToken} from '../util';
 import {NodeCameraView} from 'react-native-nodemediaclient';
-import axios from 'axios';
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import VideoPlayer from 'react-native-video-controls';
 import DateTimePicker from '@react-native-community/datetimepicker';
