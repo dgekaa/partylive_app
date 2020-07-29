@@ -48,20 +48,19 @@ const SmallCompanyBlock = ({item, navigation}) => {
           },
         );
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('You can use location');
-          Geolocation.watchPosition(
-            (position) => {
-              setLon(position.coords.longitude);
-              setLat(position.coords.latitude);
+          console.log('You can use location!!!');
+          Geolocation.getCurrentPosition(
+            (info) => {
+              setLon(info.coords.longitude);
+              setLat(info.coords.latitude);
             },
             (error) => console.log(error.code, error.message, 'ERR LOCATION'),
-            {enableHighAccuracy: false, timeout: 50000},
           );
         } else {
           console.log('Location permission denied');
         }
       } catch (err) {
-        console.warn(err);
+        console.warn(err, ' location err');
       }
     }
   };
