@@ -61,6 +61,7 @@ export const GET_PLACES = gql`
       address
       description
       alias
+      profile_image
       logo
       menu
       actions
@@ -99,6 +100,7 @@ export const GET_PLACE = gql`
       name
       address
       description
+      profile_image
       logo
       menu
       alias

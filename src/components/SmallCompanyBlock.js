@@ -9,6 +9,7 @@ import {
   Platform,
   ImageBackground,
   Image,
+  TouchableHighlight,
 } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import LinearGradient from 'react-native-linear-gradient';
@@ -138,7 +139,7 @@ const SmallCompanyBlock = ({item, navigation}) => {
   };
 
   return (
-    <TouchableOpacity
+    <TouchableHighlight
       style={styles.SmallCompanyBlock}
       onPress={(e) => {
         navigation.navigate('Company', {
@@ -280,7 +281,7 @@ const SmallCompanyBlock = ({item, navigation}) => {
           </View>
         </View>
       )}
-    </TouchableOpacity>
+    </TouchableHighlight>
   );
 };
 
