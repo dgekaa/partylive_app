@@ -274,7 +274,10 @@ const styles = StyleSheet.create({
   bottomTabBlock: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    justifyContent: 'center',
+    width: '100%',
+    height: 45,
+    marginTop: 15,
   },
   bottomTabText: {
     fontSize: 14,

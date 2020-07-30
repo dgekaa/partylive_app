@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -8,7 +8,9 @@ import {
   Dimensions,
 } from 'react-native';
 import {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
+import {ClusterMap} from 'react-native-cluster-map';
 import MapView from 'react-native-map-clustering';
+import ClusteredMapView from 'react-native-maps-super-cluster';
 import LinearGradient from 'react-native-linear-gradient';
 import Geocoder from 'react-native-geocoding';
 
@@ -115,6 +117,7 @@ const CustomMarker = ({place, getDistanceTo}) => {
           place.streams[0] &&
           place.streams[0].preview,
       }}>
+      {console.log(place, '+++++++++++++++++++')}
       {!showStream && (
         <View style={styles.noVideo}>
           <Text style={styles.noVideoText}>
@@ -191,15 +194,15 @@ const GoogleMap = ({places, navigation, onePlace, ADDRESSfromCOORD}) => {
     longitudeDelta: onePlace ? 0.12 : 0.25,
   });
 
-  useEffect(() => {
-    if (ADDRESSfromCOORD) {
-      Geocoder.from(newRegion.latitude, newRegion.longitude)
-        .then((json) => {
-          setAddresFromCoord(json.results[0].formatted_address);
-        })
-        .catch((error) => console.log(error, 'GEO'));
-    }
-  }, [newRegion, ADDRESSfromCOORD]);
+  // useEffect(() => {
+  //   if (ADDRESSfromCOORD) {
+  //     Geocoder.from(newRegion.latitude, newRegion.longitude)
+  //       .then((json) => {
+  //         setAddresFromCoord(json.results[0].formatted_address);
+  //       })
+  //       .catch((error) => console.log(error, 'GEO'));
+  //   }
+  // }, [newRegion, ADDRESSfromCOORD]);
 
   const getDistanceTo = (dist) => {
     setDistanceTo(dist);
@@ -211,15 +214,16 @@ const GoogleMap = ({places, navigation, onePlace, ADDRESSfromCOORD}) => {
 
   return (
     <View style={styles.container}>
-      {ADDRESSfromCOORD && (
+      {!!ADDRESSfromCOORD && (
         <Image
           source={require('../img/location.png')}
           style={styles.newLocation}
         />
       )}
       <MapView
+        spiralEnabled={true}
         clusterColor="#e32a6c"
-        radius={onePlace ? 1 : 100}
+        radius={onePlace ? 1 : 40}
         clusterTextColor="#fff"
         provider={PROVIDER_GOOGLE}
         style={styles.map}
@@ -230,7 +234,7 @@ const GoogleMap = ({places, navigation, onePlace, ADDRESSfromCOORD}) => {
         ADDRESSfromCOORD={
           ADDRESSfromCOORD && ADDRESSfromCOORD(addressFromCoord, newRegion)
         }>
-        {!!lat && isMapReady && (
+        {/* {!!lat && isMapReady && (
           <Marker coordinate={{latitude: +lat, longitude: +lon}}>
             <Image
               source={require('../img/dancer.png')}
@@ -245,7 +249,7 @@ const GoogleMap = ({places, navigation, onePlace, ADDRESSfromCOORD}) => {
               latitude: +onePlace.coordinates.split(',')[0],
               longitude: +onePlace.coordinates.split(',')[1],
             }}></Marker>
-        )}
+        )} */}
 
         {!!places &&
           !!places.length &&

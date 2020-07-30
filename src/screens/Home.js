@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   StyleSheet,
   View,
@@ -6,8 +6,9 @@ import {
   ActivityIndicator,
   FlatList,
   SafeAreaView,
+  RefreshControl,
 } from 'react-native';
-import {Query} from 'react-apollo';
+import {Query, useQuery} from 'react-apollo';
 
 import Header from '../components/Header';
 import CompanyTypeNav from '../components/CompanyTypeNav';
@@ -15,18 +16,19 @@ import SmallCompanyBlock from '../components/SmallCompanyBlock';
 import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
 
 const Home = (props) => {
-  const [DATA, setDATA] = useState([]);
   const [companyData, setCompanyData] = useState([]);
 
+  const PLACES = useQuery(GET_PLACES);
+
   useEffect(() => {
-    DATA.places && setCompanyData(DATA.places);
-  }, [DATA]);
+    PLACES.data && setCompanyData(PLACES.data.places);
+  }, [PLACES]);
 
   const clickedType = (type) => {
     if (type.toLowerCase() === 'все') {
-      setCompanyData(DATA.places);
+      setCompanyData(PLACES.data.places);
     } else {
-      const filteredData = DATA.places.filter((el) => {
+      const filteredData = PLACES.data.places.filter((el) => {
         if (el.categories[0] && el.categories[0].name) {
           return el.categories[0].name.toLowerCase() === type.toLowerCase();
         }
@@ -34,6 +36,18 @@ const Home = (props) => {
       setCompanyData(filteredData);
     }
   };
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    if (PLACES.refetch) {
+      setRefreshing(true);
+      PLACES.refetch().then((res) => {
+        console.log(res.loading, '...LOAD');
+        !res.loading && res.data && setRefreshing(false);
+      });
+    }
+  }, []);
 
   return (
     <View style={styles.home}>
@@ -50,38 +64,29 @@ const Home = (props) => {
           }}
         </Query>
         <View style={styles.content}>
-          <Query query={GET_PLACES}>
-            {({loading, error, data}) => {
-              if (loading) {
-                return (
-                  <View>
-                    <ActivityIndicator size="large" color="#0000ff" />
-                  </View>
-                );
-              } else if (error) {
-                return <Text>Error! ${error.message}</Text>;
-              }
-              setDATA(data);
+          {PLACES.loading && (
+            <View>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          )}
 
-              if (companyData.length) {
-                return (
-                  <FlatList
-                    data={companyData}
-                    numColumns={2}
-                    renderItem={({item}) => (
-                      <SmallCompanyBlock
-                        item={item}
-                        navigation={props.navigation}
-                      />
-                    )}
-                    keyExtractor={(item) => item.id}
-                  />
-                );
-              } else {
-                return <Text style={styles.nullFilter}>Нет заведений</Text>;
+          {PLACES.error && <Text>Error! ${error.message}</Text>}
+
+          {companyData.length ? (
+            <FlatList
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
-            }}
-          </Query>
+              data={companyData}
+              numColumns={2}
+              renderItem={({item}) => (
+                <SmallCompanyBlock item={item} navigation={props.navigation} />
+              )}
+              keyExtractor={(item) => item.id}
+            />
+          ) : (
+            <Text style={styles.nullFilter}>Нет заведений</Text>
+          )}
         </View>
       </SafeAreaView>
     </View>
