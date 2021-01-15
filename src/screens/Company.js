@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -6,9 +6,10 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import VideoPlayer from 'react-native-video-controls';
-
+import Video from 'react-native-video';
 import {EN_SHORT_TO_RU_LONG_V_P} from '../constants';
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 import Header from '../components/Header';
@@ -89,6 +90,11 @@ const Company = (props) => {
     }
   };
 
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const videoRef = useRef(null);
+
   return (
     <View style={styles.Company}>
       <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
@@ -97,16 +103,36 @@ const Company = (props) => {
           <View style={styles.videoWrap}>
             {console.log(streams[0], 'SRTEAMSSSSSS')}
 
-            {streams[0] ? (
-              showStream ? (
-                <VideoPlayer
+            {/* <VideoPlayer
                   source={{uri: streams[0].url}}
                   disableSeekbar
                   disableTimer
                   disableBack
                   disableFullscreen
                   toggleResizeModeOnFullscreen={false}
-                />
+                /> */}
+
+            {streams[0] ? (
+              showStream ? (
+                <>
+                  <Video
+                    paused={paused}
+                    source={{uri: streams[0].url}}
+                    resizeMode="contain"
+                    style={styles.backgroundVideo}
+                    onLoad={(load) => console.log(load, '---load---')}
+                    onProgress={(progr) => console.log(progr, '---progr---')}
+                    ref={videoRef}
+                  />
+                  <View style={styles.controls}>
+                    <TouchableWithoutFeedback
+                      onPress={() => setPaused((prev) => !prev)}>
+                      <Text style={styles.controlsText}>
+                        {paused ? 'paused' : 'started'}
+                      </Text>
+                    </TouchableWithoutFeedback>
+                  </View>
+                </>
               ) : (
                 <View style={styles.backgroundVideo}>
                   <Text style={styles.noVideoText}>
@@ -204,6 +230,21 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  controls: {
+    backgroundColor: 'rgba(0,0,0,1)',
+    height: 50,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    position: 'absolute',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingHorizontal: 10,
+  },
+  controlsText: {
+    color: '#fff',
   },
   noVideoText: {
     color: '#fff',

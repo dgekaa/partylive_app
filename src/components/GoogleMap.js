@@ -8,9 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
-import {ClusterMap} from 'react-native-cluster-map';
 import MapView from 'react-native-map-clustering';
-import ClusteredMapView from 'react-native-maps-super-cluster';
 import LinearGradient from 'react-native-linear-gradient';
 import Geocoder from 'react-native-geocoding';
 
@@ -34,10 +32,6 @@ const CustomMarker = ({place, getDistanceTo}) => {
   const [distanceTo, setDistanceTo] = useState();
   const [lon, setLon] = useState('');
   const [lat, setLat] = useState('');
-
-  useEffect(() => {
-    requestLocationPermission(setLon, setLat);
-  }, []);
 
   useEffect(() => {
     isShowStreamNow(place, setShowStream, setNextStreamTime);
@@ -117,7 +111,6 @@ const CustomMarker = ({place, getDistanceTo}) => {
           place.streams[0] &&
           place.streams[0].preview,
       }}>
-      {console.log(place, '+++++++++++++++++++')}
       {!showStream && (
         <View style={styles.noVideo}>
           <Text style={styles.noVideoText}>
@@ -181,18 +174,17 @@ const GoogleMap = ({places, navigation, onePlace, ADDRESSfromCOORD}) => {
   const [addressFromCoord, setAddresFromCoord] = useState('');
   const [isMapReady, setIsMapReady] = useState(false);
 
-  useEffect(() => {
-    requestLocationPermission(setLon, setLat);
-  }, []);
-
-  Geocoder.init('AIzaSyAAcvrFmEi8o7u-zXHe6geXvjRey4Qj6tg', {language: 'ru'});
-
   const [initialRegion, setInitialRegion] = useState({
     latitude: 53.9097,
     longitude: 27.556,
     latitudeDelta: onePlace ? 0.12 : 0.25,
     longitudeDelta: onePlace ? 0.12 : 0.25,
   });
+
+  useEffect(() => {
+    // requestLocationPermission(setLon, setLat);
+    Geocoder.init('AIzaSyAAcvrFmEi8o7u-zXHe6geXvjRey4Qj6tg', {language: 'ru'});
+  }, []);
 
   // useEffect(() => {
   //   if (ADDRESSfromCOORD) {
@@ -241,9 +233,8 @@ const GoogleMap = ({places, navigation, onePlace, ADDRESSfromCOORD}) => {
               style={styles.dancer}
             />
           </Marker>
-        )}
-
-        {!!onePlace && isMapReady && (
+        )} */}
+        {/*        {!!onePlace && isMapReady && (
           <Marker
             coordinate={{
               latitude: +onePlace.coordinates.split(',')[0],
@@ -297,7 +288,6 @@ const styles = StyleSheet.create({
   },
   map: {
     ...StyleSheet.absoluteFillObject,
-    // backgroundColor: 'red',
   },
   dancer: {
     width: 30,

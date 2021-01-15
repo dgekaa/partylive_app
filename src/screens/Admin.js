@@ -180,29 +180,28 @@ const Admin = (props) => {
 
   const {streams} = props.navigation.state.params.item;
 
-  const [popupVisible, setPopupVisible] = useState(false);
-  const [date, setDate] = useState(new Date());
-  const [mode, setMode] = useState('date');
-  const [show, setShow] = useState(false);
-  const [selectedDay, setSelectedDay] = useState(false);
-  const [isPickStartTime, setIsPickStartTime] = useState(false);
-  const [pickedStartTime, setPickedStartTime] = useState('');
-  const [pickedEndTime, setPickedEndTime] = useState('');
-  const [enumWeekName, setEnumWeekName] = useState('');
-  const [isClickedWorkTime, setIsClickedWorkTime] = useState(false);
-  const [pickerImageData, setpPickerImageData] = useState('');
-  const [inputName, setInputName] = useState('');
-  const [inputCameraAddress, setInputCameraAddress] = useState('');
-  const [inputAlias, setInputAlias] = useState('');
-  const [inputDescription, setInputDescription] = useState(
-    data && data.place && data.place.description && data.place.description,
-  );
-  const [typeOfCompany, setTypeOfCompany] = useState('');
-  const [typeOfCompanyId, setTypeOfCompanyId] = useState('');
-  const [isStreamOff, setIsStreamOff] = useState(false);
-
-  const [ADDRESS, setADDRESS] = useState(null);
-  const [COORD, setCOORD] = useState(null);
+  const [popupVisible, setPopupVisible] = useState(false),
+    [date, setDate] = useState(new Date()),
+    [mode, setMode] = useState('date'),
+    [show, setShow] = useState(false),
+    [selectedDay, setSelectedDay] = useState(false),
+    [isPickStartTime, setIsPickStartTime] = useState(false),
+    [pickedStartTime, setPickedStartTime] = useState(''),
+    [pickedEndTime, setPickedEndTime] = useState(''),
+    [enumWeekName, setEnumWeekName] = useState(''),
+    [isClickedWorkTime, setIsClickedWorkTime] = useState(false),
+    [pickerImageData, setpPickerImageData] = useState(''),
+    [inputName, setInputName] = useState(''),
+    [inputCameraAddress, setInputCameraAddress] = useState(''),
+    [inputAlias, setInputAlias] = useState(''),
+    [inputDescription, setInputDescription] = useState(
+      data && data.place && data.place.description && data.place.description,
+    ),
+    [typeOfCompany, setTypeOfCompany] = useState(''),
+    [typeOfCompanyId, setTypeOfCompanyId] = useState(''),
+    [isStreamOff, setIsStreamOff] = useState(false),
+    [ADDRESS, setADDRESS] = useState(null),
+    [COORD, setCOORD] = useState(null);
 
   const windowWidth = Dimensions.get('window').width;
 
@@ -696,12 +695,16 @@ const Admin = (props) => {
         height: 200,
       })
         .then((image) => {
+          console.log(image, '---image----');
+
           const finishImage = {
             name: 'images.jpeg',
             type: image.mime,
             uri: Platform.OS === 'ios' ? `file:///${image.path}` : image.path,
           };
           formData.append('0', finishImage);
+          console.log(formData, '=========');
+
           fetch('https://backend.partylive.by/graphql', {
             method: 'post',
             headers: {
@@ -712,6 +715,7 @@ const Admin = (props) => {
           })
             .then((res) => res.json())
             .then((responseJson) => {
+              console.log(responseJson, '-------');
               setpPickerImageData(image.path);
               UPLOAD_IMAGE(responseJson.data.placeImage);
             })

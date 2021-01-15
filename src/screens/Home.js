@@ -19,7 +19,6 @@ const Home = (props) => {
   const [companyData, setCompanyData] = useState([]);
 
   const PLACES = useQuery(GET_PLACES);
-
   useEffect(() => {
     PLACES.data && setCompanyData(PLACES.data.places);
   }, [PLACES]);
