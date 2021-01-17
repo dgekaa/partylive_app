@@ -24,7 +24,7 @@ const Login = (props) => {
   };
 
   return (
-    <SafeAreaView style={{backgroundColor: 'red', flex: 1}}>
+    <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
       <View style={styles.loginWrap}>
         <Header props={props} />
         <View style={styles.login}>

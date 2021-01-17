@@ -357,7 +357,7 @@ PODS:
     - React
   - RNScreens (2.4.0):
     - React
-  - RSKImageCropper (2.2.3)
+  - RSKImageCropper (2.3.0)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -561,10 +561,10 @@ SPEC CHECKSUMS:
   RNImageCropPicker: cf129d17e042ce3e96fb9ada967c28f21f977c82
   RNReanimated: 4e102df74a9674fa943e05f97f3362b6e44d0b48
   RNScreens: b5c0e1b2b04512919e78bd3898e144a157ce2363
-  RSKImageCropper: a446db0e8444a036b34f3c43db01b2373baa4b2a
+  RSKImageCropper: c337eacdcbed50e695e5153ff0c2b861b6ebfa84
   Yoga: 50fb6eb13d2152e7363293ff603385db380815b1
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: cde221bea29a7762a5c25124cfae1e18259d0ec4
+PODFILE CHECKSUM: e4a4b0b125ebd550d160ffc3e36136a2a67c7984
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.10.0.beta.2

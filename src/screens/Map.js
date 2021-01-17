@@ -42,7 +42,7 @@ const Map = (props) => {
 
   return (
     <View style={styles.Map}>
-      <SafeAreaView style={{flex: 1}}>
+      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
         <Header props={props} />
         <Query query={GET_CATEGORIES}>
           {({loading, error, data}) => {

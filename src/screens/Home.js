@@ -56,7 +56,7 @@ const Home = (props) => {
 
   return (
     <View style={styles.home}>
-      <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
+      <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
         <Header props={props} />
         <Query query={GET_CATEGORIES}>
           {({loading, error, data}) => {

@@ -61,7 +61,7 @@ const Registration = (props) => {
   };
 
   return (
-    <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
+    <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
       <View style={styles.loginWrap}>
         <Header props={props} />
         <View style={styles.login}>
