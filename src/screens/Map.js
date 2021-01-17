@@ -12,11 +12,14 @@ import Header from '../components/Header';
 import GoogleMap from '../components/GoogleMap';
 import CompanyTypeNav from '../components/CompanyTypeNav';
 import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
+import {requestLocationPermission} from '../permission';
 
 const Map = (props) => {
   const {data} = useQuery(GET_PLACES);
 
-  const [companyData, setCompanyData] = useState([]);
+  const [companyData, setCompanyData] = useState([]),
+    [lon, setLon] = useState(null),
+    [lat, setLat] = useState(null);
 
   useEffect(() => {
     data.places && setCompanyData(data.places);
@@ -33,6 +36,10 @@ const Map = (props) => {
     }
   };
 
+  useEffect(() => {
+    requestLocationPermission(setLon, setLat);
+  }, []);
+
   return (
     <View style={styles.Map}>
       <SafeAreaView style={{flex: 1}}>
@@ -48,7 +55,12 @@ const Map = (props) => {
           }}
         </Query>
         <View style={styles.content}>
-          {<GoogleMap places={companyData} navigation={props.navigation} />}
+          <GoogleMap
+            places={companyData}
+            navigation={props.navigation}
+            lon={lon}
+            lat={lat}
+          />
         </View>
       </SafeAreaView>
     </View>

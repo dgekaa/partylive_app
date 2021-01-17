@@ -9,25 +9,28 @@ import {
   RefreshControl,
 } from 'react-native';
 import {Query, useQuery} from 'react-apollo';
-
+import {requestLocationPermission} from '../permission';
 import Header from '../components/Header';
 import CompanyTypeNav from '../components/CompanyTypeNav';
 import SmallCompanyBlock from '../components/SmallCompanyBlock';
 import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
 
 const Home = (props) => {
-  const [companyData, setCompanyData] = useState([]);
+  const [companyData, setCompanyData] = useState([]),
+    [lon, setLon] = useState(''),
+    [lat, setLat] = useState('');
 
-  const PLACES = useQuery(GET_PLACES);
+  const {loading, error, data, refetch} = useQuery(GET_PLACES);
+
   useEffect(() => {
-    PLACES.data && setCompanyData(PLACES.data.places);
-  }, [PLACES]);
+    data && setCompanyData(data.places);
+  }, [loading, error, data]);
 
   const clickedType = (type) => {
     if (type.toLowerCase() === 'все') {
-      setCompanyData(PLACES.data.places);
+      setCompanyData(data.places);
     } else {
-      const filteredData = PLACES.data.places.filter((el) => {
+      const filteredData = data.places.filter((el) => {
         if (el.categories[0] && el.categories[0].name) {
           return el.categories[0].name.toLowerCase() === type.toLowerCase();
         }
@@ -39,13 +42,16 @@ const Home = (props) => {
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = React.useCallback(() => {
-    if (PLACES.refetch) {
+    if (refetch) {
       setRefreshing(true);
-      PLACES.refetch().then((res) => {
-        console.log(res.loading, '...LOAD');
+      refetch().then((res) => {
         !res.loading && res.data && setRefreshing(false);
       });
     }
+  }, []);
+
+  useEffect(() => {
+    requestLocationPermission(setLon, setLat);
   }, []);
 
   return (
@@ -63,13 +69,13 @@ const Home = (props) => {
           }}
         </Query>
         <View style={styles.content}>
-          {PLACES.loading && (
+          {loading && (
             <View>
               <ActivityIndicator size="large" color="#0000ff" />
             </View>
           )}
 
-          {PLACES.error && <Text>Error! ${error.message}</Text>}
+          {error && <Text>Error! ${error.message}</Text>}
 
           {companyData.length ? (
             <FlatList
@@ -79,7 +85,12 @@ const Home = (props) => {
               data={companyData}
               numColumns={2}
               renderItem={({item}) => (
-                <SmallCompanyBlock item={item} navigation={props.navigation} />
+                <SmallCompanyBlock
+                  lon={lon}
+                  lat={lat}
+                  item={item}
+                  navigation={props.navigation}
+                />
               )}
               keyExtractor={(item) => item.id}
             />

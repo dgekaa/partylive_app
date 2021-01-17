@@ -3,15 +3,11 @@ import {
   StyleSheet,
   View,
   Text,
-  TouchableOpacity,
   Dimensions,
-  PermissionsAndroid,
-  Platform,
   ImageBackground,
   Image,
   TouchableHighlight,
 } from 'react-native';
-import Geolocation from '@react-native-community/geolocation';
 import LinearGradient from 'react-native-linear-gradient';
 
 import bar from '../img/bar_w.png';
@@ -24,50 +20,55 @@ import {getDistanceFromLatLonInKm} from '../getDistance';
 import {EN_SHORT_TO_RU_LONG_V_P, EN_SHORT_TO_RU_LONG} from '../constants';
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 
-const SmallCompanyBlock = ({item, navigation}) => {
-  const [showStream, setShowStream] = useState();
-  const [nextStreamTime, setNextStreamTime] = useState();
-  const [workTime, setWorkTime] = useState();
-  const [isWork, setIsWork] = useState();
-  const [distanceTo, setDistanceTo] = useState();
-  const [lon, setLon] = useState('');
-  const [lat, setLat] = useState('');
-  const [nextWorkTime, setNextWorkTime] = useState(null);
+const TextBlock = ({
+  showStream,
+  nextWorkTime,
+  isWork,
+  whenIsTranslationTime,
+  profile_image,
+}) => (
+  <View style={styles.videoWrap}>
+    {!showStream && (
+      <View
+        style={[
+          styles.backgroundVideo,
+          profile_image && {backgroundColor: 'transparent'},
+        ]}>
+        <Text style={styles.noVideoText}>
+          {nextWorkTime
+            ? isWork
+              ? whenIsTranslationTime()
+              : 'Откроется:'
+            : isWork
+            ? whenIsTranslationTime()
+            : 'Закрыто'}
+        </Text>
+        <Text style={styles.noVideoText}>
+          {nextWorkTime && nextWorkTime.start_time
+            ? `${
+                nextWorkTime.day.toLowerCase() !== 'сегодня'
+                  ? EN_SHORT_TO_RU_LONG[nextWorkTime.day]
+                  : nextWorkTime.day
+              }`
+            : ''}
+        </Text>
+        <Text style={styles.noVideoText}>
+          {nextWorkTime &&
+            nextWorkTime.start_time &&
+            nextWorkTime.start_time + '-' + nextWorkTime.end_time}
+        </Text>
+      </View>
+    )}
+  </View>
+);
 
-  const requestLocationPermission = async () => {
-    if (Platform.OS === 'android') {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Cool location Permission',
-            message: 'Нужен доступ к вашему местоположению.',
-            buttonNeutral: 'Спросить позже',
-            buttonNegative: 'Отмена',
-            buttonPositive: 'OK',
-          },
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('You can use location!!!');
-          Geolocation.getCurrentPosition(
-            (info) => {
-              setLon(info.coords.longitude);
-              setLat(info.coords.latitude);
-            },
-            (error) => console.log(error.code, error.message, 'ERR LOCATION'),
-          );
-        } else {
-          console.log('Location permission denied');
-        }
-      } catch (err) {
-        console.warn(err, ' location err');
-      }
-    }
-  };
-
-  useEffect(() => {
-    requestLocationPermission();
-  }, []);
+const SmallCompanyBlock = ({item, navigation, lon, lat}) => {
+  const [showStream, setShowStream] = useState(),
+    [nextStreamTime, setNextStreamTime] = useState(),
+    [workTime, setWorkTime] = useState(),
+    [isWork, setIsWork] = useState(),
+    [distanceTo, setDistanceTo] = useState(),
+    [nextWorkTime, setNextWorkTime] = useState(null);
 
   useEffect(() => {
     if (lon && lat && item && item.coordinates) {
@@ -153,36 +154,6 @@ const SmallCompanyBlock = ({item, navigation}) => {
         <ImageBackground
           style={styles.backgroundStyle}
           source={{uri: item.streams[0].preview}}>
-          <View style={styles.videoWrap}>
-            {!showStream && (
-              <View style={styles.backgroundVideo}>
-                <Text style={styles.noVideoText}>
-                  {nextWorkTime
-                    ? isWork
-                      ? whenIsTranslationTime()
-                      : 'Откроется:'
-                    : isWork
-                    ? whenIsTranslationTime()
-                    : 'Закрыто'}
-                </Text>
-                <Text style={styles.noVideoText}>
-                  {nextWorkTime && nextWorkTime.start_time
-                    ? `${
-                        nextWorkTime.day.toLowerCase() !== 'сегодня'
-                          ? EN_SHORT_TO_RU_LONG[nextWorkTime.day]
-                          : nextWorkTime.day
-                      }`
-                    : ''}
-                </Text>
-                <Text style={styles.noVideoText}>
-                  {nextWorkTime &&
-                    nextWorkTime.start_time &&
-                    nextWorkTime.start_time + '-' + nextWorkTime.end_time}
-                </Text>
-              </View>
-            )}
-          </View>
-
           <View style={styles.description}>
             <LinearGradient
               colors={[
@@ -217,35 +188,29 @@ const SmallCompanyBlock = ({item, navigation}) => {
         </ImageBackground>
       ) : (
         <View style={styles.backgroundStyle}>
-          <View style={styles.videoWrap}>
-            {!showStream && (
-              <View style={styles.backgroundVideo}>
-                <Text style={styles.noVideoText}>
-                  {nextWorkTime
-                    ? isWork
-                      ? whenIsTranslationTime()
-                      : 'Откроется:'
-                    : isWork
-                    ? whenIsTranslationTime()
-                    : 'Закрыто'}
-                </Text>
-                <Text style={styles.noVideoText}>
-                  {nextWorkTime && nextWorkTime.start_time
-                    ? `${
-                        nextWorkTime.day.toLowerCase() !== 'сегодня'
-                          ? EN_SHORT_TO_RU_LONG[nextWorkTime.day]
-                          : nextWorkTime.day
-                      }`
-                    : ''}
-                </Text>
-                <Text style={styles.noVideoText}>
-                  {nextWorkTime &&
-                    nextWorkTime.start_time &&
-                    nextWorkTime.start_time + '-' + nextWorkTime.end_time}
-                </Text>
-              </View>
-            )}
-          </View>
+          {item.profile_image ? (
+            <ImageBackground
+              style={styles.backgroundStyle}
+              source={{
+                uri:
+                  'https://backend.partylive.by/storage/' + item.profile_image,
+              }}>
+              <TextBlock
+                showStream={showStream}
+                nextWorkTime={nextWorkTime}
+                isWork={isWork}
+                whenIsTranslationTime={() => whenIsTranslationTime()}
+                profile_image={item.profile_image}
+              />
+            </ImageBackground>
+          ) : (
+            <TextBlock
+              showStream={showStream}
+              nextWorkTime={nextWorkTime}
+              isWork={isWork}
+              whenIsTranslationTime={() => whenIsTranslationTime()}
+            />
+          )}
 
           <View style={styles.description}>
             <LinearGradient

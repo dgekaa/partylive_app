@@ -14,8 +14,6 @@ import Geocoder from 'react-native-geocoding';
 
 import {isShowStreamNow, isWorkTimeNow} from '../calculateTime';
 import {EN_SHORT_TO_RU_LONG_V_P, EN_SHORT_TO_RU_LONG} from '../constants';
-import {getDistanceFromLatLonInKm} from '../getDistance';
-import {requestLocationPermission} from '../permission';
 
 import bar from '../img/bar_w.png';
 import karaoke from '../img/karaoke_w.png';
@@ -23,33 +21,18 @@ import klub from '../img/klub_w.png';
 import launge from '../img/launge_w.png';
 import pab from '../img/pab_w.png';
 
-const CustomMarker = ({place, getDistanceTo}) => {
-  const [showStream, setShowStream] = useState();
-  const [nextStreamTime, setNextStreamTime] = useState();
-  const [workTime, setWorkTime] = useState();
-  const [isWork, setIsWork] = useState();
-  const [nextWorkTime, setNextWorkTime] = useState(null);
-  const [distanceTo, setDistanceTo] = useState();
-  const [lon, setLon] = useState('');
-  const [lat, setLat] = useState('');
+const CustomMarker = ({place, getDistanceTo, newRegion}) => {
+  const [showStream, setShowStream] = useState(),
+    [nextStreamTime, setNextStreamTime] = useState(),
+    [workTime, setWorkTime] = useState(),
+    [isWork, setIsWork] = useState(),
+    [nextWorkTime, setNextWorkTime] = useState(null),
+    [distanceTo, setDistanceTo] = useState();
 
   useEffect(() => {
     isShowStreamNow(place, setShowStream, setNextStreamTime);
     isWorkTimeNow(place, setWorkTime, setIsWork, setNextWorkTime);
   }, [place]);
-
-  useEffect(() => {
-    if (lon && lat && place && place.coordinates) {
-      const dist = getDistanceFromLatLonInKm(
-        lat,
-        lon,
-        place.coordinates.split(',')[0],
-        place.coordinates.split(',')[1],
-      ).toFixed(1);
-      getDistanceTo(dist);
-      setDistanceTo(dist);
-    }
-  }, [lon, lat, place]);
 
   const whenIsTranslationTime = () => {
     if (
@@ -105,11 +88,11 @@ const CustomMarker = ({place, getDistanceTo}) => {
     <ImageBackground
       style={styles.customMarker}
       source={{
-        uri:
-          showStream &&
-          place.streams &&
-          place.streams[0] &&
-          place.streams[0].preview,
+        uri: showStream
+          ? place.streams && place.streams[0] && place.streams[0].preview
+          : newRegion.latitudeDelta < 0.1 && newRegion.longitudeDelta < 0.15
+          ? 'https://backend.partylive.by/storage/' + place.profile_image
+          : '',
       }}>
       {!showStream && (
         <View style={styles.noVideo}>
@@ -166,23 +149,27 @@ const CustomMarker = ({place, getDistanceTo}) => {
   );
 };
 
-const GoogleMap = ({places, navigation, onePlace, ADDRESSfromCOORD}) => {
-  const [lon, setLon] = useState('');
-  const [lat, setLat] = useState('');
-  const [distanceTo, setDistanceTo] = useState('');
-  const [newRegion, setNewRegion] = useState('');
-  const [addressFromCoord, setAddresFromCoord] = useState('');
-  const [isMapReady, setIsMapReady] = useState(false);
+const GoogleMap = ({
+  places,
+  navigation,
+  onePlace,
+  ADDRESSfromCOORD,
+  lon,
+  lat,
+}) => {
+  const [distanceTo, setDistanceTo] = useState(''),
+    [newRegion, setNewRegion] = useState(''),
+    [addressFromCoord, setAddresFromCoord] = useState(''),
+    [isMapReady, setIsMapReady] = useState(false);
 
-  const [initialRegion, setInitialRegion] = useState({
+  const initialRegion = {
     latitude: 53.9097,
     longitude: 27.556,
     latitudeDelta: onePlace ? 0.12 : 0.25,
     longitudeDelta: onePlace ? 0.12 : 0.25,
-  });
+  };
 
   useEffect(() => {
-    // requestLocationPermission(setLon, setLat);
     Geocoder.init('AIzaSyAAcvrFmEi8o7u-zXHe6geXvjRey4Qj6tg', {language: 'ru'});
   }, []);
 
@@ -196,13 +183,9 @@ const GoogleMap = ({places, navigation, onePlace, ADDRESSfromCOORD}) => {
   //   }
   // }, [newRegion, ADDRESSfromCOORD]);
 
-  const getDistanceTo = (dist) => {
-    setDistanceTo(dist);
-  };
+  const getDistanceTo = (dist) => setDistanceTo(dist);
 
-  const onMapLayout = () => {
-    setIsMapReady(true);
-  };
+  const onMapLayout = () => setIsMapReady(true);
 
   return (
     <View style={styles.container}>
@@ -219,45 +202,39 @@ const GoogleMap = ({places, navigation, onePlace, ADDRESSfromCOORD}) => {
         clusterTextColor="#fff"
         provider={PROVIDER_GOOGLE}
         style={styles.map}
+        zoomEnabled={true}
         initialRegion={initialRegion}
         onRegionChangeComplete={(data) => setNewRegion(data)}
-        onRegionChange={(data) => {}}
         onLayout={onMapLayout}
         ADDRESSfromCOORD={
           ADDRESSfromCOORD && ADDRESSfromCOORD(addressFromCoord, newRegion)
         }>
-        {/* {!!lat && isMapReady && (
-          <Marker coordinate={{latitude: +lat, longitude: +lon}}>
-            <Image
-              source={require('../img/dancer.png')}
-              style={styles.dancer}
-            />
-          </Marker>
-        )} */}
-        {/*        {!!onePlace && isMapReady && (
-          <Marker
-            coordinate={{
-              latitude: +onePlace.coordinates.split(',')[0],
-              longitude: +onePlace.coordinates.split(',')[1],
-            }}></Marker>
-        )} */}
+        <Marker
+          coordinate={{
+            latitude: lat,
+            longitude: lon,
+          }}>
+          <Image source={require('../img/dancer.png')} style={styles.dancer} />
+        </Marker>
 
         {!!places &&
           !!places.length &&
           isMapReady &&
-          places.map((place) => {
+          places.map((place, i) => {
             const location = place.coordinates.split(',');
             return (
               <Marker
-                onPress={() => {
+                key={i}
+                onPress={() =>
                   navigation.navigate('Company', {
                     data: place,
                     distanceTo,
-                  });
-                }}
+                  })
+                }
                 id={place.id}
                 coordinate={{latitude: +location[0], longitude: +location[1]}}>
                 <CustomMarker
+                  newRegion={newRegion}
                   place={place}
                   navigation={navigation}
                   getDistanceTo={getDistanceTo}
@@ -337,6 +314,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+    textAlign: 'center',
   },
   bottomRow: {
     flexDirection: 'row',

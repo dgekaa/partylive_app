@@ -91,8 +91,7 @@ const Company = (props) => {
   };
 
   const [paused, setPaused] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
+
   const videoRef = useRef(null);
 
   return (
@@ -101,17 +100,6 @@ const Company = (props) => {
         <Header props={props} />
         <View style={styles.content}>
           <View style={styles.videoWrap}>
-            {console.log(streams[0], 'SRTEAMSSSSSS')}
-
-            {/* <VideoPlayer
-                  source={{uri: streams[0].url}}
-                  disableSeekbar
-                  disableTimer
-                  disableBack
-                  disableFullscreen
-                  toggleResizeModeOnFullscreen={false}
-                /> */}
-
             {streams[0] ? (
               showStream ? (
                 <>
