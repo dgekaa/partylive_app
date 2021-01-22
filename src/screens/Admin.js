@@ -218,7 +218,8 @@ const Admin = (props) => {
     data &&
       data.place.profile_image &&
       setpPickerImageData(
-        'https://backend.partylive.by/storage/' + data.place.profile_image,
+        'https://backend.partylive.by/storage/' +
+          data.place.profile_image.replace('.png', '.jpg'),
       );
   }, [data]);
 

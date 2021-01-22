@@ -91,7 +91,8 @@ const CustomMarker = ({place, getDistanceTo, newRegion}) => {
         uri: showStream
           ? place.streams && place.streams[0] && place.streams[0].preview
           : newRegion.latitudeDelta < 0.1 && newRegion.longitudeDelta < 0.15
-          ? 'https://backend.partylive.by/storage/' + place.profile_image
+          ? 'https://backend.partylive.by/storage/' +
+            place.profile_image.replace('.png', '.jpg')
           : '',
       }}>
       {!showStream && (

@@ -193,14 +193,15 @@ const SmallCompanyBlock = ({item, navigation, lon, lat}) => {
               style={styles.backgroundStyle}
               source={{
                 uri:
-                  'https://backend.partylive.by/storage/' + item.profile_image,
+                  'https://backend.partylive.by/storage/' +
+                  item.profile_image.replace('.png', '.jpg'),
               }}>
               <TextBlock
                 showStream={showStream}
                 nextWorkTime={nextWorkTime}
                 isWork={isWork}
                 whenIsTranslationTime={() => whenIsTranslationTime()}
-                profile_image={item.profile_image}
+                profile_image={item.profile_image.replace('.png', '.jpg')}
               />
             </ImageBackground>
           ) : (
