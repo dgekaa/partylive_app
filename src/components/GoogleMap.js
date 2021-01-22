@@ -21,7 +21,7 @@ import klub from '../img/klub_w.png';
 import launge from '../img/launge_w.png';
 import pab from '../img/pab_w.png';
 
-const CustomMarker = ({place, getDistanceTo, newRegion}) => {
+const CustomMarker = ({place, loadedPlace, getDistanceTo, newRegion}) => {
   const [showStream, setShowStream] = useState(),
     [nextStreamTime, setNextStreamTime] = useState(),
     [workTime, setWorkTime] = useState(),
@@ -84,13 +84,18 @@ const CustomMarker = ({place, getDistanceTo, newRegion}) => {
     }
   };
 
+  // newRegion.latitudeDelta < 0.1 &&
+  //   newRegion.longitudeDelta < 0.15 &&
+  //   place.profile_image
+  // ?
   return (
     <ImageBackground
+      onLoad={() => loadedPlace(place)}
       style={styles.customMarker}
       source={{
         uri: showStream
           ? place.streams && place.streams[0] && place.streams[0].preview
-          : newRegion.latitudeDelta < 0.1 && newRegion.longitudeDelta < 0.15
+          : place.profile_image
           ? 'https://backend.partylive.by/storage/' +
             place.profile_image.replace('.png', '.jpg')
           : '',
@@ -161,7 +166,8 @@ const GoogleMap = ({
   const [distanceTo, setDistanceTo] = useState(''),
     [newRegion, setNewRegion] = useState(''),
     [addressFromCoord, setAddresFromCoord] = useState(''),
-    [isMapReady, setIsMapReady] = useState(false);
+    [isMapReady, setIsMapReady] = useState(false),
+    [tracksViewChanges, setTracksViewChanges] = useState([]);
 
   const initialRegion = {
     latitude: 53.9097,
@@ -185,8 +191,15 @@ const GoogleMap = ({
   // }, [newRegion, ADDRESSfromCOORD]);
 
   const getDistanceTo = (dist) => setDistanceTo(dist);
+  const onMarkerPress = (place) =>
+    navigation.navigate('Company', {
+      data: place,
+      distanceTo,
+    });
 
   const onMapLayout = () => setIsMapReady(true);
+  const loadedPlace = (place) =>
+    setTracksViewChanges((prevArray) => [...prevArray, +place.id]);
 
   return (
     <View style={styles.container}>
@@ -198,8 +211,9 @@ const GoogleMap = ({
       )}
       <MapView
         spiralEnabled={true}
+        spiderLineColor={'#000'}
         clusterColor="#e32a6c"
-        radius={onePlace ? 1 : 40}
+        radius={onePlace ? 1 : 50}
         clusterTextColor="#fff"
         provider={PROVIDER_GOOGLE}
         style={styles.map}
@@ -223,15 +237,14 @@ const GoogleMap = ({
           isMapReady &&
           places.map((place, i) => {
             const location = place.coordinates.split(',');
+
             return (
               <Marker
                 key={i}
-                onPress={() =>
-                  navigation.navigate('Company', {
-                    data: place,
-                    distanceTo,
-                  })
+                tracksViewChanges={
+                  tracksViewChanges.indexOf(+place.id) !== -1 ? false : true
                 }
+                onPress={() => onMarkerPress(place)}
                 id={place.id}
                 coordinate={{latitude: +location[0], longitude: +location[1]}}>
                 <CustomMarker
@@ -239,6 +252,7 @@ const GoogleMap = ({
                   place={place}
                   navigation={navigation}
                   getDistanceTo={getDistanceTo}
+                  loadedPlace={(place) => loadedPlace(place)}
                 />
               </Marker>
             );

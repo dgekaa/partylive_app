@@ -18,6 +18,7 @@ import {ApolloProvider} from 'react-apollo';
 import {setContext} from 'apollo-link-context';
 import {List, ListItem} from 'native-base';
 import {createDrawerNavigator} from 'react-navigation-drawer';
+import Reactotron, {overlay} from 'reactotron-react-native';
 
 import Map from './src/screens/Map';
 import Home from './src/screens/Home';
@@ -25,7 +26,7 @@ import Company from './src/screens/Company';
 import Login from './src/screens/Login';
 import Registration from './src/screens/Registration';
 import EditCompany from './src/screens/EditCompany';
-import Admin from './src/screens/Admin';
+import Admin from './src/screens/admin/Admin';
 import {getToken, signIn, signOut} from './src/util';
 
 const httpLink = new HttpLink({

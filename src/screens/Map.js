@@ -7,6 +7,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import {Query, useQuery} from 'react-apollo';
+import Reactotron from 'reactotron-react-native';
 
 import Header from '../components/Header';
 import GoogleMap from '../components/GoogleMap';
@@ -23,6 +24,8 @@ const Map = (props) => {
 
   useEffect(() => {
     data.places && setCompanyData(data.places);
+    console.log('---useEffect---');
+    Reactotron.log(data);
   }, [data]);
 
   const clickedType = (type) => {
@@ -38,7 +41,10 @@ const Map = (props) => {
 
   useEffect(() => {
     requestLocationPermission(setLon, setLat);
+    console.log('--location---');
   }, []);
+
+  console.log('--map---');
 
   return (
     <View style={styles.Map}>
@@ -46,6 +52,8 @@ const Map = (props) => {
         <Header props={props} />
         <Query query={GET_CATEGORIES}>
           {({loading, error, data}) => {
+            Reactotron.log(data);
+
             if (loading) {
               return <ActivityIndicator size="large" color="#0000ff" />;
             } else if (error) {

@@ -12,22 +12,16 @@ import {
   Image,
   TextInput,
   ActivityIndicator,
-  Switch,
   Animated,
   PermissionsAndroid,
   SafeAreaView,
-  ScrollView,
-  ImageEditor,
   NativeModules,
   StatusBar,
 } from 'react-native';
-import {useMutation as UM} from '@apollo/react-hooks';
-const gql = require('graphql-tag');
 
-import {getToken} from '../util';
+import {getToken} from '../../util';
 import {NodeCameraView} from 'react-native-nodemediaclient';
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
-import VideoPlayer from 'react-native-video-controls';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Query, useMutation, useQuery} from 'react-apollo';
 
@@ -36,9 +30,11 @@ import {
   EN_SHORT_TO_RU_SHORT,
   SHORT_DAY_OF_WEEK,
   EN_SHORT_TO_NUMBER,
-} from '../constants';
-import {numberDayNow} from '../calculateTime.js';
-import Header from '../components/Header';
+} from '../../constants';
+import {numberDayNow} from '../../calculateTime';
+import Stream from './Stream';
+import Header from '../../components/Header';
+import AdminHeader from './AdminHeader';
 import {
   GET_PLACE,
   CREATE_WORK_TIME,
@@ -48,137 +44,14 @@ import {
   UPDATE_STREAMS_SCHEDULE,
   CREATE_STREAMS_SCHEDULE,
   GET_CATEGORIES,
-  UPDATE_IMAGE,
-  UPDATE_SEE_YOU_TOMORROW,
-  UPDATE_STREAM,
-  CREATE_STREAM,
   SAVE_ADDRESS,
   UPDATE_MOBILE_STREAM,
   UPDATE_PLACE_IMAGE,
-} from '../QUERYES';
-import GoogleMap from '../components/GoogleMap';
-import {ReactNativeFile} from 'apollo-upload-client';
-
-const AdminHeader = ({
-  cancel,
-  ready,
-  moveOut,
-  who,
-  videoPause,
-  navigation,
-  saveFunction,
-  cancelFunction,
-  disableMobileStream,
-}) => {
-  return (
-    <View style={headerStyles.header}>
-      <TouchableOpacity
-        onPress={() => {
-          moveOut(who);
-          disableMobileStream && disableMobileStream();
-          videoPause && videoPause();
-          cancelFunction && cancelFunction();
-        }}>
-        {!cancel ? (
-          <View style={headerStyles.goBackBlock}>
-            <Image
-              style={headerStyles.goBack}
-              source={require('../img/arrow.png')}
-            />
-          </View>
-        ) : (
-          <Text style={headerStyles.headerBtn}>Отмена</Text>
-        )}
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate('Home');
-          disableMobileStream && disableMobileStream();
-        }}>
-        <View style={headerStyles.PLLogo}>
-          <Text style={headerStyles.party}>PARTY</Text>
-          <View style={headerStyles.partyWrap}>
-            <Text style={headerStyles.live}>.LIVE</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-      {!ready ? (
-        <TouchableOpacity
-          style={headerStyles.burgerWrap}
-          onPress={() => navigation.openDrawer()}>
-          <View style={headerStyles.burgerOne} />
-          <View style={headerStyles.burgerOne} />
-          <View style={headerStyles.burgerOne} />
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity
-          onPress={() => {
-            moveOut(who);
-            videoPause && videoPause();
-            saveFunction && saveFunction();
-          }}>
-          <Text style={headerStyles.headerBtn}>Готово</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-};
-
-const headerStyles = StyleSheet.create({
-  header: {
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomColor: '#ededed',
-    borderBottomWidth: 1,
-    backgroundColor: '#fff',
-  },
-  goBackBlock: {
-    width: 30,
-    height: 30,
-  },
-  goBack: {},
-  headerBtn: {
-    fontSize: 16,
-    color: '#e32a6c',
-  },
-  PLLogo: {
-    flexDirection: 'row',
-  },
-  partyWrap: {
-    backgroundColor: 'rgb(227, 42, 108)',
-    borderRadius: 5,
-  },
-  party: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    lineHeight: 25,
-    marginRight: 5,
-  },
-  live: {
-    fontSize: 20,
-    lineHeight: 25,
-    fontWeight: 'bold',
-    color: 'white',
-    paddingHorizontal: 5,
-  },
-  burgerWrap: {
-    width: 30,
-    height: 20,
-    justifyContent: 'space-between',
-  },
-  burgerOne: {
-    height: 2,
-    backgroundColor: '#000',
-    borderRadius: 2,
-  },
-});
+} from '../../QUERYES';
+import GoogleMap from '../../components/GoogleMap';
+import WorkSchedule from './WorkSchedule';
 
 const Admin = (props) => {
-  const [singleFile, setSingleFile] = useState(null);
-
   const {streams} = props.navigation.state.params.item;
 
   const [popupVisible, setPopupVisible] = useState(false),
@@ -193,14 +66,12 @@ const Admin = (props) => {
     [isClickedWorkTime, setIsClickedWorkTime] = useState(false),
     [pickerImageData, setpPickerImageData] = useState(''),
     [inputName, setInputName] = useState(''),
-    [inputCameraAddress, setInputCameraAddress] = useState(''),
     [inputAlias, setInputAlias] = useState(''),
     [inputDescription, setInputDescription] = useState(
       data && data.place && data.place.description && data.place.description,
     ),
     [typeOfCompany, setTypeOfCompany] = useState(''),
     [typeOfCompanyId, setTypeOfCompanyId] = useState(''),
-    [isStreamOff, setIsStreamOff] = useState(false),
     [ADDRESS, setADDRESS] = useState(null),
     [COORD, setCOORD] = useState(null);
 
@@ -223,8 +94,6 @@ const Admin = (props) => {
       );
   }, [data]);
 
-  console.log(data, '+++++++++++++++++++++data');
-
   useEffect(() => {
     setPickedStartTime('');
     setPickedEndTime('');
@@ -240,21 +109,6 @@ const Admin = (props) => {
     data && data.place && data.place.name && setInputName(data.place.name);
   }, []);
 
-  const dateNow = new Date()
-    .toLocaleDateString()
-    .split('.')
-    .reverse()
-    .join('-');
-
-  useEffect(() => {
-    data &&
-      data.place &&
-      data.place.streams &&
-      data.place.streams[0] &&
-      data.place.streams[0].see_you_tomorrow &&
-      setIsStreamOff(data.place.streams[0].see_you_tomorrow === dateNow);
-  }, [data, dateNow]);
-
   const refreshObject = {
     refetchQueries: [
       {
@@ -266,48 +120,35 @@ const Admin = (props) => {
   };
 
   const [CREATE_WORK_TIME_mutation] = useMutation(
-    CREATE_WORK_TIME,
-    refreshObject,
-  );
-  const [UPDATE_WORK_SCHEDULE_mutation] = useMutation(
-    UPDATE_WORK_SCHEDULE,
-    refreshObject,
-  );
-  const [DELETE_SCHEDULE_mutation] = useMutation(
-    DELETE_SCHEDULE,
-    refreshObject,
-  );
-  const [UPDATE_STREAMS_SCHEDULE_mutation] = useMutation(
-    UPDATE_STREAMS_SCHEDULE,
-    refreshObject,
-  );
-  const [CREATE_STREAMS_SCHEDULE_mutation] = useMutation(
-    CREATE_STREAMS_SCHEDULE,
-    refreshObject,
-  );
-  const [UPDATE_PLACE_DATA_mutation] = useMutation(
-    UPDATE_PLACE_DATA,
-    refreshObject,
-  );
-  const [UPDATE_IMAGE_mutation] = useMutation(UPDATE_IMAGE, refreshObject);
-  const [SAVE_ADDRESS_mutation] = useMutation(SAVE_ADDRESS, refreshObject);
-  const [UPDATE_SEE_YOU_TOMORROW_mutation] = useMutation(
-    UPDATE_SEE_YOU_TOMORROW,
-    refreshObject,
-  );
-
-  const [UPDATE_STREAM_mutation] = useMutation(UPDATE_STREAM, refreshObject);
-  const [CREATE_STREAM_mutation] = useMutation(CREATE_STREAM, refreshObject);
-
-  const [UPDATE_MOBILE_STREAM_mutation] = useMutation(
-    UPDATE_MOBILE_STREAM,
-    refreshObject,
-  );
-
-  const [UPDATE_PLACE_IMAGE_mutation] = useMutation(
-    UPDATE_PLACE_IMAGE,
-    refreshObject,
-  );
+      CREATE_WORK_TIME,
+      refreshObject,
+    ),
+    [UPDATE_WORK_SCHEDULE_mutation] = useMutation(
+      UPDATE_WORK_SCHEDULE,
+      refreshObject,
+    ),
+    [DELETE_SCHEDULE_mutation] = useMutation(DELETE_SCHEDULE, refreshObject),
+    [UPDATE_STREAMS_SCHEDULE_mutation] = useMutation(
+      UPDATE_STREAMS_SCHEDULE,
+      refreshObject,
+    ),
+    [CREATE_STREAMS_SCHEDULE_mutation] = useMutation(
+      CREATE_STREAMS_SCHEDULE,
+      refreshObject,
+    ),
+    [UPDATE_PLACE_DATA_mutation] = useMutation(
+      UPDATE_PLACE_DATA,
+      refreshObject,
+    ),
+    [SAVE_ADDRESS_mutation] = useMutation(SAVE_ADDRESS, refreshObject),
+    [UPDATE_MOBILE_STREAM_mutation] = useMutation(
+      UPDATE_MOBILE_STREAM,
+      refreshObject,
+    ),
+    [UPDATE_PLACE_IMAGE_mutation] = useMutation(
+      UPDATE_PLACE_IMAGE,
+      refreshObject,
+    );
 
   const SetNewTimeObject = (data) => {
     const timeObject = {};
@@ -460,23 +301,6 @@ const Admin = (props) => {
     );
   };
 
-  const disableStream = (see_you_tomorrow) => {
-    if (data.place.streams[0]) {
-      UPDATE_SEE_YOU_TOMORROW_mutation({
-        variables: {
-          id: data.place.streams[0].id,
-          see_you_tomorrow: see_you_tomorrow,
-        },
-        optimisticResponse: null,
-      })
-        .then(
-          (res) => console.log(res, 'RES__'),
-          (err) => console.log(err, '___ERR___'),
-        )
-        .catch((err) => console.log(err, '______err_1'));
-    }
-  };
-
   const tomorrowFromDay = (day) => {
     if (day === 6) {
       return 0;
@@ -485,14 +309,14 @@ const Admin = (props) => {
     }
   };
 
-  const streamValue = useState(new Animated.Value(-windowWidth))[0];
-  const profileValue = useState(new Animated.Value(-windowWidth))[0];
-  const workScheduleValue = useState(new Animated.Value(-windowWidth))[0];
-  const streamScheduleValue = useState(new Animated.Value(-windowWidth))[0];
-  const translationValue = useState(new Animated.Value(-windowWidth))[0];
-  const chooseCategoryValue = useState(new Animated.Value(-windowWidth))[0];
-  const descriptionValue = useState(new Animated.Value(-windowWidth))[0];
-  const addressValue = useState(new Animated.Value(-windowWidth))[0];
+  const streamValue = useState(new Animated.Value(-windowWidth))[0],
+    profileValue = useState(new Animated.Value(-windowWidth))[0],
+    workScheduleValue = useState(new Animated.Value(-windowWidth))[0],
+    streamScheduleValue = useState(new Animated.Value(-windowWidth))[0],
+    translationValue = useState(new Animated.Value(-windowWidth))[0],
+    chooseCategoryValue = useState(new Animated.Value(-windowWidth))[0],
+    descriptionValue = useState(new Animated.Value(-windowWidth))[0],
+    addressValue = useState(new Animated.Value(-windowWidth))[0];
 
   const moveIn = (data) => {
     Animated.timing(data, {
@@ -543,46 +367,6 @@ const Admin = (props) => {
         console.warn(err);
       }
     }
-  };
-
-  const videoPause = () => {
-    !videoRef.current.state.paused &&
-      videoRef.current.methods.togglePlayPause();
-  };
-
-  const updateStream = (inputCameraAddress) => {
-    UPDATE_STREAM_mutation({
-      variables: {
-        id: data.place.streams[0].id,
-        url: `https://partycamera.org/${inputCameraAddress}/index.m3u8`,
-        preview: `http://partycamera.org/${inputCameraAddress}/preview.jpg`,
-      },
-      optimisticResponse: null,
-    })
-      .then(
-        (res) => console.log(res, 'stream RES__'),
-        (err) => console.log(err, 'stream ERR___'),
-      )
-      .catch((err) => console.log(err, '______err_1'));
-  };
-
-  const createStream = (inputCameraAddress) => {
-    CREATE_STREAM_mutation({
-      variables: {
-        name: data.place.name,
-        url: `https://partycamera.org/${inputCameraAddress}/index.m3u8`,
-        preview: `http://partycamera.org/${inputCameraAddress}/preview.jpg`,
-        place: {
-          connect: '' + data.place.id,
-        },
-      },
-      optimisticResponse: null,
-    })
-      .then(
-        (res) => console.log(res, 'create stream RES__'),
-        (err) => console.log(err, 'create stream ERR___'),
-      )
-      .catch((err) => console.log(err, '______err_1'));
   };
 
   const chooseCategory = () => {
@@ -776,85 +560,14 @@ const Admin = (props) => {
             </View>
           )}
         </View>
-        <Animated.ScrollView
-          style={[
-            styles.sliderAdminMenu,
-            {transform: [{translateX: streamValue}, {perspective: 1000}]},
-          ]}>
-          <AdminHeader
-            cancel
-            ready
-            saveFunction={() => {
-              disableStream(isStreamOff ? dateNow : null);
-              if (inputCameraAddress) {
-                if (!data.place.streams[0]) {
-                  createStream(inputCameraAddress);
-                } else {
-                  updateStream(inputCameraAddress);
-                }
-              }
-            }}
-            cancelFunction={() => {
-              data &&
-              data.place &&
-              data.place.streams &&
-              data.place.streams[0] &&
-              data.place.streams[0].see_you_tomorrow
-                ? setIsStreamOff(data.place.streams[0].see_you_tomorrow)
-                : setIsStreamOff(false);
-            }}
-            navigation={props.navigation}
-            moveOut={moveOut}
-            who={streamValue}
-            videoPause={videoPause}
-          />
-          <Text style={styles.headerAdminTitle}>Стрим</Text>
-          <View style={styles.videoWrap}>
-            <VideoPlayer
-              ref={videoRef}
-              poster={streams[0] && streams[0].preview}
-              paused={true}
-              source={{uri: streams[0] && streams[0].url}}
-              disableSeekbar
-              disableTimer
-              disableBack
-              disableFullscreen
-              toggleResizeModeOnFullscreen={false}
-            />
-          </View>
-          {data && data.place && data.place.streams && data.place.streams[0] && (
-            <View style={styles.streamOffMainWrap}>
-              <View style={styles.streamOffWrap}>
-                <Text style={styles.streamOffMainText}>Отключить стрим</Text>
-                <Text style={styles.streamOffText}>
-                  Выключается до следующего дня
-                </Text>
-              </View>
-              <Switch
-                trackColor={{false: '#aeaeae', true: '#e32a6c'}}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={setIsStreamOff}
-                value={isStreamOff}
-              />
-            </View>
-          )}
-
-          <View style={styles.cameraAddress}>
-            <Text>Адрес камеры:</Text>
-            <TextInput
-              style={styles.textInputStyle}
-              onChangeText={(text) => setInputCameraAddress(text)}
-              value={inputCameraAddress}
-              placeholder={
-                (data.place.streams &&
-                  data.place.streams[0] &&
-                  data.place.streams[0].url) ||
-                'Введите адрес стрима'
-              }
-            />
-          </View>
-        </Animated.ScrollView>
-
+        <Stream
+          streamValue={streamValue}
+          navigation={props.navigation}
+          videoRef={videoRef}
+          streams={streams}
+          data={data}
+          moveOut={moveOut}
+        />
         <Animated.ScrollView
           style={[
             styles.sliderAdminMenu,
@@ -867,7 +580,6 @@ const Admin = (props) => {
           />
           <View style={styles.profileWrap}>
             <Text style={styles.headerAdminTitle}>Профиль заведения</Text>
-
             <View>
               {pickerImageData ? (
                 <>
@@ -942,7 +654,6 @@ const Admin = (props) => {
               <TouchableOpacity
                 style={styles.addressText}
                 onPress={() => moveIn(addressValue)}>
-                {/* ######################################3 */}
                 <TextInput
                   style={styles.textInputStyle}
                   value={data.place.address}
@@ -1133,78 +844,14 @@ const Admin = (props) => {
           </SafeAreaView>
         </Animated.ScrollView>
 
-        <Animated.ScrollView
-          style={[
-            styles.sliderAdminMenu,
-            {transform: [{translateX: workScheduleValue}, {perspective: 1000}]},
-          ]}>
-          <SafeAreaView style={{flex: 1}}>
-            <AdminHeader
-              cancel
-              ready
-              navigation={props.navigation}
-              moveOut={moveOut}
-              who={workScheduleValue}
-            />
-            <Text style={styles.headerAdminTitle}>График работы</Text>
-            {EN_SHORT_DAY_OF_WEEK.map((el, i) => {
-              let oneDay = SetNewTimeObject(data.place.schedules)[el.day];
-              return (
-                <View
-                  key={i}
-                  style={[
-                    styles.graphRow,
-                    i === 6 && {
-                      borderBottomColor: '#e3e3e3',
-                      borderBottomWidth: 2,
-                    },
-                  ]}>
-                  <Text
-                    style={[
-                      styles.graphDay,
-                      numberDayNow === i && {color: '#e32a6c'},
-                    ]}>
-                    {EN_SHORT_TO_RU_SHORT[el.day]}
-                    {oneDay &&
-                      oneDay.start_time &&
-                      (oneDay.start_time.split(':')[0] * 3600 +
-                        oneDay.start_time.split(':')[1] * 60 <=
-                      oneDay.end_time.split(':')[0] * 3600 +
-                        oneDay.end_time.split(':')[1] * 60
-                        ? ''
-                        : `-${SHORT_DAY_OF_WEEK[tomorrowFromDay(i)]}`)}
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.graphTime}
-                    onPress={() => {
-                      setSelectedDay(oneDay);
-                      setEnumWeekName(el.day);
-                      setPopupVisible(true);
-                      setIsClickedWorkTime(true);
-                    }}>
-                    <Text
-                      style={[
-                        styles.graphTimeText,
-                        numberDayNow === i && {fontWeight: 'bold'},
-                      ]}>
-                      {oneDay && oneDay.id
-                        ? oneDay.start_time + '-' + oneDay.end_time
-                        : '-'}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.graphDayOf}
-                    onPress={() => setAsDayOf(oneDay)}>
-                    {oneDay && oneDay.id && (
-                      <Text style={styles.onOff}>Вых</Text>
-                    )}
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </SafeAreaView>
-        </Animated.ScrollView>
+        <WorkSchedule
+          workScheduleValue={workScheduleValue}
+          navigation={props.navigation}
+          moveOut={moveOut}
+          SetNewTimeObject={(data) => SetNewTimeObject(data)}
+          data={data}
+          tomorrowFromDay={(data) => tomorrowFromDay(data)}
+        />
 
         <Animated.ScrollView
           style={[
@@ -1506,7 +1153,8 @@ const styles = StyleSheet.create({
   },
   sliderAdminMenu: {
     position: 'absolute',
-    top: getStatusBarHeight(),
+    // top: getStatusBarHeight(),
+    top: 0, // в андроиде смещалось вниз
     right: 0,
     bottom: 0,
     left: 0,
@@ -1580,9 +1228,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#E32A6C',
     color: '#fff',
   },
-  videoWrap: {
-    height: 250,
-  },
 
   tableHeader: {
     borderBottomColor: '#e3e3e3',
@@ -1617,24 +1262,7 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width * 0.8,
     height: Dimensions.get('window').width * 0.8 * 0.56,
   },
-  streamOffMainWrap: {
-    flexDirection: 'row',
-    paddingTop: 20,
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    justifyContent: 'space-between',
-  },
-  streamOffMainText: {
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  streamOffText: {
-    fontSize: 16,
-    color: '#999',
-  },
-  cameraAddress: {
-    margin: 10,
-  },
+
   textInputWrap: {
     marginVertical: 20,
     flexDirection: 'row',
@@ -1673,7 +1301,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-
   btnCategoryOuter: {
     borderRadius: 5,
     alignItems: 'center',
