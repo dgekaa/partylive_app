@@ -8,6 +8,7 @@ import {
   Dimensions,
   SafeAreaView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import {useMutation} from 'react-apollo';
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
@@ -18,8 +19,8 @@ import {numberDayNow} from '../../calculateTime';
 import {
   GET_PLACE,
   DELETE_SCHEDULE,
-  CREATE_WORK_TIME,
-  UPDATE_WORK_SCHEDULE,
+  UPDATE_STREAMS_SCHEDULE,
+  CREATE_STREAMS_SCHEDULE,
 } from '../../QUERYES';
 import {
   EN_SHORT_DAY_OF_WEEK,
@@ -28,9 +29,9 @@ import {
   EN_SHORT_TO_NUMBER,
 } from '../../constants';
 
-const WorkSchedule = ({
-  workScheduleValue,
+const StreamSchedule = ({
   navigation,
+  streamScheduleValue,
   moveOut,
   SetNewTimeObject,
   data,
@@ -46,30 +47,98 @@ const WorkSchedule = ({
     awaitRefetchQueries: true,
   };
 
-  const [enumWeekName, setEnumWeekName] = useState(''),
-    [popupVisible, setPopupVisible] = useState(false),
-    [show, setShow] = useState(false),
-    [selectedDay, setSelectedDay] = useState(false),
-    [pickedStartTime, setPickedStartTime] = useState(''),
-    [pickedEndTime, setPickedEndTime] = useState(''),
-    [isPickStartTime, setIsPickStartTime] = useState(false),
-    [date, setDate] = useState(new Date()),
-    [mode, setMode] = useState('date');
-
-  const [DELETE_SCHEDULE_mutation] = useMutation(
-      DELETE_SCHEDULE,
+  const [UPDATE_STREAMS_SCHEDULE_mutation] = useMutation(
+      UPDATE_STREAMS_SCHEDULE,
       refreshObject,
     ),
-    [CREATE_WORK_TIME_mutation] = useMutation(CREATE_WORK_TIME, refreshObject),
-    [UPDATE_WORK_SCHEDULE_mutation] = useMutation(
-      UPDATE_WORK_SCHEDULE,
+    [CREATE_STREAMS_SCHEDULE_mutation] = useMutation(
+      CREATE_STREAMS_SCHEDULE,
       refreshObject,
-    );
+    ),
+    [DELETE_SCHEDULE_mutation] = useMutation(DELETE_SCHEDULE, refreshObject);
+
+  const [selectedDay, setSelectedDay] = useState(false),
+    [enumWeekName, setEnumWeekName] = useState(''),
+    [popupVisible, setPopupVisible] = useState(false),
+    [show, setShow] = useState(false),
+    [mode, setMode] = useState('date'),
+    [date, setDate] = useState(new Date()),
+    [pickedStartTime, setPickedStartTime] = useState(''),
+    [pickedEndTime, setPickedEndTime] = useState(''),
+    [isPickStartTime, setIsPickStartTime] = useState(false);
 
   useEffect(() => {
     setPickedStartTime('');
     setPickedEndTime('');
   }, [popupVisible]);
+
+  const onChangeTime = (event, selectedTime) => {
+    const currentDate = selectedTime || date;
+    setShow(Platform.OS === 'ios');
+    setDate(currentDate);
+
+    const hours = selectedTime.getHours(),
+      minutes = selectedTime.getMinutes();
+
+    const time =
+      '' +
+      (hours > 9 ? hours : '0' + hours) +
+      ':' +
+      (minutes > 9 ? minutes : '0' + minutes);
+
+    if (isPickStartTime) {
+      setPickedStartTime(time);
+    } else {
+      setPickedEndTime(time);
+    }
+  };
+
+  const showTimepicker = () => {
+    setShow(true);
+    setMode('time');
+  };
+
+  const saveStreamTime = () => {
+    if (!selectedDay.id) {
+      if (pickedStartTime && pickedEndTime) {
+        setPopupVisible(false);
+
+        CREATE_STREAMS_SCHEDULE_mutation({
+          variables: {
+            id: data.place.streams[0].id,
+            day: enumWeekName,
+            start_time: pickedStartTime,
+            end_time: pickedEndTime,
+          },
+          optimisticResponse: null,
+        }).then(
+          (res) => console.log(res, 'RES'),
+          (err) => console.log(err, 'ERR'),
+        );
+      }
+    } else {
+      if ((pickedStartTime && pickedEndTime) || selectedDay.start_time) {
+        setPopupVisible(false);
+
+        UPDATE_STREAMS_SCHEDULE_mutation({
+          variables: {
+            id: data.place.streams[0].id,
+            update: [
+              {
+                id: selectedDay.id,
+                start_time: pickedStartTime || selectedDay.start_time,
+                end_time: pickedEndTime || selectedDay.end_time,
+              },
+            ],
+          },
+          optimisticResponse: null,
+        }).then(
+          (res) => console.log(res, 'RES'),
+          (err) => console.log(err, 'ERR'),
+        );
+      }
+    }
+  };
 
   const setAsDayOf = (day) => {
     if (day.id) {
@@ -82,66 +151,13 @@ const WorkSchedule = ({
     }
   };
 
-  const onChangeTime = (event, selectedTime) => {
-    const currentDate = selectedTime || date;
-    setShow(Platform.OS === 'ios');
-    setDate(currentDate);
-
-    const hours = selectedTime.getHours(),
-      minutes = selectedTime.getMinutes(),
-      time =
-        '' +
-        (hours > 9 ? hours : '0' + hours) +
-        ':' +
-        (minutes > 9 ? minutes : '0' + minutes);
-
-    isPickStartTime ? setPickedStartTime(time) : setPickedEndTime(time);
-  };
-
-  const showTimepicker = () => {
-    setShow(true);
-    setMode('time');
-  };
-
-  const saveWorkTime = () => {
-    if (!selectedDay.id) {
-      if (pickedStartTime && pickedEndTime) {
-        setPopupVisible(false);
-
-        CREATE_WORK_TIME_mutation({
-          variables: {
-            id: navigation.state.params.item.id,
-            day: enumWeekName,
-            start_time: pickedStartTime,
-            end_time: pickedEndTime,
-          },
-          optimisticResponse: null,
-        });
-      }
-    } else {
-      if ((pickedStartTime && pickedEndTime) || selectedDay.start_time) {
-        setPopupVisible(false);
-
-        UPDATE_WORK_SCHEDULE_mutation({
-          variables: {
-            id: selectedDay.id,
-            start_time: pickedStartTime || selectedDay.start_time,
-            end_time: pickedEndTime || selectedDay.end_time,
-          },
-          optimisticResponse: null,
-        }).then(
-          (res) => console.log(res, 'RES'),
-          (err) => console.log(err, 'ERR'),
-        );
-      }
-    }
-  };
-
   return (
     <Animated.ScrollView
       style={[
         styles.sliderAdminMenu,
-        {transform: [{translateX: workScheduleValue}, {perspective: 1000}]},
+        {
+          transform: [{translateX: streamScheduleValue}, {perspective: 1000}],
+        },
       ]}>
       <SafeAreaView style={{flex: 1}}>
         <AdminHeader
@@ -149,11 +165,15 @@ const WorkSchedule = ({
           ready
           navigation={navigation}
           moveOut={moveOut}
-          who={workScheduleValue}
+          who={streamScheduleValue}
         />
-        <Text style={styles.headerAdminTitle}>График работы</Text>
+
+        <Text style={styles.headerAdminTitle}>График трансляций</Text>
         {EN_SHORT_DAY_OF_WEEK.map((el, i) => {
-          let oneDay = SetNewTimeObject(data.place.schedules)[el.day];
+          let oneDay = SetNewTimeObject(
+            data.place.streams[0] ? data.place.streams[0].schedules : [],
+          )[el.day];
+
           return (
             <View
               key={i}
@@ -182,9 +202,13 @@ const WorkSchedule = ({
               <TouchableOpacity
                 style={styles.graphTime}
                 onPress={() => {
-                  setSelectedDay(oneDay);
-                  setEnumWeekName(el.day);
-                  setPopupVisible(true);
+                  if (!data.place.streams[0]) {
+                    Alert.alert('Оповещение', 'Стрим еще не создан');
+                  } else {
+                    setSelectedDay(oneDay);
+                    setEnumWeekName(el.day);
+                    setPopupVisible(true);
+                  }
                 }}>
                 <Text
                   style={[
@@ -196,11 +220,16 @@ const WorkSchedule = ({
                     : '-'}
                 </Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={styles.graphDayOf}
-                onPress={() => setAsDayOf(oneDay)}>
-                {oneDay && oneDay.id && <Text style={styles.onOff}>Вых</Text>}
+                onPress={() => {
+                  if (!data.place.streams[0]) {
+                    Alert.alert('Оповещение', 'Стрим еще не создан');
+                  } else {
+                    setAsDayOf(oneDay);
+                  }
+                }}>
+                {oneDay && oneDay.id && <Text style={styles.onOff}>Откл</Text>}
               </TouchableOpacity>
             </View>
           );
@@ -275,7 +304,7 @@ const WorkSchedule = ({
               </View>
               <TouchableOpacity
                 style={styles.saveBtn}
-                onPress={() => saveWorkTime()}>
+                onPress={() => saveStreamTime()}>
                 <Text style={styles.saveBtnText}>Сохранить</Text>
               </TouchableOpacity>
             </View>
@@ -283,6 +312,19 @@ const WorkSchedule = ({
         </DialogContent>
       </Dialog>
     </Animated.ScrollView>
+  );
+};
+
+const isIPhoneX = () => {
+  const dimen = Dimensions.get('window');
+  return (
+    Platform.OS === 'ios' &&
+    !Platform.isPad &&
+    !Platform.isTVOS &&
+    (dimen.height === 812 ||
+      dimen.width === 812 ||
+      dimen.height === 896 ||
+      dimen.width === 896)
   );
 };
 
@@ -392,4 +434,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default WorkSchedule;
+export default StreamSchedule;

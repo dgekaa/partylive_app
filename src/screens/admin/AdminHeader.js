@@ -12,15 +12,26 @@ const AdminHeader = ({
   cancelFunction,
   disableMobileStream,
 }) => {
+  const goBackClick = () => {
+      moveOut(who);
+      disableMobileStream && disableMobileStream();
+      videoPause && videoPause();
+      cancelFunction && cancelFunction();
+    },
+    goHomeClick = () => {
+      navigation.navigate('Home');
+      disableMobileStream && disableMobileStream();
+    },
+    burgerClick = () => navigation.openDrawer(),
+    readyClick = () => {
+      moveOut(who);
+      videoPause && videoPause();
+      saveFunction && saveFunction();
+    };
+
   return (
     <View style={styles.header}>
-      <TouchableOpacity
-        onPress={() => {
-          moveOut(who);
-          disableMobileStream && disableMobileStream();
-          videoPause && videoPause();
-          cancelFunction && cancelFunction();
-        }}>
+      <TouchableOpacity onPress={() => goBackClick()}>
         {!cancel ? (
           <View style={styles.goBackBlock}>
             <Image
@@ -32,11 +43,7 @@ const AdminHeader = ({
           <Text style={styles.headerBtn}>Отмена</Text>
         )}
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate('Home');
-          disableMobileStream && disableMobileStream();
-        }}>
+      <TouchableOpacity onPress={() => goHomeClick()}>
         <View style={styles.PLLogo}>
           <Text style={styles.party}>PARTY</Text>
           <View style={styles.partyWrap}>
@@ -47,18 +54,13 @@ const AdminHeader = ({
       {!ready ? (
         <TouchableOpacity
           style={styles.burgerWrap}
-          onPress={() => navigation.openDrawer()}>
+          onPress={() => burgerClick()}>
           <View style={styles.burgerOne} />
           <View style={styles.burgerOne} />
           <View style={styles.burgerOne} />
         </TouchableOpacity>
       ) : (
-        <TouchableOpacity
-          onPress={() => {
-            moveOut(who);
-            videoPause && videoPause();
-            saveFunction && saveFunction();
-          }}>
+        <TouchableOpacity onPress={() => readyClick()}>
           <Text style={styles.headerBtn}>Готово</Text>
         </TouchableOpacity>
       )}

@@ -23,7 +23,7 @@ import {
 const Stream = ({
   streamValue,
   navigation,
-  videoRef,
+
   streams,
   data,
   moveOut,
@@ -47,6 +47,8 @@ const Stream = ({
 
   const [inputCameraAddress, setInputCameraAddress] = useState(''),
     [isStreamOff, setIsStreamOff] = useState(false);
+
+  const videoRef = useRef(null);
 
   useEffect(() => {
     data &&
@@ -202,6 +204,19 @@ const Stream = ({
         />
       </View>
     </Animated.ScrollView>
+  );
+};
+
+const isIPhoneX = () => {
+  const dimen = Dimensions.get('window');
+  return (
+    Platform.OS === 'ios' &&
+    !Platform.isPad &&
+    !Platform.isTVOS &&
+    (dimen.height === 812 ||
+      dimen.width === 812 ||
+      dimen.height === 896 ||
+      dimen.width === 896)
   );
 };
 

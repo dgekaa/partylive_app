@@ -180,15 +180,15 @@ const GoogleMap = ({
     Geocoder.init('AIzaSyAAcvrFmEi8o7u-zXHe6geXvjRey4Qj6tg', {language: 'ru'});
   }, []);
 
-  // useEffect(() => {
-  //   if (ADDRESSfromCOORD) {
-  //     Geocoder.from(newRegion.latitude, newRegion.longitude)
-  //       .then((json) => {
-  //         setAddresFromCoord(json.results[0].formatted_address);
-  //       })
-  //       .catch((error) => console.log(error, 'GEO'));
-  //   }
-  // }, [newRegion, ADDRESSfromCOORD]);
+  useEffect(() => {
+    if (ADDRESSfromCOORD) {
+      Geocoder.from(newRegion.latitude, newRegion.longitude)
+        .then((json) => {
+          setAddresFromCoord(json.results[0].formatted_address);
+        })
+        .catch((error) => console.log(error, 'GEO'));
+    }
+  }, [newRegion, ADDRESSfromCOORD]);
 
   const getDistanceTo = (dist) => setDistanceTo(dist);
   const onMarkerPress = (place) =>
