@@ -20,14 +20,7 @@ import {
   UPDATE_SEE_YOU_TOMORROW,
 } from '../../QUERYES';
 
-const Stream = ({
-  streamValue,
-  navigation,
-
-  streams,
-  data,
-  moveOut,
-}) => {
+const Stream = ({streamValue, navigation, streams, data, moveOut}) => {
   const refreshObject = {
     refetchQueries: [
       {

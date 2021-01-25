@@ -13,9 +13,9 @@ import Header from '../components/Header';
 import {LOGIN} from '../QUERYES';
 
 const Login = (props) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [validationError, setValidationError] = useState('');
+  const [email, setEmail] = useState(''),
+    [password, setPassword] = useState(''),
+    [validationError, setValidationError] = useState('');
 
   const clearAllInputs = () => {
     setEmail('');
@@ -60,13 +60,14 @@ const Login = (props) => {
                           props.navigation.state.params.changeLoginState(
                             true,
                             res.data.login.access_token,
+                            res.data.login.user.id,
                           );
                           props.navigation.navigate('Home');
                           clearAllInputs();
                         })
-                        .catch(() => {
-                          setValidationError('Неверный логин либо пароль');
-                        });
+                        .catch(() =>
+                          setValidationError('Неверный логин либо пароль'),
+                        );
                     }}>
                     <Text style={styles.btnText}>Вход</Text>
                   </TouchableOpacity>

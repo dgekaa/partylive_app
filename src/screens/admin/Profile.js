@@ -24,6 +24,10 @@ const Profile = ({
   setInputAlias,
   inputAlias,
   inputDesc,
+  moveIn,
+  chooseCategoryValue,
+  addressValue,
+  descriptionValue,
 }) => {
   const [pickerImageData, setpPickerImageData] = useState('');
 

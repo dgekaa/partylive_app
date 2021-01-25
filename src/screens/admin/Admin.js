@@ -52,6 +52,14 @@ const Admin = (props) => {
 
   const windowWidth = Dimensions.get('window').width,
     tomorrowFromDay = (day) => (day === 6 ? 0 : day + 1),
+    streamValue = useState(new Animated.Value(-windowWidth))[0],
+    profileValue = useState(new Animated.Value(-windowWidth))[0],
+    workScheduleValue = useState(new Animated.Value(-windowWidth))[0],
+    streamScheduleValue = useState(new Animated.Value(-windowWidth))[0],
+    translationValue = useState(new Animated.Value(-windowWidth))[0],
+    chooseCategoryValue = useState(new Animated.Value(-windowWidth))[0],
+    descriptionValue = useState(new Animated.Value(-windowWidth))[0],
+    addressValue = useState(new Animated.Value(-windowWidth))[0],
     adminBtns = [
       {
         moveIn: streamValue,
@@ -69,15 +77,7 @@ const Admin = (props) => {
         moveIn: streamScheduleValue,
         name: 'График стримов',
       },
-    ],
-    streamValue = useState(new Animated.Value(-windowWidth))[0],
-    profileValue = useState(new Animated.Value(-windowWidth))[0],
-    workScheduleValue = useState(new Animated.Value(-windowWidth))[0],
-    streamScheduleValue = useState(new Animated.Value(-windowWidth))[0],
-    translationValue = useState(new Animated.Value(-windowWidth))[0],
-    chooseCategoryValue = useState(new Animated.Value(-windowWidth))[0],
-    descriptionValue = useState(new Animated.Value(-windowWidth))[0],
-    addressValue = useState(new Animated.Value(-windowWidth))[0];
+    ];
 
   const moveIn = (data) =>
       Animated.timing(data, {
@@ -93,14 +93,12 @@ const Admin = (props) => {
       }).start();
 
   if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
-
   if (error) return <Text>`Error! ${error.message}`</Text>;
 
   return (
     <View style={styles.Admin}>
       <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
         <Header props={props} />
-
         <View style={styles.AdminInner}>
           {adminBtns.map((el, i) => (
             <TouchableOpacity
@@ -110,7 +108,6 @@ const Admin = (props) => {
               <Text style={styles.oneBlockArrow}>&#62;</Text>
             </TouchableOpacity>
           ))}
-
           {!data.place.streams[0] && (
             <View>
               <TouchableOpacity
@@ -122,7 +119,6 @@ const Admin = (props) => {
             </View>
           )}
         </View>
-
         <Stream
           streamValue={streamValue}
           navigation={props.navigation}
@@ -134,12 +130,16 @@ const Admin = (props) => {
           navigation={props.navigation}
           profileValue={profileValue}
           moveOut={moveOut}
+          moveIn={moveIn}
           data={data}
           setInputName={setInputName}
           inputName={inputName}
           inputAlias={inputAlias}
           setInputAlias={setInputAlias}
           inputDesc={inputDesc}
+          chooseCategoryValue={chooseCategoryValue}
+          descriptionValue={descriptionValue}
+          addressValue={addressValue}
         />
         <Category
           navigation={props.navigation}

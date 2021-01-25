@@ -18,7 +18,6 @@ import {ApolloProvider} from 'react-apollo';
 import {setContext} from 'apollo-link-context';
 import {List, ListItem} from 'native-base';
 import {createDrawerNavigator} from 'react-navigation-drawer';
-import Reactotron, {overlay} from 'reactotron-react-native';
 
 import Map from './src/screens/Map';
 import Home from './src/screens/Home';
@@ -27,150 +26,160 @@ import Login from './src/screens/Login';
 import Registration from './src/screens/Registration';
 import EditCompany from './src/screens/EditCompany';
 import Admin from './src/screens/admin/Admin';
-import {getToken, signIn, signOut} from './src/util';
+import {
+  getToken,
+  signIn,
+  signOut,
+  getUser,
+  setUser,
+  deleteUser,
+} from './src/util';
 
 const httpLink = new HttpLink({
-  uri: 'https://backend.partylive.by/graphql',
-});
-
-const authLink = setContext(async (req, {headers}) => {
-  const token = await getToken();
-  return {
-    ...headers,
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-  };
-});
-
-const link = authLink.concat(httpLink);
-
-const client = new ApolloClient({
-  cache: new InMemoryCache(),
-  link: link,
-});
+    uri: 'https://backend.partylive.by/graphql',
+  }),
+  authLink = setContext(async (req, {headers}) => {
+    const token = await getToken();
+    return {
+      ...headers,
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    };
+  }),
+  link = authLink.concat(httpLink),
+  client = new ApolloClient({
+    cache: new InMemoryCache(),
+    link: link,
+  });
 
 const App = () => {
-  const [loggedIn, setLoggedIn] = useState();
+  const [loggedIn, setLoggedIn] = useState(),
+    [appUser, setAppUser] = useState();
 
   const getAsyncToken = async () => {
-    const token = await getToken();
-    if (token) {
-      setLoggedIn(true);
-    }
-  };
+      const token = await getToken();
+      token && setLoggedIn(true);
+    },
+    getAsyncUser = async () => {
+      const user = await getUser();
+      user && setAppUser(user);
+    };
 
   useEffect(() => {
     getAsyncToken();
+    getAsyncUser();
   }, []);
 
-  const handleChangeLoginState = (loggedIn = false, token) => {
+  const handleChangeLoginState = (loggedIn = false, token, userId) => {
     setLoggedIn(loggedIn);
+    setAppUser(userId);
     if (loggedIn) {
       signIn(token);
+      setUser(userId);
     } else {
       signOut();
+      deleteUser();
     }
   };
 
-  const navOptionHandler = (navigation) => ({
+  const navOptionHandler = () => ({
     header: null,
   });
 
   // НИЖНЕЕ МЕНЮ
   const HomeStackNavigator = createStackNavigator({
-    Home: {
-      screen: Home,
-      navigationOptions: navOptionHandler,
-    },
-  });
-  const MapStackNavigator = createStackNavigator({
-    Map: {
-      screen: Map,
-      navigationOptions: navOptionHandler,
-    },
-  });
-  const MainTab = createBottomTabNavigator(
-    {
       Home: {
-        screen: HomeStackNavigator,
-        navigationOptions: {
-          tabBarIcon: ({focused}) => (
-            <View style={styles.bottomTabBlock}>
-              <Image
-                width={26}
-                height={26}
-                source={require('./src/img/menu2.png')}
-              />
-              <Text style={[styles.bottomTabText, focused && styles.focused]}>
-                Главная
-              </Text>
-            </View>
-          ),
-          tabBarLabel: () => {},
-        },
+        screen: Home,
+        navigationOptions: navOptionHandler,
       },
+    }),
+    MapStackNavigator = createStackNavigator({
       Map: {
-        screen: MapStackNavigator,
-        navigationOptions: {
-          tabBarIcon: ({focused}) => (
-            <View style={styles.bottomTabBlock}>
-              <Image
-                width={26}
-                height={26}
-                source={require('./src/img/location1.png')}
-              />
-              <Text style={[styles.bottomTabText, focused && styles.focused]}>
-                Карта
-              </Text>
-            </View>
-          ),
-          tabBarLabel: () => {},
+        screen: Map,
+        navigationOptions: navOptionHandler,
+      },
+    }),
+    MainTab = createBottomTabNavigator(
+      {
+        Home: {
+          screen: HomeStackNavigator,
+          navigationOptions: {
+            tabBarIcon: ({focused}) => (
+              <View style={styles.bottomTabBlock}>
+                <Image
+                  width={26}
+                  height={26}
+                  source={require('./src/img/menu2.png')}
+                />
+                <Text style={[styles.bottomTabText, focused && styles.focused]}>
+                  Главная
+                </Text>
+              </View>
+            ),
+            tabBarLabel: () => {},
+          },
+        },
+        Map: {
+          screen: MapStackNavigator,
+          navigationOptions: {
+            tabBarIcon: ({focused}) => (
+              <View style={styles.bottomTabBlock}>
+                <Image
+                  width={26}
+                  height={26}
+                  source={require('./src/img/location1.png')}
+                />
+                <Text style={[styles.bottomTabText, focused && styles.focused]}>
+                  Карта
+                </Text>
+              </View>
+            ),
+            tabBarLabel: () => {},
+          },
         },
       },
-    },
-    {
-      tabBarOptions: {
-        style: {
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: '#fff',
-          paddingBottom: 15,
-          borderTopColor: '#ededed',
+      {
+        tabBarOptions: {
+          style: {
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#fff',
+            paddingBottom: 15,
+            borderTopColor: '#ededed',
+          },
         },
       },
-    },
-  );
-
-  const MainStack = createStackNavigator(
-    {
-      Home: {
-        screen: MainTab,
-        navigationOptions: navOptionHandler,
+    ),
+    MainStack = createStackNavigator(
+      {
+        Home: {
+          screen: MainTab,
+          navigationOptions: navOptionHandler,
+        },
+        EditCompany: {
+          screen: EditCompany,
+          navigationOptions: navOptionHandler,
+        },
+        Login: {
+          screen: Login,
+          navigationOptions: navOptionHandler,
+        },
+        Registration: {
+          screen: Registration,
+          navigationOptions: navOptionHandler,
+        },
+        Admin: {
+          screen: Admin,
+          navigationOptions: navOptionHandler,
+        },
+        Company: {
+          screen: Company,
+          navigationOptions: navOptionHandler,
+        },
       },
-      EditCompany: {
-        screen: EditCompany,
-        navigationOptions: navOptionHandler,
-      },
-      Login: {
-        screen: Login,
-        navigationOptions: navOptionHandler,
-      },
-      Registration: {
-        screen: Registration,
-        navigationOptions: navOptionHandler,
-      },
-      Admin: {
-        screen: Admin,
-        navigationOptions: navOptionHandler,
-      },
-      Company: {
-        screen: Company,
-        navigationOptions: navOptionHandler,
-      },
-    },
-    {initialRouteKey: 'Home'},
-  );
+      {initialRouteKey: 'Home'},
+    );
 
   // БОКОВОЕ МЕНЮ
   const SideMenu = (props) => {
@@ -184,33 +193,36 @@ const App = () => {
             <ListItem onPress={() => props.navigation.navigate('Map')}>
               <Text>Карта</Text>
             </ListItem>
-            {props.loggedIn && (
+
+            {props.loggedIn && +props.appUser === 1 && (
               <ListItem
                 onPress={() => props.navigation.navigate('EditCompany')}>
                 <Text>Список заведений</Text>
               </ListItem>
             )}
+
             {!props.loggedIn && (
-              <ListItem
-                onPress={() =>
-                  props.navigation.navigate('Login', {
-                    changeLoginState: props.changeLoginState,
-                  })
-                }>
-                <Text>Вход</Text>
-              </ListItem>
-            )}
-            {!props.loggedIn && (
-              <ListItem
-                onPress={() =>
-                  props.navigation.navigate('Registration', {
-                    changeLoginState: props.changeLoginState,
-                  })
-                }>
-                <Text>Регистрация</Text>
-              </ListItem>
+              <>
+                <ListItem
+                  onPress={() =>
+                    props.navigation.navigate('Login', {
+                      changeLoginState: props.changeLoginState,
+                    })
+                  }>
+                  <Text>Вход</Text>
+                </ListItem>
+                <ListItem
+                  onPress={() =>
+                    props.navigation.navigate('Registration', {
+                      changeLoginState: props.changeLoginState,
+                    })
+                  }>
+                  <Text>Регистрация</Text>
+                </ListItem>
+              </>
             )}
           </List>
+
           {props.loggedIn && (
             <List style={styles.logoutBtn}>
               <ListItem
@@ -227,6 +239,7 @@ const App = () => {
       </ScrollView>
     );
   };
+
   const AppDrawer = createDrawerNavigator(
     {
       drawer: MainStack,
@@ -237,6 +250,7 @@ const App = () => {
           <SideMenu
             {...props}
             loggedIn={loggedIn}
+            appUser={appUser}
             changeLoginState={handleChangeLoginState}
           />
         );

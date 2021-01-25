@@ -8,18 +8,12 @@ import {
   SafeAreaView,
 } from 'react-native';
 import {useMutation, useQuery} from 'react-apollo';
-import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
+import Dialog, {DialogContent} from 'react-native-popup-dialog';
 
 import Header from '../components/Header';
 import {GET_PLACES, CREATE_PLACE, DELETE_PLACE} from '../QUERYES';
 
 const EditCompany = (props) => {
-  const {data} = useQuery(GET_PLACES);
-
-  const [isConfirmPopup, setIsConfirmPopup] = useState(false);
-  const [deletElId, setDeleteElId] = useState(null);
-  const [deleteElName, setDeleteElName] = useState(null);
-
   const refreshObject = {
     refetchQueries: [
       {
@@ -29,8 +23,14 @@ const EditCompany = (props) => {
     awaitRefetchQueries: true,
   };
 
-  const [CREATE_PLACE_mutation] = useMutation(CREATE_PLACE, refreshObject);
-  const [DELETE_PLACE_mutation] = useMutation(DELETE_PLACE, refreshObject);
+  const {data} = useQuery(GET_PLACES);
+
+  const [isConfirmPopup, setIsConfirmPopup] = useState(false),
+    [deletElId, setDeleteElId] = useState(null),
+    [deleteElName, setDeleteElName] = useState(null);
+
+  const [CREATE_PLACE_mutation] = useMutation(CREATE_PLACE, refreshObject),
+    [DELETE_PLACE_mutation] = useMutation(DELETE_PLACE, refreshObject);
 
   const create = () => {
     CREATE_PLACE_mutation({
@@ -51,17 +51,26 @@ const EditCompany = (props) => {
     );
   };
 
-  const deleteOne = (id) => {
-    DELETE_PLACE_mutation({
-      variables: {
-        id: id,
-      },
-      optimisticResponse: null,
-    }).then(
-      (res) => console.log(res, 'RES'),
-      (err) => console.log(err, 'ERR'),
-    );
-  };
+  const allowDelete = (id) => {
+      DELETE_PLACE_mutation({
+        variables: {
+          id: id,
+        },
+        optimisticResponse: null,
+      }).then(
+        (res) => {
+          console.log(res, 'RES');
+          setIsConfirmPopup(false);
+        },
+        (err) => console.log(err, 'ERR'),
+      );
+    },
+    deleteClick = (el) => {
+      setDeleteElId(el.id);
+      setDeleteElName(el.name);
+      setIsConfirmPopup(true);
+    },
+    toCompany = (el) => props.navigation.navigate('Admin', {item: el});
 
   return (
     <View style={styles.EditCompany}>
@@ -73,18 +82,14 @@ const EditCompany = (props) => {
             <View style={styles.row} key={el.id}>
               <TouchableOpacity
                 style={styles.delete}
-                onPress={() => {
-                  setDeleteElId(el.id);
-                  setDeleteElName(el.name);
-                  setIsConfirmPopup(true);
-                }}>
+                onPress={() => deleteClick(el)}>
                 <Text style={styles.deleteText} numberOfLines={1}>
                   &#215;
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.textRowName}
-                onPress={() => props.navigation.navigate('Admin', {item: el})}>
+                onPress={() => toCompany(el)}>
                 <Text style={styles.textRowInnerName} numberOfLines={1}>
                   {el.name}
                 </Text>
@@ -95,13 +100,13 @@ const EditCompany = (props) => {
               <Text style={styles.textRowType}>
                 {el.categories[0] && el.categories[0].name.toLowerCase()}
               </Text>
+              <Text style={styles.textRowType}>{el.coordinates}</Text>
+              <Text style={styles.textRowType}>{el.address.slice(0, 17)}</Text>
             </View>
           ))}
           <TouchableOpacity
             style={styles.createCompany}
-            onPress={() => {
-              create();
-            }}>
+            onPress={() => create()}>
             <Text style={styles.createCompanyText}>СОЗДАТЬ ЗАВЕДЕНИЕ</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -117,11 +122,7 @@ const EditCompany = (props) => {
           <View style={styles.popupConfirmBtns}>
             <TouchableOpacity
               style={styles.popupConfirmBtn}
-              onPress={() => {
-                console.log(deletElId, '_____deletElId');
-                deleteOne(deletElId);
-                setIsConfirmPopup(false);
-              }}>
+              onPress={() => allowDelete(deletElId)}>
               <Text style={styles.popupConfirmBtnText}>Да</Text>
             </TouchableOpacity>
             <TouchableOpacity

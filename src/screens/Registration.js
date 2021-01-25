@@ -33,6 +33,7 @@ const Registration = (props) => {
     props.navigation.state.params.changeLoginState(
       true,
       res.data.register.tokens.access_token,
+      res.data.register.user,
     );
     props.navigation.navigate('Home');
 

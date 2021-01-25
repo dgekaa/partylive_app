@@ -15,7 +15,7 @@ import {useMutation} from 'react-apollo';
 import GoogleMap from '../../components/GoogleMap';
 import {GET_PLACE, SAVE_ADDRESS} from '../../QUERYES';
 
-const NewAddress = ({navigation, addressValue, moveOut}) => {
+const NewAddress = ({navigation, addressValue, moveOut, data}) => {
   const refreshObject = {
     refetchQueries: [
       {

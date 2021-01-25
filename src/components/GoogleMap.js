@@ -184,22 +184,22 @@ const GoogleMap = ({
     if (ADDRESSfromCOORD) {
       Geocoder.from(newRegion.latitude, newRegion.longitude)
         .then((json) => {
+          console.log(json.results[0], '---json.results[0]');
           setAddresFromCoord(json.results[0].formatted_address);
         })
         .catch((error) => console.log(error, 'GEO'));
     }
   }, [newRegion, ADDRESSfromCOORD]);
 
-  const getDistanceTo = (dist) => setDistanceTo(dist);
-  const onMarkerPress = (place) =>
-    navigation.navigate('Company', {
-      data: place,
-      distanceTo,
-    });
-
-  const onMapLayout = () => setIsMapReady(true);
-  const loadedPlace = (place) =>
-    setTracksViewChanges((prevArray) => [...prevArray, +place.id]);
+  const getDistanceTo = (dist) => setDistanceTo(dist),
+    onMarkerPress = (place) =>
+      navigation.navigate('Company', {
+        data: place,
+        distanceTo,
+      }),
+    onMapLayout = () => setIsMapReady(true),
+    loadedPlace = (place) =>
+      setTracksViewChanges((prevArray) => [...prevArray, +place.id]);
 
   return (
     <View style={styles.container}>
@@ -210,8 +210,8 @@ const GoogleMap = ({
         />
       )}
       <MapView
-        spiralEnabled={true}
-        spiderLineColor={'#000'}
+        spiralEnabled={false}
+        // spiderLineColor={'#000'}
         clusterColor="#e32a6c"
         radius={onePlace ? 1 : 50}
         clusterTextColor="#fff"
@@ -237,7 +237,6 @@ const GoogleMap = ({
           isMapReady &&
           places.map((place, i) => {
             const location = place.coordinates.split(',');
-
             return (
               <Marker
                 key={i}
