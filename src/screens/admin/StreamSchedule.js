@@ -13,6 +13,7 @@ import {
 import {useMutation} from 'react-apollo';
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import QueryIndicator from '../../components/QueryIndicator';
 
 import AdminHeader from './AdminHeader';
 import {numberDayNow} from '../../calculateTime';
@@ -65,7 +66,8 @@ const StreamSchedule = ({
     [date, setDate] = useState(new Date()),
     [pickedStartTime, setPickedStartTime] = useState(''),
     [pickedEndTime, setPickedEndTime] = useState(''),
-    [isPickStartTime, setIsPickStartTime] = useState(false);
+    [isPickStartTime, setIsPickStartTime] = useState(false),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   useEffect(() => {
     setPickedStartTime('');
@@ -102,7 +104,7 @@ const StreamSchedule = ({
     if (!selectedDay.id) {
       if (pickedStartTime && pickedEndTime) {
         setPopupVisible(false);
-
+        setQueryIndicator(true);
         CREATE_STREAMS_SCHEDULE_mutation({
           variables: {
             id: data.place.streams[0].id,
@@ -112,13 +114,20 @@ const StreamSchedule = ({
           },
           optimisticResponse: null,
         }).then(
-          (res) => console.log(res, 'RES'),
-          (err) => console.log(err, 'ERR'),
+          (res) => {
+            console.log(res, 'RES');
+            setQueryIndicator(false);
+          },
+          (err) => {
+            console.log(err, 'ERR');
+            setQueryIndicator(false);
+          },
         );
       }
     } else {
       if ((pickedStartTime && pickedEndTime) || selectedDay.start_time) {
         setPopupVisible(false);
+        setQueryIndicator(true);
 
         UPDATE_STREAMS_SCHEDULE_mutation({
           variables: {
@@ -133,8 +142,14 @@ const StreamSchedule = ({
           },
           optimisticResponse: null,
         }).then(
-          (res) => console.log(res, 'RES'),
-          (err) => console.log(err, 'ERR'),
+          (res) => {
+            console.log(res, 'RES');
+            setQueryIndicator(false);
+          },
+          (err) => {
+            console.log(err, 'ERR');
+            setQueryIndicator(false);
+          },
         );
       }
     }
@@ -142,12 +157,23 @@ const StreamSchedule = ({
 
   const setAsDayOf = (day) => {
     if (day.id) {
+      setQueryIndicator(true);
+
       DELETE_SCHEDULE_mutation({
         variables: {
           id: day.id,
         },
         optimisticResponse: null,
-      });
+      }).then(
+        (res) => {
+          console.log(res, '____RES____');
+          setQueryIndicator(false);
+        },
+        (err) => {
+          console.log(err, '____ERR____');
+          setQueryIndicator(false);
+        },
+      );
     }
   };
 
@@ -311,6 +337,8 @@ const StreamSchedule = ({
           )}
         </DialogContent>
       </Dialog>
+
+      {queryIndicator && <QueryIndicator />}
     </Animated.ScrollView>
   );
 };

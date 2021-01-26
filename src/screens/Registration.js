@@ -10,17 +10,19 @@ import {
 import {Mutation} from 'react-apollo';
 
 import Header from '../components/Header';
+import QueryIndicator from '../components/QueryIndicator';
 import {REGISTER} from '../QUERYES';
 
 const Registration = (props) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [repassword, setRepassword] = useState('');
-  const [name, setName] = useState('');
-  const [nameErr, setNameErr] = useState(false);
-  const [passwordErr, setPasswordErr] = useState(false);
-  const [repasswordErr, setRepasswordErr] = useState(false);
-  const [emailErr, setEmailErr] = useState(false);
+  const [email, setEmail] = useState(''),
+    [password, setPassword] = useState(''),
+    [repassword, setRepassword] = useState(''),
+    [name, setName] = useState(''),
+    [nameErr, setNameErr] = useState(false),
+    [passwordErr, setPasswordErr] = useState(false),
+    [repasswordErr, setRepasswordErr] = useState(false),
+    [emailErr, setEmailErr] = useState(false),
+    [registrIndicator, setRegistrIndicator] = useState(false);
 
   const clearAllInputs = () => {
     setName('');
@@ -36,11 +38,12 @@ const Registration = (props) => {
       res.data.register.user,
     );
     props.navigation.navigate('Home');
-
+    setRegistrIndicator(false);
     clearAllInputs();
   };
 
   const registerErrHandle = () => {
+    setRegistrIndicator(false);
     if (name.length === 0) return setNameErr('Поле обязательно для ввода');
     setNameErr(false);
     if (email.length === 0) return setEmailErr('Поле обязательно для ввода');
@@ -59,6 +62,20 @@ const Registration = (props) => {
     setPasswordErr(false);
     setRepasswordErr(false);
     setEmailErr('Email не валиден либо уже существует');
+  };
+
+  const registrClick = (addMutation) => {
+    setRegistrIndicator(true);
+    addMutation({
+      variables: {
+        name,
+        email,
+        password,
+        password_confirmation: repassword,
+      },
+    })
+      .then((res) => registerHandle(res))
+      .catch((err) => registerErrHandle(err));
   };
 
   return (
@@ -102,18 +119,7 @@ const Registration = (props) => {
                   </Text>
                   <TouchableOpacity
                     style={styles.btn}
-                    onPress={() => {
-                      addMutation({
-                        variables: {
-                          name,
-                          email,
-                          password,
-                          password_confirmation: repassword,
-                        },
-                      })
-                        .then((res) => registerHandle(res))
-                        .catch((err) => registerErrHandle(err));
-                    }}>
+                    onPress={() => registrClick(addMutation)}>
                     <Text style={styles.btnText}>Зарегистрироваться</Text>
                   </TouchableOpacity>
                 </View>
@@ -122,6 +128,7 @@ const Registration = (props) => {
           </Mutation>
         </View>
       </View>
+      {registrIndicator && <QueryIndicator />}
     </SafeAreaView>
   );
 };

@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   Text,
-  ActivityIndicator,
   FlatList,
   SafeAreaView,
   RefreshControl,
@@ -11,6 +10,7 @@ import {
 import {Query, useQuery} from 'react-apollo';
 import {requestLocationPermission} from '../permission';
 import Header from '../components/Header';
+import QueryIndicator from '../components/QueryIndicator';
 import CompanyTypeNav from '../components/CompanyTypeNav';
 import SmallCompanyBlock from '../components/SmallCompanyBlock';
 import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
@@ -18,12 +18,18 @@ import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
 const Home = (props) => {
   const [companyData, setCompanyData] = useState([]),
     [lon, setLon] = useState(''),
-    [lat, setLat] = useState('');
+    [lat, setLat] = useState(''),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   const {loading, error, data, refetch} = useQuery(GET_PLACES);
 
   useEffect(() => {
     data && setCompanyData(data.places);
+    if (data || error) {
+      setQueryIndicator(false);
+    } else if (loading) {
+      setQueryIndicator(true);
+    }
   }, [loading, error, data]);
 
   const clickedType = (type) => {
@@ -60,6 +66,11 @@ const Home = (props) => {
         <Header props={props} />
         <Query query={GET_CATEGORIES}>
           {({loading, error, data}) => {
+            if (data || error) {
+              setQueryIndicator(false);
+            } else if (loading) {
+              setQueryIndicator(true);
+            }
             if (loading) {
               return <></>;
             } else if (error) {
@@ -69,12 +80,6 @@ const Home = (props) => {
           }}
         </Query>
         <View style={styles.content}>
-          {loading && (
-            <View>
-              <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-          )}
-
           {error && <Text>Error! ${error.message}</Text>}
 
           {companyData.length ? (
@@ -99,6 +104,7 @@ const Home = (props) => {
           )}
         </View>
       </SafeAreaView>
+      {queryIndicator && <QueryIndicator />}
     </View>
   );
 };

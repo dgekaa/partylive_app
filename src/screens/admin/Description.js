@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import AdminHeader from './AdminHeader';
 import {useMutation} from 'react-apollo';
+import QueryIndicator from '../../components/QueryIndicator';
 import {GET_PLACE, UPDATE_PLACE_DATA} from '../../QUERYES';
 
 const Description = ({
@@ -33,7 +34,8 @@ const Description = ({
 
   const decriptionLengthLimit = 300;
 
-  const [inputDescription, setInputDescription] = useState(isDescription);
+  const [inputDescription, setInputDescription] = useState(isDescription),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   const [UPDATE_PLACE_DATA_mutation] = useMutation(
     UPDATE_PLACE_DATA,
@@ -49,6 +51,7 @@ const Description = ({
   };
 
   const saveDescription = () => {
+    setQueryIndicator(true);
     UPDATE_PLACE_DATA_mutation({
       variables: {
         id: isPlace.id,
@@ -56,8 +59,14 @@ const Description = ({
       },
       optimisticResponse: null,
     }).then(
-      (res) => console.log(res, 'desc RES'),
-      (err) => console.log(err, 'desc ERR'),
+      (res) => {
+        console.log(res, 'desc RES');
+        setQueryIndicator(false);
+      },
+      (err) => {
+        console.log(err, 'desc ERR');
+        setQueryIndicator(false);
+      },
     );
   };
 
@@ -79,9 +88,9 @@ const Description = ({
           cancel
           ready
           saveFunction={() => saveDescription()}
-          cancelFunction={() => {
-            isDescription ? setDesc(isDescription) : setDesc('');
-          }}
+          cancelFunction={() =>
+            isDescription ? setDesc(isDescription) : setDesc('')
+          }
           navigation={navigation}
           moveOut={moveOut}
           who={descriptionValue}
@@ -109,6 +118,7 @@ const Description = ({
           {decriptionLengthLimit}
         </Text>
       </SafeAreaView>
+      {queryIndicator && <QueryIndicator />}
     </Animated.ScrollView>
   );
 };

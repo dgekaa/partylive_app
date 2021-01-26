@@ -7,7 +7,6 @@ import {
   SafeAreaView,
 } from 'react-native';
 import {Query, useQuery} from 'react-apollo';
-import Reactotron from 'reactotron-react-native';
 
 import Header from '../components/Header';
 import GoogleMap from '../components/GoogleMap';
@@ -16,17 +15,22 @@ import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
 import {requestLocationPermission} from '../permission';
 
 const Map = (props) => {
-  const {data} = useQuery(GET_PLACES);
+  const {data, loading, error} = useQuery(GET_PLACES);
 
   const [companyData, setCompanyData] = useState([]),
     [lon, setLon] = useState(null),
-    [lat, setLat] = useState(null);
+    [lat, setLat] = useState(null),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   useEffect(() => {
-    data.places && setCompanyData(data.places);
-    console.log('---useEffect---');
-    Reactotron.log(data);
-  }, [data]);
+    data && data.places && setCompanyData(data.places);
+
+    if (data || error) {
+      setQueryIndicator(false);
+    } else if (loading) {
+      setQueryIndicator(true);
+    }
+  }, [data, loading, error]);
 
   const clickedType = (type) => {
     if (type.toLowerCase() !== 'все') {
@@ -41,10 +45,7 @@ const Map = (props) => {
 
   useEffect(() => {
     requestLocationPermission(setLon, setLat);
-    console.log('--location---');
   }, []);
-
-  console.log('--map---');
 
   return (
     <View style={styles.Map}>
@@ -52,7 +53,11 @@ const Map = (props) => {
         <Header props={props} />
         <Query query={GET_CATEGORIES}>
           {({loading, error, data}) => {
-            Reactotron.log(data);
+            if (data || error) {
+              setQueryIndicator(false);
+            } else if (loading) {
+              setQueryIndicator(true);
+            }
 
             if (loading) {
               return <ActivityIndicator size="large" color="#0000ff" />;
@@ -71,6 +76,7 @@ const Map = (props) => {
           />
         </View>
       </SafeAreaView>
+      {queryIndicator && <QueryIndicator />}
     </View>
   );
 };

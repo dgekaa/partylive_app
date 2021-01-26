@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
   StyleSheet,
@@ -17,6 +17,7 @@ import {useQuery} from 'react-apollo';
 import {EN_SHORT_DAY_OF_WEEK} from '../../constants';
 import Stream from './Stream';
 import Header from '../../components/Header';
+import QueryIndicator from '../../components/QueryIndicator';
 import {GET_PLACE} from '../../QUERYES';
 import WorkSchedule from './WorkSchedule';
 import StreamSchedule from './StreamSchedule';
@@ -33,7 +34,8 @@ const Admin = (props) => {
     [inputAlias, setInputAlias] = useState(''),
     [inputDesc, setInputDesc] = useState(
       data && data.place && data.place.description && data.place.description,
-    );
+    ),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   const {loading, error, data} = useQuery(GET_PLACE, {
     variables: {id: props.navigation.state.params.item.id},
@@ -91,6 +93,14 @@ const Admin = (props) => {
         duration: 200,
         useNativeDriver: true,
       }).start();
+
+  useEffect(() => {
+    if (data || error) {
+      setQueryIndicator(false);
+    } else if (loading) {
+      setQueryIndicator(true);
+    }
+  }, [data, loading, error]);
 
   if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
   if (error) return <Text>`Error! ${error.message}`</Text>;
@@ -185,6 +195,7 @@ const Admin = (props) => {
           data={data}
         />
       </SafeAreaView>
+      {queryIndicator && <QueryIndicator />}
     </View>
   );
 };

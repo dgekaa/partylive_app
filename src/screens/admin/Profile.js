@@ -13,6 +13,7 @@ import {
 import AdminHeader from './AdminHeader';
 import {useMutation} from 'react-apollo';
 import {GET_PLACE, UPDATE_PLACE_DATA, UPDATE_PLACE_IMAGE} from '../../QUERYES';
+import QueryIndicator from '../../components/QueryIndicator';
 
 const Profile = ({
   navigation,
@@ -29,7 +30,8 @@ const Profile = ({
   addressValue,
   descriptionValue,
 }) => {
-  const [pickerImageData, setpPickerImageData] = useState('');
+  const [pickerImageData, setpPickerImageData] = useState(''),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   const refreshObject = {
     refetchQueries: [
@@ -73,6 +75,7 @@ const Profile = ({
     };
 
     const UPLOAD_IMAGE = (img) => {
+      setQueryIndicator(true);
       UPDATE_PLACE_IMAGE_mutation({
         variables: {
           id: isPlace.id,
@@ -80,8 +83,14 @@ const Profile = ({
         },
         optimisticResponse: null,
       }).then(
-        (res) => console.log(res, 'RES mob profile_image'),
-        (err) => console.log(err, 'ERR mob profile_image'),
+        (res) => {
+          console.log(res, 'RES mob profile_image');
+          setQueryIndicator(false);
+        },
+        (err) => {
+          console.log(err, 'ERR mob profile_image');
+          setQueryIndicator(false);
+        },
       );
     };
 
@@ -131,6 +140,7 @@ const Profile = ({
   };
 
   const saveNewData = () => {
+    setQueryIndicator(true);
     UPDATE_PLACE_DATA_mutation({
       variables: {
         id: isPlace.id,
@@ -139,18 +149,23 @@ const Profile = ({
       },
       optimisticResponse: null,
     }).then(
-      (res) => console.log(res, 'RES'),
-      (err) => console.log(err, 'ERR'),
+      (res) => {
+        console.log(res, 'RES');
+        setQueryIndicator(false);
+      },
+      (err) => {
+        console.log(err, 'ERR');
+        setQueryIndicator(false);
+      },
     );
   };
 
   const changePhoto = () =>
-    getAsyncToken().then((token) => goToPickImage(token));
-
-  const deletePhoto = () => {
-    UPLOAD_IMAGE('');
-    setpPickerImageData('');
-  };
+      getAsyncToken().then((token) => goToPickImage(token)),
+    deletePhoto = () => {
+      UPLOAD_IMAGE('');
+      setpPickerImageData('');
+    };
 
   return (
     <Animated.ScrollView
@@ -254,6 +269,7 @@ const Profile = ({
           <Text style={styles.pinkBtnText}>СОХРАНИТЬ</Text>
         </TouchableOpacity>
       </View>
+      {queryIndicator && <QueryIndicator />}
     </Animated.ScrollView>
   );
 };

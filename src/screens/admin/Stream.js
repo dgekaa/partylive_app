@@ -12,6 +12,7 @@ import {
 import AdminHeader from './AdminHeader';
 import VideoPlayer from 'react-native-video-controls';
 import {useMutation} from 'react-apollo';
+import QueryIndicator from '../../components/QueryIndicator';
 
 import {
   GET_PLACE,
@@ -39,7 +40,8 @@ const Stream = ({streamValue, navigation, streams, data, moveOut}) => {
     );
 
   const [inputCameraAddress, setInputCameraAddress] = useState(''),
-    [isStreamOff, setIsStreamOff] = useState(false);
+    [isStreamOff, setIsStreamOff] = useState(false),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   const videoRef = useRef(null);
 
@@ -59,6 +61,7 @@ const Stream = ({streamValue, navigation, streams, data, moveOut}) => {
     .join('-');
 
   const updateStream = (inputCameraAddress) => {
+    setQueryIndicator(true);
     UPDATE_STREAM_mutation({
       variables: {
         id: data.place.streams[0].id,
@@ -68,13 +71,20 @@ const Stream = ({streamValue, navigation, streams, data, moveOut}) => {
       optimisticResponse: null,
     })
       .then(
-        (res) => console.log(res, 'stream RES__'),
-        (err) => console.log(err, 'stream ERR___'),
+        (res) => {
+          console.log(res, 'stream RES__');
+          setQueryIndicator(false);
+        },
+        (err) => {
+          console.log(err, 'stream ERR___');
+          setQueryIndicator(false);
+        },
       )
       .catch((err) => console.log(err, '______err_1'));
   };
 
   const createStream = (inputCameraAddress) => {
+    setQueryIndicator(false);
     CREATE_STREAM_mutation({
       variables: {
         name: data.place.name,
@@ -86,11 +96,14 @@ const Stream = ({streamValue, navigation, streams, data, moveOut}) => {
       },
       optimisticResponse: null,
     })
-      .then(
-        (res) => console.log(res, 'create stream RES__'),
-        (err) => console.log(err, 'create stream ERR___'),
-      )
-      .catch((err) => console.log(err, '______err_1'));
+      .then((res) => {
+        console.log(res, 'create stream RES__');
+        setQueryIndicator(false);
+      })
+      .catch((err) => {
+        console.log(err, '______err_1');
+        setQueryIndicator(false);
+      });
   };
 
   const videoPause = () => {
@@ -100,6 +113,7 @@ const Stream = ({streamValue, navigation, streams, data, moveOut}) => {
 
   const disableStream = (see_you_tomorrow) => {
     if (data.place.streams[0]) {
+      setQueryIndicator(true);
       UPDATE_SEE_YOU_TOMORROW_mutation({
         variables: {
           id: data.place.streams[0].id,
@@ -107,11 +121,14 @@ const Stream = ({streamValue, navigation, streams, data, moveOut}) => {
         },
         optimisticResponse: null,
       })
-        .then(
-          (res) => console.log(res, 'RES__'),
-          (err) => console.log(err, '___ERR___'),
-        )
-        .catch((err) => console.log(err, '______err_1'));
+        .then((res) => {
+          console.log(res, 'RES__');
+          setQueryIndicator(false);
+        })
+        .catch((err) => {
+          console.log(err, '______err_1');
+          setQueryIndicator(false);
+        });
     }
   };
 
@@ -196,6 +213,7 @@ const Stream = ({streamValue, navigation, streams, data, moveOut}) => {
           placeholder={placeholder}
         />
       </View>
+      {queryIndicator && <QueryIndicator />}
     </Animated.ScrollView>
   );
 };

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import AdminHeader from './AdminHeader';
 import {Query, useMutation} from 'react-apollo';
+import QueryIndicator from '../../components/QueryIndicator';
 import {GET_PLACE, GET_CATEGORIES, UPDATE_PLACE_DATA} from '../../QUERYES';
 
 const Category = ({navigation, chooseCategoryValue, moveOut, data}) => {
@@ -29,11 +30,13 @@ const Category = ({navigation, chooseCategoryValue, moveOut, data}) => {
   );
 
   const [typeOfCompany, setTypeOfCompany] = useState(''),
-    [typeOfCompanyId, setTypeOfCompanyId] = useState('');
+    [typeOfCompanyId, setTypeOfCompanyId] = useState(''),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   const categories = data.place.categories && data.place.categories[0];
 
   const chooseCategory = () => {
+    setQueryIndicator(true);
     UPDATE_PLACE_DATA_mutation({
       variables: {
         id: data.place.id,
@@ -44,8 +47,14 @@ const Category = ({navigation, chooseCategoryValue, moveOut, data}) => {
       },
       optimisticResponse: null,
     }).then(
-      (res) => console.log(res, 'RES'),
-      (err) => console.log(err, 'ERR'),
+      (res) => {
+        console.log(res, 'RES');
+        setQueryIndicator(false);
+      },
+      (err) => {
+        console.log(err, 'ERR');
+        setQueryIndicator(false);
+      },
     );
   };
 
@@ -87,17 +96,22 @@ const Category = ({navigation, chooseCategoryValue, moveOut, data}) => {
       <Text style={styles.headerAdminTitle}>Тип заведения</Text>
       <View style={styles.categoryBtnsRow}>
         <Query query={GET_CATEGORIES}>
-          {(prop) => {
-            if (prop.loading)
+          {({error, loading, data}) => {
+            if (data || error) {
+              setQueryIndicator(false);
+            } else if (loading) {
+              setQueryIndicator(true);
+            }
+            if (loading)
               return (
                 <View>
                   <ActivityIndicator size="large" color="#0000ff" />
                 </View>
               );
 
-            if (prop.error) return <Text>Error! ${prop.error.message}</Text>;
+            if (error) return <Text>Error! ${error.message}</Text>;
 
-            return prop.data.categories.map((el, i) => (
+            return data.categories.map((el, i) => (
               <TouchableOpacity
                 key={i}
                 style={[
@@ -112,6 +126,7 @@ const Category = ({navigation, chooseCategoryValue, moveOut, data}) => {
           }}
         </Query>
       </View>
+      {queryIndicator && <QueryIndicator />}
     </Animated.ScrollView>
   );
 };

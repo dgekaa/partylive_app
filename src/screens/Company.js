@@ -25,15 +25,14 @@ import pab from '../img/pab.png';
 const Company = (props) => {
   const {
     data: {id, name, address, streams, categories},
-    distanceTo,
   } = props.navigation.state.params;
 
   const dataCompany = props.navigation.state.params.data;
 
-  const [showStream, setShowStream] = useState();
-  const [nextStreamTime, setNextStreamTime] = useState();
-  const [workTime, setWorkTime] = useState();
-  const [isWork, setIsWork] = useState();
+  const [showStream, setShowStream] = useState(),
+    [nextStreamTime, setNextStreamTime] = useState(),
+    [workTime, setWorkTime] = useState(),
+    [isWork, setIsWork] = useState();
 
   useEffect(() => {
     isShowStreamNow(dataCompany, setShowStream, setNextStreamTime);

@@ -10,17 +10,43 @@ import {
 import {Mutation} from 'react-apollo';
 
 import Header from '../components/Header';
+import QueryIndicator from '../components/QueryIndicator';
 import {LOGIN} from '../QUERYES';
 
 const Login = (props) => {
   const [email, setEmail] = useState(''),
     [password, setPassword] = useState(''),
-    [validationError, setValidationError] = useState('');
+    [validationError, setValidationError] = useState(''),
+    [loginIndicator, setLoginIndicator] = useState(false);
 
   const clearAllInputs = () => {
     setEmail('');
     setPassword('');
     setValidationError('');
+  };
+
+  const loginClick = (addMutation) => {
+    setLoginIndicator(true);
+    addMutation({
+      variables: {
+        username: email,
+        password,
+      },
+    })
+      .then((res) => {
+        setLoginIndicator(false);
+        props.navigation.state.params.changeLoginState(
+          true,
+          res.data.login.access_token,
+          res.data.login.user.id,
+        );
+        props.navigation.navigate('Home');
+        clearAllInputs();
+      })
+      .catch(() => {
+        setValidationError('Неверный логин либо пароль');
+        setLoginIndicator(false);
+      });
   };
 
   return (
@@ -49,26 +75,7 @@ const Login = (props) => {
                   <Text style={styles.validationError}>{validationError}</Text>
                   <TouchableOpacity
                     style={styles.btn}
-                    onPress={() => {
-                      addMutation({
-                        variables: {
-                          username: email,
-                          password,
-                        },
-                      })
-                        .then((res) => {
-                          props.navigation.state.params.changeLoginState(
-                            true,
-                            res.data.login.access_token,
-                            res.data.login.user.id,
-                          );
-                          props.navigation.navigate('Home');
-                          clearAllInputs();
-                        })
-                        .catch(() =>
-                          setValidationError('Неверный логин либо пароль'),
-                        );
-                    }}>
+                    onPress={() => loginClick(addMutation)}>
                     <Text style={styles.btnText}>Вход</Text>
                   </TouchableOpacity>
                 </View>
@@ -77,6 +84,7 @@ const Login = (props) => {
           </Mutation>
         </View>
       </View>
+      {loginIndicator && <QueryIndicator />}
     </SafeAreaView>
   );
 };

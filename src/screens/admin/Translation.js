@@ -8,12 +8,10 @@ import {
   Dimensions,
   SafeAreaView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import {useMutation} from 'react-apollo';
-import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import {NodeCameraView} from 'react-native-nodemediaclient';
-
+import QueryIndicator from '../../components/QueryIndicator';
 import AdminHeader from './AdminHeader';
 import {GET_PLACE, UPDATE_MOBILE_STREAM} from '../../QUERYES';
 
@@ -31,7 +29,8 @@ const Translation = ({navigation, translationValue, moveOut, data}) => {
   const vbRef = useRef(null);
 
   const [publishBtnTitle, setPublishBtnTitle] = useState('Начать трансляцию'),
-    [isPublish, setIsPublish] = useState(false);
+    [isPublish, setIsPublish] = useState(false),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   const [UPDATE_MOBILE_STREAM_mutation] = useMutation(
     UPDATE_MOBILE_STREAM,
@@ -83,6 +82,7 @@ const Translation = ({navigation, translationValue, moveOut, data}) => {
   };
 
   const updateMobileStream = (bool) => {
+    setQueryIndicator(true);
     UPDATE_MOBILE_STREAM_mutation({
       variables: {
         id: data.place.id,
@@ -90,8 +90,14 @@ const Translation = ({navigation, translationValue, moveOut, data}) => {
       },
       optimisticResponse: null,
     }).then(
-      (res) => console.log(res, 'RES mob stream'),
-      (err) => console.log(err, 'ERR'),
+      (res) => {
+        console.log(res, 'RES mob stream');
+        setQueryIndicator(false);
+      },
+      (err) => {
+        console.log(err, 'ERR');
+        setQueryIndicator(false);
+      },
     );
   };
 
@@ -142,11 +148,7 @@ const Translation = ({navigation, translationValue, moveOut, data}) => {
             style={styles.translStartStopBtn}
             onPress={() => {
               requestCameraPermission();
-              if (isPublish) {
-                disableMobileStream();
-              } else {
-                enableMobileStream();
-              }
+              isPublish ? disableMobileStream() : enableMobileStream();
             }}>
             <Text
               style={[
@@ -160,6 +162,7 @@ const Translation = ({navigation, translationValue, moveOut, data}) => {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
+      {queryIndicator && <QueryIndicator />}
     </Animated.ScrollView>
   );
 };

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -11,6 +11,7 @@ import {useMutation, useQuery} from 'react-apollo';
 import Dialog, {DialogContent} from 'react-native-popup-dialog';
 
 import Header from '../components/Header';
+import QueryIndicator from '../components/QueryIndicator';
 import {GET_PLACES, CREATE_PLACE, DELETE_PLACE} from '../QUERYES';
 
 const EditCompany = (props) => {
@@ -23,16 +24,26 @@ const EditCompany = (props) => {
     awaitRefetchQueries: true,
   };
 
-  const {data} = useQuery(GET_PLACES);
+  const {data, loading, error} = useQuery(GET_PLACES);
+
+  useEffect(() => {
+    if (data || error) {
+      setQueryIndicator(false);
+    } else if (loading) {
+      setQueryIndicator(true);
+    }
+  }, [data, loading, error]);
 
   const [isConfirmPopup, setIsConfirmPopup] = useState(false),
     [deletElId, setDeleteElId] = useState(null),
-    [deleteElName, setDeleteElName] = useState(null);
+    [deleteElName, setDeleteElName] = useState(null),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   const [CREATE_PLACE_mutation] = useMutation(CREATE_PLACE, refreshObject),
     [DELETE_PLACE_mutation] = useMutation(DELETE_PLACE, refreshObject);
 
   const create = () => {
+    setQueryIndicator(true);
     CREATE_PLACE_mutation({
       variables: {
         name: 'Стандартное название',
@@ -46,12 +57,20 @@ const EditCompany = (props) => {
       },
       optimisticResponse: null,
     }).then(
-      (res) => console.log(res, 'RES'),
-      (err) => console.log(err, 'ERR'),
+      (res) => {
+        console.log(res, 'RES');
+        setQueryIndicator(false);
+      },
+      (err) => {
+        console.log(err, 'ERR');
+        setQueryIndicator(false);
+      },
     );
   };
 
   const allowDelete = (id) => {
+      setQueryIndicator(true);
+      setIsConfirmPopup(false);
       DELETE_PLACE_mutation({
         variables: {
           id: id,
@@ -60,9 +79,12 @@ const EditCompany = (props) => {
       }).then(
         (res) => {
           console.log(res, 'RES');
-          setIsConfirmPopup(false);
+          setQueryIndicator(false);
         },
-        (err) => console.log(err, 'ERR'),
+        (err) => {
+          console.log(err, 'ERR');
+          setQueryIndicator(false);
+        },
       );
     },
     deleteClick = (el) => {
@@ -100,8 +122,6 @@ const EditCompany = (props) => {
               <Text style={styles.textRowType}>
                 {el.categories[0] && el.categories[0].name.toLowerCase()}
               </Text>
-              <Text style={styles.textRowType}>{el.coordinates}</Text>
-              <Text style={styles.textRowType}>{el.address.slice(0, 17)}</Text>
             </View>
           ))}
           <TouchableOpacity
@@ -133,6 +153,8 @@ const EditCompany = (props) => {
           </View>
         </DialogContent>
       </Dialog>
+
+      {queryIndicator && <QueryIndicator />}
     </View>
   );
 };

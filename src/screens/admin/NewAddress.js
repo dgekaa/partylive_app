@@ -1,10 +1,8 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
   Text,
-  TextInput,
-  Switch,
   Animated,
   StatusBar,
   Dimensions,
@@ -14,6 +12,7 @@ import AdminHeader from './AdminHeader';
 import {useMutation} from 'react-apollo';
 import GoogleMap from '../../components/GoogleMap';
 import {GET_PLACE, SAVE_ADDRESS} from '../../QUERYES';
+import QueryIndicator from '../../components/QueryIndicator';
 
 const NewAddress = ({navigation, addressValue, moveOut, data}) => {
   const refreshObject = {
@@ -27,7 +26,8 @@ const NewAddress = ({navigation, addressValue, moveOut, data}) => {
   };
 
   const [ADDRESS, setADDRESS] = useState(null),
-    [COORD, setCOORD] = useState(null);
+    [COORD, setCOORD] = useState(null),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   const [SAVE_ADDRESS_mutation] = useMutation(SAVE_ADDRESS, refreshObject);
 
@@ -39,6 +39,7 @@ const NewAddress = ({navigation, addressValue, moveOut, data}) => {
   const saveNewAddress = () => {
     if (ADDRESS) {
       const coordinate = COORD.latitude + ',' + COORD.longitude;
+      setQueryIndicator(true);
       SAVE_ADDRESS_mutation({
         variables: {
           id: data.place.id,
@@ -47,11 +48,14 @@ const NewAddress = ({navigation, addressValue, moveOut, data}) => {
         },
         optimisticResponse: null,
       })
-        .then(
-          (res) => console.log(res, 'RES__'),
-          (err) => console.log(err, '___ERR___'),
-        )
-        .catch((err) => console.log(err, '______err_1'));
+        .then((res) => {
+          console.log(res, 'RES__');
+          setQueryIndicator(false);
+        })
+        .catch((err) => {
+          console.log(err, '______err_1');
+          setQueryIndicator(false);
+        });
     }
   };
 
@@ -81,6 +85,7 @@ const NewAddress = ({navigation, addressValue, moveOut, data}) => {
           </Text>
         </View>
       </SafeAreaView>
+      {queryIndicator && <QueryIndicator />}
     </Animated.ScrollView>
   );
 };

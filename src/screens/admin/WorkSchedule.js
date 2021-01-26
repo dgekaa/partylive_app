@@ -13,6 +13,7 @@ import {useMutation} from 'react-apollo';
 import Dialog, {ScaleAnimation, DialogContent} from 'react-native-popup-dialog';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
+import QueryIndicator from '../../components/QueryIndicator';
 import AdminHeader from './AdminHeader';
 import {numberDayNow} from '../../calculateTime';
 import {
@@ -54,7 +55,8 @@ const WorkSchedule = ({
     [pickedEndTime, setPickedEndTime] = useState(''),
     [isPickStartTime, setIsPickStartTime] = useState(false),
     [date, setDate] = useState(new Date()),
-    [mode, setMode] = useState('date');
+    [mode, setMode] = useState('date'),
+    [queryIndicator, setQueryIndicator] = useState(false);
 
   const [DELETE_SCHEDULE_mutation] = useMutation(
       DELETE_SCHEDULE,
@@ -73,12 +75,22 @@ const WorkSchedule = ({
 
   const setAsDayOf = (day) => {
     if (day.id) {
+      setQueryIndicator(true);
       DELETE_SCHEDULE_mutation({
         variables: {
           id: day.id,
         },
         optimisticResponse: null,
-      });
+      }).then(
+        (res) => {
+          console.log(res, 'RES');
+          setQueryIndicator(false);
+        },
+        (err) => {
+          console.log(err, 'ERR');
+          setQueryIndicator(false);
+        },
+      );
     }
   };
 
@@ -107,7 +119,7 @@ const WorkSchedule = ({
     if (!selectedDay.id) {
       if (pickedStartTime && pickedEndTime) {
         setPopupVisible(false);
-
+        setQueryIndicator(true);
         CREATE_WORK_TIME_mutation({
           variables: {
             id: navigation.state.params.item.id,
@@ -116,12 +128,21 @@ const WorkSchedule = ({
             end_time: pickedEndTime,
           },
           optimisticResponse: null,
-        });
+        }).then(
+          (res) => {
+            console.log(res, 'RES');
+            setQueryIndicator(false);
+          },
+          (err) => {
+            console.log(err, 'ERR');
+            setQueryIndicator(false);
+          },
+        );
       }
     } else {
       if ((pickedStartTime && pickedEndTime) || selectedDay.start_time) {
         setPopupVisible(false);
-
+        setQueryIndicator(true);
         UPDATE_WORK_SCHEDULE_mutation({
           variables: {
             id: selectedDay.id,
@@ -130,8 +151,14 @@ const WorkSchedule = ({
           },
           optimisticResponse: null,
         }).then(
-          (res) => console.log(res, 'RES'),
-          (err) => console.log(err, 'ERR'),
+          (res) => {
+            console.log(res, 'RES');
+            setQueryIndicator(false);
+          },
+          (err) => {
+            console.log(err, 'ERR');
+            setQueryIndicator(false);
+          },
         );
       }
     }
@@ -282,6 +309,7 @@ const WorkSchedule = ({
           )}
         </DialogContent>
       </Dialog>
+      {queryIndicator && <QueryIndicator />}
     </Animated.ScrollView>
   );
 };
