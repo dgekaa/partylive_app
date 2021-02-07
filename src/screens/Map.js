@@ -43,9 +43,15 @@ const Map = (props) => {
     }
   };
 
-  useEffect(() => {
-    requestLocationPermission(setLon, setLat);
-  }, []);
+  const toggleQueryIndicator = ({data, error, loading}) => {
+    if (data || error) {
+      setQueryIndicator(false);
+    } else if (loading) {
+      setQueryIndicator(true);
+    }
+  };
+
+  data && requestLocationPermission(setLon, setLat);
 
   return (
     <View style={styles.Map}>
@@ -53,11 +59,7 @@ const Map = (props) => {
         <Header props={props} />
         <Query query={GET_CATEGORIES}>
           {({loading, error, data}) => {
-            if (data || error) {
-              setQueryIndicator(false);
-            } else if (loading) {
-              setQueryIndicator(true);
-            }
+            toggleQueryIndicator(loading, error, data);
 
             if (loading) {
               return <ActivityIndicator size="large" color="#0000ff" />;

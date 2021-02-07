@@ -42,7 +42,6 @@ export const requestLocationPermission = async (setLon, setLat) => {
         console.log('You can use location!!!');
         Geolocation.getCurrentPosition(
           (info) => {
-            // return {long: info.coords.longitude, lat: info.coords.latitude};
             setLon(info.coords.longitude);
             setLat(info.coords.latitude);
           },

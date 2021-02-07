@@ -180,16 +180,20 @@ const GoogleMap = ({
     Geocoder.init('AIzaSyAAcvrFmEi8o7u-zXHe6geXvjRey4Qj6tg', {language: 'ru'});
   }, []);
 
+  const getGeocoderPosition = (lat, lon) => {
+    Geocoder.from(lat, lon)
+      .then((json) => setAddresFromCoord(json.results[0].formatted_address))
+      .catch((error) => console.log(error, 'GEO'));
+  };
+
   useEffect(() => {
-    if (ADDRESSfromCOORD) {
-      Geocoder.from(newRegion.latitude, newRegion.longitude)
-        .then((json) => {
-          console.log(json.results[0], '---json.results[0]');
-          setAddresFromCoord(json.results[0].formatted_address);
-        })
-        .catch((error) => console.log(error, 'GEO'));
-    }
-  }, [newRegion, ADDRESSfromCOORD]);
+    ADDRESSfromCOORD &&
+      getGeocoderPosition(newRegion.latitude, newRegion.longitude);
+  }, [newRegion]);
+
+  useEffect(() => {
+    ADDRESSfromCOORD && ADDRESSfromCOORD(addressFromCoord, newRegion);
+  }, [addressFromCoord, newRegion]);
 
   const getDistanceTo = (dist) => setDistanceTo(dist),
     onMarkerPress = (place) =>
@@ -220,17 +224,19 @@ const GoogleMap = ({
         zoomEnabled={true}
         initialRegion={initialRegion}
         onRegionChangeComplete={(data) => setNewRegion(data)}
-        onLayout={onMapLayout}
-        ADDRESSfromCOORD={
-          ADDRESSfromCOORD && ADDRESSfromCOORD(addressFromCoord, newRegion)
-        }>
-        <Marker
-          coordinate={{
-            latitude: lat,
-            longitude: lon,
-          }}>
-          <Image source={require('../img/dancer.png')} style={styles.dancer} />
-        </Marker>
+        onLayout={onMapLayout}>
+        {lat && lon && (
+          <Marker
+            coordinate={{
+              latitude: lat,
+              longitude: lon,
+            }}>
+            <Image
+              source={require('../img/dancer.png')}
+              style={styles.dancer}
+            />
+          </Marker>
+        )}
 
         {!!places &&
           !!places.length &&
@@ -273,8 +279,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 40,
     height: 40,
-    top: Dimensions.get('window').height / 2,
-    left: Dimensions.get('window').width / 2,
+    top: Dimensions.get('window').height / 2 - 40,
+    left: Dimensions.get('window').width / 2 - 20,
     zIndex: 100,
   },
   map: {

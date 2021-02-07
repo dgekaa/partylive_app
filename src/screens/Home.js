@@ -56,9 +56,15 @@ const Home = (props) => {
     }
   }, []);
 
-  useEffect(() => {
-    requestLocationPermission(setLon, setLat);
-  }, []);
+  const toggleQueryIndicator = ({data, error, loading}) => {
+    if (data || error) {
+      setQueryIndicator(false);
+    } else if (loading) {
+      setQueryIndicator(true);
+    }
+  };
+
+  data && requestLocationPermission(setLon, setLat);
 
   return (
     <View style={styles.home}>
@@ -66,11 +72,8 @@ const Home = (props) => {
         <Header props={props} />
         <Query query={GET_CATEGORIES}>
           {({loading, error, data}) => {
-            if (data || error) {
-              setQueryIndicator(false);
-            } else if (loading) {
-              setQueryIndicator(true);
-            }
+            toggleQueryIndicator(loading, error, data);
+
             if (loading) {
               return <></>;
             } else if (error) {
@@ -81,7 +84,6 @@ const Home = (props) => {
         </Query>
         <View style={styles.content}>
           {error && <Text>Error! ${error.message}</Text>}
-
           {companyData.length ? (
             <FlatList
               refreshControl={

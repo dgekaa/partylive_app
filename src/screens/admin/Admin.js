@@ -112,6 +112,7 @@ const Admin = (props) => {
         <View style={styles.AdminInner}>
           {adminBtns.map((el, i) => (
             <TouchableOpacity
+              key={i}
               style={styles.oneBlock}
               onPress={() => moveIn(el.moveIn)}>
               <Text style={styles.oneBlockText}>{el.name}</Text>
