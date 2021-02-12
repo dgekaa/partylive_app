@@ -5,7 +5,9 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
   SafeAreaView,
+  FlatList,
 } from 'react-native';
 import {useMutation, useQuery} from 'react-apollo';
 import Dialog, {DialogContent} from 'react-native-popup-dialog';
@@ -15,6 +17,23 @@ import QueryIndicator from '../components/QueryIndicator';
 import {GET_PLACES, CREATE_PLACE, DELETE_PLACE} from '../QUERYES';
 
 const EditCompany = (props) => {
+  const [isConfirmPopup, setIsConfirmPopup] = useState(false),
+    [deletElId, setDeleteElId] = useState(null),
+    [deleteElName, setDeleteElName] = useState(null),
+    [queryIndicator, setQueryIndicator] = useState(false),
+    [first, setFirst] = useState(200),
+    [refreshing, setRefreshing] = useState(false);
+
+  const {data, loading, error, refetch} = useQuery(
+    GET_PLACES,
+    {
+      variables: {first: first},
+    },
+    {
+      manual: true,
+    },
+  );
+
   const refreshObject = {
     refetchQueries: [
       {
@@ -24,8 +43,6 @@ const EditCompany = (props) => {
     awaitRefetchQueries: true,
   };
 
-  const {data, loading, error} = useQuery(GET_PLACES);
-
   useEffect(() => {
     if (data || error) {
       setQueryIndicator(false);
@@ -34,41 +51,35 @@ const EditCompany = (props) => {
     }
   }, [data, loading, error]);
 
-  const [isConfirmPopup, setIsConfirmPopup] = useState(false),
-    [deletElId, setDeleteElId] = useState(null),
-    [deleteElName, setDeleteElName] = useState(null),
-    [queryIndicator, setQueryIndicator] = useState(false);
-
   const [CREATE_PLACE_mutation] = useMutation(CREATE_PLACE, refreshObject),
     [DELETE_PLACE_mutation] = useMutation(DELETE_PLACE, refreshObject);
 
   const create = () => {
-    setQueryIndicator(true);
-    CREATE_PLACE_mutation({
-      variables: {
-        name: 'Стандартное название',
-        address: 'улица Ленина 8, Минск, Беларусь',
-        description: 'введите описание',
-        coordinates: '53.9006799,27.5582599',
-        alias: 'pseudonim',
-        categories: {
-          connect: 2,
+      setQueryIndicator(true);
+      CREATE_PLACE_mutation({
+        variables: {
+          name: 'Стандартное название',
+          address: 'улица Ленина 8, Минск, Беларусь',
+          description: 'введите описание',
+          coordinates: '53.9006799,27.5582599',
+          alias: 'pseudonim',
+          categories: {
+            connect: 2,
+          },
         },
-      },
-      optimisticResponse: null,
-    }).then(
-      (res) => {
-        console.log(res, 'RES');
-        setQueryIndicator(false);
-      },
-      (err) => {
-        console.log(err, 'ERR');
-        setQueryIndicator(false);
-      },
-    );
-  };
-
-  const allowDelete = (id) => {
+        optimisticResponse: null,
+      }).then(
+        (res) => {
+          console.log(res, 'RES');
+          setQueryIndicator(false);
+        },
+        (err) => {
+          console.log(err, 'ERR');
+          setQueryIndicator(false);
+        },
+      );
+    },
+    allowDelete = (id) => {
       setQueryIndicator(true);
       setIsConfirmPopup(false);
       DELETE_PLACE_mutation({
@@ -92,44 +103,66 @@ const EditCompany = (props) => {
       setDeleteElName(el.name);
       setIsConfirmPopup(true);
     },
-    toCompany = (el) => props.navigation.navigate('Admin', {item: el});
+    toCompany = (el) => props.navigation.navigate('Admin', {item: el}),
+    refetchPlaces = () => {
+      setFirst((prev) => prev + 100);
+      refetch();
+    },
+    onRefresh = () => {
+      setRefreshing(true);
+      refetch().then((res) => !res.loading && res.data && setRefreshing(false));
+    };
 
   return (
     <View style={styles.EditCompany}>
       <SafeAreaView style={{backgroundColor: '#eee', flex: 1}}>
         <Header props={props} />
         <Text style={styles.headerText}>Список заведений</Text>
-        <ScrollView>
-          {data.places.map((el) => (
-            <View style={styles.row} key={el.id}>
-              <TouchableOpacity
-                style={styles.delete}
-                onPress={() => deleteClick(el)}>
-                <Text style={styles.deleteText} numberOfLines={1}>
-                  &#215;
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.textRowName}
-                onPress={() => toCompany(el)}>
-                <Text style={styles.textRowInnerName} numberOfLines={1}>
-                  {el.name}
-                </Text>
-              </TouchableOpacity>
-              <Text style={styles.textRowAlias} numberOfLines={1}>
-                {el.alias}
-              </Text>
-              <Text style={styles.textRowType}>
-                {el.categories[0] && el.categories[0].name.toLowerCase()}
-              </Text>
-            </View>
-          ))}
-          <TouchableOpacity
-            style={styles.createCompany}
-            onPress={() => create()}>
-            <Text style={styles.createCompanyText}>СОЗДАТЬ ЗАВЕДЕНИЕ</Text>
-          </TouchableOpacity>
-        </ScrollView>
+        {data && data.places && (
+          <FlatList
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => onRefresh()}
+              />
+            }
+            data={data.places.data}
+            numColumns={1}
+            onEndReachedThreshold={0.01}
+            onEndReached={() => refetchPlaces()}
+            renderItem={({item}) => (
+              <>
+                <View style={styles.row} key={item.id}>
+                  <TouchableOpacity
+                    style={styles.delete}
+                    onPress={() => deleteClick(item)}>
+                    <Text style={styles.deleteText} numberOfLines={1}>
+                      &#215;
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.textRowName}
+                    onPress={() => toCompany(item)}>
+                    <Text style={styles.textRowInnerName} numberOfLines={1}>
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
+                  <Text style={styles.textRowAlias} numberOfLines={1}>
+                    {item.alias}
+                  </Text>
+                  <Text style={styles.textRowType}>
+                    {item.categories[0] &&
+                      item.categories[0].name.toLowerCase()}
+                  </Text>
+                </View>
+              </>
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        )}
+        <TouchableOpacity style={styles.createCompany} onPress={() => create()}>
+          <Text style={styles.createCompanyText}>СОЗДАТЬ ЗАВЕДЕНИЕ</Text>
+        </TouchableOpacity>
       </SafeAreaView>
 
       <Dialog
@@ -216,6 +249,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     width: 200,
     padding: 8,
+    marginBottom: 5,
     borderRadius: 5,
     fontWeight: 'bold',
     alignSelf: 'center',

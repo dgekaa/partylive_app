@@ -2,15 +2,15 @@ import React, {useState, useRef, useEffect} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity, FlatList} from 'react-native';
 
 const CompanyTypeNav = ({data, clickedType}) => {
-  const [buttonActive, setButtonActive] = useState(0);
-  const [DATA, setDATA] = useState([]);
+  const [buttonActive, setButtonActive] = useState(0),
+    [DATA, setDATA] = useState([]);
 
   const navigationFlatList = useRef(null);
 
   useEffect(() => {
-    if (data && data.categories) {
+    data &&
+      data.categories &&
       setDATA([{id: 0, name: 'Все'}, ...data.categories]);
-    }
   }, [data]);
 
   const pressButton = (item, index) => {

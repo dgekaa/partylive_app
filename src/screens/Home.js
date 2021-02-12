@@ -13,18 +13,28 @@ import Header from '../components/Header';
 import QueryIndicator from '../components/QueryIndicator';
 import CompanyTypeNav from '../components/CompanyTypeNav';
 import SmallCompanyBlock from '../components/SmallCompanyBlock';
-import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
+import {GET_CATEGORIES, GET_PLACES, GET_PLACES_WITH_FILTER} from '../QUERYES';
 
 const Home = (props) => {
   const [companyData, setCompanyData] = useState([]),
     [lon, setLon] = useState(''),
     [lat, setLat] = useState(''),
-    [queryIndicator, setQueryIndicator] = useState(false);
+    [queryIndicator, setQueryIndicator] = useState(false),
+    [refreshing, setRefreshing] = useState(false),
+    [first, setFirst] = useState(12);
 
-  const {loading, error, data, refetch} = useQuery(GET_PLACES);
+  const {loading, error, data, refetch} = useQuery(
+    GET_PLACES,
+    {
+      variables: {first: first},
+    },
+    {
+      manual: true,
+    },
+  );
 
   useEffect(() => {
-    data && setCompanyData(data.places);
+    data && setCompanyData(data.places.data);
     if (data || error) {
       setQueryIndicator(false);
     } else if (loading) {
@@ -33,36 +43,34 @@ const Home = (props) => {
   }, [loading, error, data]);
 
   const clickedType = (type) => {
-    if (type.toLowerCase() === 'все') {
-      setCompanyData(data.places);
-    } else {
-      const filteredData = data.places.filter((el) => {
-        if (el.categories[0] && el.categories[0].name) {
-          return el.categories[0].name.toLowerCase() === type.toLowerCase();
-        }
-      });
-      setCompanyData(filteredData);
-    }
-  };
-
-  const [refreshing, setRefreshing] = useState(false);
-
-  const onRefresh = React.useCallback(() => {
-    if (refetch) {
+      if (type.toLowerCase() === 'все') {
+        setCompanyData(data.places.data);
+      } else {
+        const filteredData = data.places.data.filter((el) => {
+          if (el.categories[0] && el.categories[0].name) {
+            return el.categories[0].name.toLowerCase() === type.toLowerCase();
+          }
+        });
+        setCompanyData(filteredData);
+      }
+    },
+    onRefresh = () => {
       setRefreshing(true);
       refetch().then((res) => {
         !res.loading && res.data && setRefreshing(false);
       });
-    }
-  }, []);
-
-  const toggleQueryIndicator = ({data, error, loading}) => {
-    if (data || error) {
-      setQueryIndicator(false);
-    } else if (loading) {
-      setQueryIndicator(true);
-    }
-  };
+    },
+    toggleQueryIndicator = ({data, error, loading}) => {
+      if (data || error) {
+        setQueryIndicator(false);
+      } else if (loading) {
+        setQueryIndicator(true);
+      }
+    },
+    refetchPlaces = () => {
+      setFirst((prev) => prev + 12);
+      refetch();
+    };
 
   data && requestLocationPermission(setLon, setLat);
 
@@ -87,10 +95,15 @@ const Home = (props) => {
           {companyData.length ? (
             <FlatList
               refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={() => onRefresh()}
+                />
               }
               data={companyData}
               numColumns={2}
+              onEndReachedThreshold={0}
+              onEndReached={refetchPlaces}
               renderItem={({item}) => (
                 <SmallCompanyBlock
                   lon={lon}
@@ -106,7 +119,7 @@ const Home = (props) => {
           )}
         </View>
       </SafeAreaView>
-      {queryIndicator && <QueryIndicator />}
+      {(queryIndicator || loading) && <QueryIndicator />}
     </View>
   );
 };

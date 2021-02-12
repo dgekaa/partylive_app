@@ -53,41 +53,88 @@ export const GET_CATEGORIES = gql`
   }
 `;
 
-export const GET_PLACES = gql`
-  query {
-    places {
-      id
-      name
-      address
-      description
-      alias
-      profile_image
-      logo
-      menu
-      actions
-      coordinates
-      streams {
-        url
-        name
+export const GET_PLACES_WITH_FILTER = gql`
+  query GETPLACES($value: Mixed, $first: Int) {
+    places(
+      hasCategories: {AND: [{column: ID, operator: EQ, value: $value}]}
+      first: $first
+    ) {
+      data {
         id
-        preview
+        name
+        address
+        description
+        alias
+        profile_image
+        logo
+        menu
+        actions
+        coordinates
+        streams {
+          url
+          name
+          id
+          preview
+          schedules {
+            id
+            day
+            start_time
+            end_time
+          }
+        }
         schedules {
           id
           day
           start_time
           end_time
         }
+        categories {
+          id
+          name
+          slug
+        }
       }
-      schedules {
-        id
-        day
-        start_time
-        end_time
-      }
-      categories {
+    }
+  }
+`;
+
+export const GET_PLACES = gql`
+  query GETPLACES($first: Int) {
+    places(first: $first) {
+      data {
         id
         name
-        slug
+        address
+        description
+        alias
+        profile_image
+        logo
+        menu
+        actions
+        coordinates
+        streams {
+          url
+          name
+          id
+          preview
+          schedules {
+            id
+            day
+            start_time
+            end_time
+          }
+        }
+        schedules {
+          id
+          day
+          start_time
+          end_time
+        }
+        categories {
+          id
+          name
+          slug
+        }
       }
     }
   }

@@ -13,17 +13,21 @@ import GoogleMap from '../components/GoogleMap';
 import CompanyTypeNav from '../components/CompanyTypeNav';
 import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
 import {requestLocationPermission} from '../permission';
+import QueryIndicator from '../components/QueryIndicator';
 
 const Map = (props) => {
-  const {data, loading, error} = useQuery(GET_PLACES);
-
   const [companyData, setCompanyData] = useState([]),
     [lon, setLon] = useState(null),
     [lat, setLat] = useState(null),
-    [queryIndicator, setQueryIndicator] = useState(false);
+    [queryIndicator, setQueryIndicator] = useState(false),
+    [first, setFirst] = useState(200);
+
+  const {loading, error, data, refetch} = useQuery(GET_PLACES, {
+    variables: {first: first},
+  });
 
   useEffect(() => {
-    data && data.places && setCompanyData(data.places);
+    data && data.places && setCompanyData(data.places.data);
 
     if (data || error) {
       setQueryIndicator(false);

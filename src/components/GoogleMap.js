@@ -224,7 +224,10 @@ const GoogleMap = ({
         zoomEnabled={true}
         initialRegion={initialRegion}
         onRegionChangeComplete={(data) => setNewRegion(data)}
-        onLayout={onMapLayout}>
+        onLayout={onMapLayout}
+        onMarkersChange={(data) => {}}
+        // onChangeMap
+      >
         {lat && lon && (
           <Marker
             coordinate={{
