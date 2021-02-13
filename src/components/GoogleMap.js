@@ -58,31 +58,30 @@ const CustomMarker = ({place, loadedPlace, getDistanceTo, newRegion}) => {
   };
 
   const whenIsWorkTime = () => {
-    if (!isWork) {
-      return 'закрыто';
-    } else {
-      if (workTime) {
-        return 'до ' + workTime.split('-')[1];
+      if (!isWork) {
+        return 'закрыто';
       } else {
-        return 'Время работы не задано';
+        if (workTime) {
+          return 'до ' + workTime.split('-')[1];
+        } else {
+          return 'Время работы не задано';
+        }
       }
-    }
-  };
-
-  const getImg = () => {
-    switch (place.categories[0].slug) {
-      case 'bar':
-        return bar;
-      case 'klub':
-        return klub;
-      case 'launge':
-        return launge;
-      case 'pab':
-        return pab;
-      case 'karaoke':
-        return karaoke;
-    }
-  };
+    },
+    getImg = () => {
+      switch (place.categories[0].slug) {
+        case 'bar':
+          return bar;
+        case 'klub':
+          return klub;
+        case 'launge':
+          return launge;
+        case 'pab':
+          return pab;
+        case 'karaoke':
+          return karaoke;
+      }
+    };
 
   // newRegion.latitudeDelta < 0.1 &&
   //   newRegion.longitudeDelta < 0.15 &&

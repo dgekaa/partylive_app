@@ -44,11 +44,6 @@ const Home = (props) => {
     );
 
   useEffect(() => {
-    console.log(first, '---first');
-    console.log(companyId, '---companyId');
-  }, [first, companyId]);
-
-  useEffect(() => {
     data && setCompanyData(data.places.data);
     if (data || error) {
       setQueryIndicator(false);

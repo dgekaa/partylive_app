@@ -11,7 +11,7 @@ import {Query, useQuery} from 'react-apollo';
 import Header from '../components/Header';
 import GoogleMap from '../components/GoogleMap';
 import CompanyTypeNav from '../components/CompanyTypeNav';
-import {GET_CATEGORIES, GET_PLACES} from '../QUERYES';
+import {GET_CATEGORIES, GET_PLACES, GET_PLACES_WITH_FILTER} from '../QUERYES';
 import {requestLocationPermission} from '../permission';
 import QueryIndicator from '../components/QueryIndicator';
 
@@ -20,11 +20,21 @@ const Map = (props) => {
     [lon, setLon] = useState(null),
     [lat, setLat] = useState(null),
     [queryIndicator, setQueryIndicator] = useState(false),
-    [first, setFirst] = useState(200);
+    [first, setFirst] = useState(200),
+    [companyId, setCompanyId] = useState(null);
 
-  const {loading, error, data, refetch} = useQuery(GET_PLACES, {
-    variables: {first: first},
-  });
+  const {loading, error, data} = useQuery(GET_PLACES, {
+      variables: {first: first},
+    }),
+    FILTER = useQuery(
+      GET_PLACES_WITH_FILTER,
+      {
+        variables: {first: first, value: companyId},
+      },
+      {
+        manual: true,
+      },
+    );
 
   useEffect(() => {
     data && data.places && setCompanyData(data.places.data);
@@ -34,26 +44,19 @@ const Map = (props) => {
     } else if (loading) {
       setQueryIndicator(true);
     }
-  }, [data, loading, error]);
 
-  const clickedType = (type) => {
-    if (type.toLowerCase() !== 'все') {
-      const filteredData = data.places.filter(
-        (el) => el.categories[0].name.toUpperCase() === type.toUpperCase(),
-      );
-      setCompanyData(filteredData);
-    } else {
-      setCompanyData(data.places);
-    }
-  };
+    FILTER.data && companyId && setCompanyData(FILTER.data.places.data);
+  }, [data, loading, error, FILTER]);
 
-  const toggleQueryIndicator = ({data, error, loading}) => {
-    if (data || error) {
-      setQueryIndicator(false);
-    } else if (loading) {
-      setQueryIndicator(true);
-    }
-  };
+  const clickedType = (type, id) =>
+      type.toLowerCase() === 'все' ? setCompanyId(null) : setCompanyId(id),
+    toggleQueryIndicator = ({data, error, loading}) => {
+      if (data || error) {
+        setQueryIndicator(false);
+      } else if (loading) {
+        setQueryIndicator(true);
+      }
+    };
 
   data && requestLocationPermission(setLon, setLat);
 
