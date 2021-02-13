@@ -14,7 +14,7 @@ const CompanyTypeNav = ({data, clickedType}) => {
   }, [data]);
 
   const pressButton = (item, index) => {
-    clickedType(item.name);
+    clickedType(item.name, item.id);
     navigationFlatList.current.scrollToIndex({
       animated: true,
       index: index,

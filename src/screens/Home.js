@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   StyleSheet,
   View,
@@ -17,6 +17,7 @@ import {GET_CATEGORIES, GET_PLACES, GET_PLACES_WITH_FILTER} from '../QUERYES';
 
 const Home = (props) => {
   const [companyData, setCompanyData] = useState([]),
+    [companyId, setCompanyId] = useState(null),
     [lon, setLon] = useState(''),
     [lat, setLat] = useState(''),
     [queryIndicator, setQueryIndicator] = useState(false),
@@ -24,14 +25,28 @@ const Home = (props) => {
     [first, setFirst] = useState(12);
 
   const {loading, error, data, refetch} = useQuery(
-    GET_PLACES,
-    {
-      variables: {first: first},
-    },
-    {
-      manual: true,
-    },
-  );
+      GET_PLACES,
+      {
+        variables: {first: first},
+      },
+      {
+        manual: true,
+      },
+    ),
+    FILTER = useQuery(
+      GET_PLACES_WITH_FILTER,
+      {
+        variables: {first: first, value: companyId},
+      },
+      {
+        manual: true,
+      },
+    );
+
+  useEffect(() => {
+    console.log(first, '---first');
+    console.log(companyId, '---companyId');
+  }, [first, companyId]);
 
   useEffect(() => {
     data && setCompanyData(data.places.data);
@@ -40,19 +55,15 @@ const Home = (props) => {
     } else if (loading) {
       setQueryIndicator(true);
     }
-  }, [loading, error, data]);
+    FILTER.data && companyId && setCompanyData(FILTER.data.places.data);
+  }, [loading, error, data, FILTER]);
 
-  const clickedType = (type) => {
-      if (type.toLowerCase() === 'все') {
-        setCompanyData(data.places.data);
-      } else {
-        const filteredData = data.places.data.filter((el) => {
-          if (el.categories[0] && el.categories[0].name) {
-            return el.categories[0].name.toLowerCase() === type.toLowerCase();
-          }
-        });
-        setCompanyData(filteredData);
-      }
+  const flatListRef = useRef(null);
+
+  const clickedType = (type, id) => {
+      setFirst(12);
+      flatListRef.current.scrollToOffset({animated: true, offset: 0});
+      type.toLowerCase() === 'все' ? setCompanyId(null) : setCompanyId(id);
     },
     onRefresh = () => {
       setRefreshing(true);
@@ -81,7 +92,6 @@ const Home = (props) => {
         <Query query={GET_CATEGORIES}>
           {({loading, error, data}) => {
             toggleQueryIndicator(loading, error, data);
-
             if (loading) {
               return <></>;
             } else if (error) {
@@ -94,6 +104,7 @@ const Home = (props) => {
           {error && <Text>Error! ${error.message}</Text>}
           {companyData.length ? (
             <FlatList
+              ref={flatListRef}
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
